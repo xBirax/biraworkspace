@@ -1,0 +1,45 @@
+{
+  "collectedAt": "2026-07-22T12:48:13.782Z",
+  "hostname": "bira-960XFH",
+  "arch": "x64",
+  "platform": "linux",
+  "cpus": 20,
+  "os": {
+    "id": "ubuntu",
+    "versionId": "26.04",
+    "prettyName": "Ubuntu 26.04 LTS",
+    "codename": "resolute"
+  },
+  "display": {
+    "sessionType": "wayland",
+    "waylandDisplay": "wayland-0",
+    "x11Display": ":0",
+    "desktop": "ubuntu:GNOME"
+  },
+  "memory": {
+    "totalGiB": 30.4,
+    "class": "32GB-class"
+  },
+  "browsers": {
+    "chrome": {
+      "present": true,
+      "path": "/usr/bin/google-chrome-stable",
+      "version": "150.0.7871.181"
+    },
+    "brave": {
+      "present": false,
+      "path": null,
+      "version": null
+    }
+  },
+  "matrixTags": {
+    "ubuntu2404": false,
+    "ubuntu2604": true,
+    "wayland": true,
+    "x11": false,
+    "ram16class": false,
+    "ram32class": true,
+    "chromePresent": true,
+    "braveAbsent": true
+  }
+}

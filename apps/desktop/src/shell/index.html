@@ -1,0 +1,1034 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>ADR Shell</title>
+    <link rel="stylesheet" href="./fonts.css" />
+    <link rel="stylesheet" href="./tokens.css" />
+    <style>
+      #rail {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 0;
+        background: var(--bar);
+        border-right: 1px solid var(--line);
+        overflow-y: auto;
+        overflow-x: hidden;
+        user-select: none;
+      }
+      #rail[data-expanded="true"] {
+        align-items: stretch;
+        padding: 14px 10px;
+        gap: 6px;
+      }
+      #service-tabs {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+      #rail[data-expanded="true"] #workspace-tabs,
+      #rail[data-expanded="true"] #service-tabs {
+        align-items: stretch !important;
+      }
+      #rail[data-expanded="true"] .slot {
+        width: 100%;
+        align-items: stretch;
+      }
+      #rail[data-expanded="true"] .tab,
+      #rail[data-expanded="true"] .util {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 10px;
+        padding: 0 9px;
+        border-radius: 10px;
+      }
+      #rail[data-expanded="true"] .tab {
+        display: flex;
+        height: 40px;
+      }
+      #rail[data-expanded="true"] .util {
+        display: flex;
+        height: 38px;
+      }
+      #rail[data-expanded="true"] .service-label,
+      #rail[data-expanded="true"] .nav-label,
+      #rail[data-expanded="true"] .ws-label {
+        display: block;
+      }
+      #rail[data-expanded="true"] .service-label {
+        min-width: 0;
+        overflow: hidden;
+        color: var(--fg);
+        font-size: 12px;
+        text-align: left;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      #rail[data-expanded="true"] .service-status {
+        display: block;
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 1.2;
+      }
+      .slot.loading .service-status { color: var(--info); }
+      .slot.failed .service-status { color: var(--danger-fg); }
+      .slot.loading .service-status::before {
+        content: "";
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        margin-right: 5px;
+        border: 1px solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: nav-spin 800ms linear infinite;
+      }
+      @keyframes nav-spin { to { transform: rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) {
+        .slot.loading .service-status::before { animation: none; }
+      }
+      #rail[data-expanded="true"] .slot.active .tab {
+        background: var(--card);
+        border-color: var(--line);
+      }
+      #rail[data-expanded="true"] .slot.active .ind {
+        position: absolute;
+        top: 8px;
+        left: -10px;
+        width: 3px;
+        height: 24px;
+        margin: 0;
+      }
+      #rail[data-expanded="true"] .ws {
+        width: 100%;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 3px 7px;
+        border-radius: 10px;
+        text-align: left;
+      }
+      .ws-avatar {
+        width: 26px;
+        height: 26px;
+        display: grid;
+        flex: 0 0 auto;
+        place-items: center;
+        border-radius: 50%;
+      }
+      .ws-label,
+      .service-label,
+      .nav-label {
+        display: none;
+      }
+      .ws-label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 12px;
+      }
+      #rail[data-expanded="true"] .ws-label { padding-right: 26px; }
+      #rail[data-expanded="true"] .rail-sep {
+        width: 100%;
+        height: 1px;
+        margin: 3px 0;
+      }
+      .workspace-heading {
+        display: none;
+      }
+      #rail[data-expanded="true"] .workspace-heading {
+        display: block;
+        padding: 4px 8px 2px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+      }
+      #rail[data-expanded="true"] #tab-add,
+      #rail[data-expanded="true"] #tab-ws-add {
+        width: 100%;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+        padding: 0 9px;
+        border-radius: 10px;
+      }
+      .add-glyph {
+        width: 16px;
+        flex: 0 0 auto;
+        text-align: center;
+      }
+      .tab:focus-visible,
+      .util:focus-visible,
+      .ws:focus-visible,
+      #tab-ws-add:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      #rail[data-position="top"][data-expanded="true"],
+      #rail[data-position="bottom"][data-expanded="true"] {
+        align-items: center;
+        padding: 0 12px;
+      }
+      #rail[data-position="top"][data-expanded="true"] #workspace-tabs,
+      #rail[data-position="bottom"][data-expanded="true"] #workspace-tabs,
+      #rail[data-position="top"][data-expanded="true"] #service-tabs,
+      #rail[data-position="bottom"][data-expanded="true"] #service-tabs {
+        align-items: center !important;
+      }
+      #rail[data-position="top"][data-expanded="true"] .slot,
+      #rail[data-position="bottom"][data-expanded="true"] .slot {
+        width: auto;
+      }
+      #rail[data-position="top"][data-expanded="true"] .tab,
+      #rail[data-position="bottom"][data-expanded="true"] .tab {
+        width: auto;
+        padding: 0 8px;
+      }
+      /* Na horizontal nada ocupa a linha inteira: os 100% da coluna empurravam
+         os serviços para fora (e em "Embaixo" nem os utilitários escapavam). */
+      #rail:is([data-position="top"], [data-position="bottom"])[data-expanded="true"]
+        :is(#tab-ws-add, #tab-add, .util, .ws) {
+        width: auto;
+      }
+      #rail:is([data-position="top"], [data-position="bottom"]) .rail-sep {
+        width: 2px;
+        height: 22px;
+        margin: 0 4px;
+      }
+      #rail[data-position="top"] .workspace-heading,
+      #rail[data-position="bottom"] .workspace-heading {
+        display: none;
+      }
+      #rail[data-position="top"][data-expanded="true"] .service-label,
+      #rail[data-position="bottom"][data-expanded="true"] .service-label,
+      #rail[data-position="top"][data-expanded="true"] .nav-label,
+      #rail[data-position="bottom"][data-expanded="true"] .nav-label {
+        display: block;
+      }
+      .brand {
+        width: 42px;
+        height: 42px;
+        flex: 0 0 auto;
+        border: 0;
+        border-radius: 12px;
+        padding: 0;
+        background: transparent;
+        cursor: pointer;
+      }
+      .brand:hover {
+        background: var(--card);
+      }
+      .brand img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .slot {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex-shrink: 0;
+      }
+      .tab {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--fg);
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        padding: 0;
+      }
+      .tab:hover {
+        background: var(--card);
+      }
+      .tab.drag-over {
+        border-color: var(--accent);
+        background: var(--card);
+      }
+      .tab .tile {
+        width: 30px;
+        height: 30px;
+      }
+      /* The CRM tile is drawn as an <img>, not a .tile span. Without this the
+         image swallows the mousedown (and browsers start their own image drag),
+         so the button's dragstart never fires and the CRM tile alone could not
+         be dragged in the rail. */
+      .tab svg,
+      .tab img {
+        pointer-events: none;
+      }
+      .tab img {
+        display: block;
+        width: 30px;
+        height: 30px;
+        object-fit: contain;
+      }
+      /* Divider between one workspace's tiles and the next, tinted with that
+         workspace's colour so the groups are tellable apart at a glance. */
+      .rail-sep {
+        width: 22px;
+        height: 2px;
+        flex: 0 0 auto;
+        margin: 4px 0;
+        border-radius: 2px;
+        background: var(--muted);
+        opacity: 0.6;
+      }
+      /* Tiles belonging to a workspace that is not the active one. */
+      .slot.other-workspace .tab {
+        opacity: 0.5;
+      }
+      .slot.other-workspace .tab:hover {
+        opacity: 1;
+      }
+      .ind {
+        width: 20px;
+        height: 2px;
+        border-radius: 1px;
+        background: transparent;
+        margin-top: -6px;
+      }
+      .slot.active .ind {
+        background: var(--accent);
+      }
+      .slot.pinned .tab {
+        border-color: var(--line2);
+      }
+      /* Esmaece o ícone inteiro: o véu absoluto cobria só 36 dos 44 px da aba. */
+      .slot.hibernated .tile {
+        opacity: 0.45;
+      }
+      .badge {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        min-width: 16px;
+        height: 16px;
+        padding: 0 4px;
+        border-radius: 8px;
+        background: var(--accent);
+        color: var(--on-accent);
+        font-size: 9px;
+        font-weight: 700;
+        display: grid;
+        place-items: center;
+        line-height: 1;
+        border: 0;
+        cursor: pointer;
+        z-index: 1;
+      }
+      .badge.red {
+        background: var(--danger);
+        color: #fff;
+        min-width: 15px;
+        height: 15px;
+      }
+      #tab-add {
+        border: 1px dashed rgba(148, 163, 184, 0.35);
+        color: var(--muted);
+      }
+      #tab-add:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: transparent;
+      }
+      .util {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+      }
+      .util:hover {
+        background: var(--card);
+        color: var(--fg);
+      }
+      .divider {
+        width: 28px;
+        height: 1px;
+        background: var(--line2);
+        margin: 4px 0;
+        flex-shrink: 0;
+      }
+      .spacer {
+        flex: 1;
+        min-height: 8px;
+      }
+      button.ws {
+        position: relative;
+        width: 30px;
+        height: 30px;
+        border-radius: 999px;
+        border: 2px solid transparent;
+        font-weight: 700;
+        font-size: 11px;
+        cursor: pointer;
+        flex-shrink: 0;
+        padding: 0;
+      }
+      button.ws.active {
+        border-color: var(--accent);
+      }
+      .ws-unread {
+        position: absolute;
+        top: -2px;
+        right: -4px;
+        min-width: 14px;
+        height: 14px;
+        padding: 0 3px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--bar);
+        border-radius: 8px;
+        background: var(--danger);
+        color: #fff;
+        font-size: 8px;
+        font-weight: 700;
+        line-height: 1;
+      }
+      #rail[data-expanded="true"] .ws-unread {
+        top: 0;
+        right: 2px;
+      }
+      #workspace-tabs {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: center;
+      }
+      #tab-ws-add {
+        width: 30px;
+        height: 30px;
+        border-radius: 999px;
+        border: 1px dashed rgba(148, 163, 184, 0.35);
+        background: transparent;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+      #tab-ws-add:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      #rail[data-position="right"] {
+        border-right: 0;
+        border-left: 1px solid var(--line);
+      }
+      #rail[data-position="top"],
+      #rail[data-position="bottom"] {
+        flex-direction: row;
+        padding: 0 12px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        border-right: 0;
+        gap: 8px;
+      }
+      #rail[data-position="top"] {
+        border-bottom: 1px solid var(--line);
+      }
+      #rail[data-position="bottom"] {
+        border-top: 1px solid var(--line);
+      }
+      #rail[data-position="top"] #workspace-tabs,
+      #rail[data-position="bottom"] #workspace-tabs,
+      #rail[data-position="top"] #service-tabs,
+      #rail[data-position="bottom"] #service-tabs {
+        flex-direction: row !important;
+      }
+      #rail[data-position="top"] .divider,
+      #rail[data-position="bottom"] .divider {
+        width: 1px;
+        height: 28px;
+        margin: 0 4px;
+      }
+      #rail[data-position="top"] .spacer,
+      #rail[data-position="bottom"] .spacer {
+        min-width: 8px;
+        min-height: 0;
+      }
+
+      #titlebar{
+        display: flex;
+        align-items: center;
+        background: var(--bar);
+        border-bottom: 1px solid var(--line);
+        padding-left: 12px;
+        user-select: none;
+        -webkit-app-region: drag;
+        overflow: hidden;
+      }
+      #titlebar .mark{
+        width: 22px;
+        height: 22px;
+        flex-shrink: 0;
+      }
+      #titlebar .mark img{
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      #titlebar .name{
+        margin-left: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--fg2);
+        white-space: nowrap;
+      }
+      #titlebar #search{
+        -webkit-app-region: no-drag;
+        margin-left: 20px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--hover);
+        border: 1px solid var(--line2);
+        color: var(--muted);
+        font-size: 11px;
+        border-radius: 6px;
+        padding: 4px 10px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      #titlebar #search:hover{
+        color: var(--fg2);
+      }
+      #titlebar #search kbd{
+        color: var(--dim);
+        font: inherit;
+      }
+      #titlebar .drag{
+        flex: 1;
+        height: 100%;
+      }
+      #titlebar .wc{
+        -webkit-app-region: no-drag;
+        width: 46px;
+        height: 36px;
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+      }
+      #titlebar .wc:hover{
+        background: var(--hover);
+        color: var(--fg);
+      }
+      #titlebar #close:hover{
+        background: var(--danger);
+        color: #fff;
+      }
+
+#titlebar { position: absolute; inset: 0 0 auto; height: 36px; }
+#titlebar .wc { height: 100%; }
+#titlebar[data-compact="true"] :is(.mark, .name, #search kbd) { display: none; }
+#titlebar[data-compact="true"] #search { margin-left: 0; min-width: 0; }
+#titlebar .drag { min-width: 0; }
+#titlebar[data-narrow="true"] { padding-left: 4px; }
+#titlebar[data-narrow="true"] .wc { width: 36px; }
+#titlebar[data-narrow="true"] #search { padding-inline: 4px; }
+body { overflow: hidden; background: var(--bg); }
+#rail { position: absolute; }
+
+    </style>
+    <link rel="stylesheet" href="./internal-surfaces.css" />
+  </head>
+  <body data-adr-surface="shell">
+<header id="titlebar" data-adr-surface="titlebar">
+    <div class="mark"><img src="./adr-logo.png" alt="" /></div>
+    <div class="name">ADR Workspace</div>
+    <button type="button" id="search" title="Buscar (Ctrl+K)">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      Buscar <kbd>Ctrl+K</kbd>
+    </button>
+    <div class="drag"></div>
+    <button type="button" class="wc" id="min" title="Minimizar">
+      <svg width="10" height="10" viewBox="0 0 10 10"><rect x="0" y="4.5" width="10" height="1" fill="currentColor"></rect></svg>
+    </button>
+    <button type="button" class="wc" id="max" title="Maximizar">
+      <svg width="10" height="10" viewBox="0 0 10 10"><rect x="0.5" y="0.5" width="9" height="9" fill="none" stroke="currentColor"></rect></svg>
+    </button>
+    <button type="button" class="wc" id="close" title="Fechar">
+      <svg width="10" height="10" viewBox="0 0 10 10">
+        <line x1="0" y1="0" x2="10" y2="10" stroke="currentColor"></line>
+        <line x1="10" y1="0" x2="0" y2="10" stroke="currentColor"></line>
+      </svg>
+    </button>
+    </header>
+<nav id="rail" data-adr-surface="rail" aria-label="Workspaces e serviços">
+    <!-- The ADR mark used to live here as a second, fixed way into the CRM.
+         That made two CRM entry points in the rail, one of them unmovable.
+         The CRM is now a single draggable tile in #service-tabs; app identity
+         stays in the titlebar. -->
+    <div id="workspace-tabs"></div>
+    <button id="tab-ws-add" type="button" title="Novo workspace" aria-label="Novo workspace">
+      <span class="add-glyph">+</span><span class="nav-label">Novo workspace</span>
+    </button>
+    <div class="divider"></div>
+
+    <div id="service-tabs"></div>
+
+    <button class="tab" id="tab-add" type="button" title="Adicionar serviço" aria-label="Adicionar serviço">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      <span class="nav-label">Adicionar serviço</span>
+    </button>
+
+    <div class="spacer"></div>
+
+    <button class="util" id="tab-reload" type="button" title="Recarregar (Ctrl+R) · sem cache: Ctrl+Shift+R" aria-label="Recarregar serviço">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12a9 9 0 1 1-3-6.7"></path>
+        <path d="M21 3v6h-6"></path>
+      </svg>
+      <span class="nav-label">Recarregar</span>
+    </button>
+
+    <div class="slot">
+      <button class="util" id="tab-notif" type="button" title="Notificações" aria-label="Notificações">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+        <span class="nav-label">Notificações</span>
+      </button>
+      <span class="badge red" id="notif-badge" style="display: none"></span>
+    </div>
+
+    <button class="util" id="sidebar-toggle" type="button" aria-label="Recolher barra lateral" aria-pressed="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m15 18-6-6 6-6"></path>
+      </svg>
+      <span class="nav-label" id="sidebar-toggle-label">Recolher barra lateral</span>
+    </button>
+
+    <button class="util" id="tab-settings" type="button" title="Configurações (Ctrl+,)" aria-label="Configurações">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="4" y1="6" x2="20" y2="6"></line>
+        <circle cx="9" cy="6" r="2" fill="currentColor" stroke="none"></circle>
+        <line x1="4" y1="12" x2="20" y2="12"></line>
+        <circle cx="15" cy="12" r="2" fill="currentColor" stroke="none"></circle>
+        <line x1="4" y1="18" x2="20" y2="18"></line>
+        <circle cx="9" cy="18" r="2" fill="currentColor" stroke="none"></circle>
+      </svg>
+      <span class="nav-label">Configurações</span>
+    </button>
+
+    </nav>
+    <script src="./theme.js"></script>
+    <script>
+      let state = { services: [], workspaces: [], activeSurface: "crm", badges: {} };
+
+      document.getElementById("search").addEventListener("click", () => window.adrShell?.openPalette());
+      document.getElementById("min").addEventListener("click", () => window.adrShell?.windowControl("minimize"));
+      document.getElementById("max").addEventListener("click", () => window.adrShell?.windowControl("maximize"));
+      document.getElementById("close").addEventListener("click", () => window.adrShell?.windowControl("close"));
+      function applyChromeLayout(layout) {
+        if (!layout?.sidebar) return;
+        const scale = Number(state.uiScale) || 1;
+        const titlebar = document.getElementById("titlebar");
+        titlebar.dataset.compact = String(layout.width / scale < 560);
+        titlebar.dataset.narrow = String(layout.width / scale < 375);
+        const rail = document.getElementById("rail");
+        rail.dataset.expanded = String(layout.expanded);
+        for (const [key, value] of Object.entries(layout.sidebar)) {
+          rail.style[key === "x" ? "left" : key === "y" ? "top" : key] = `${value / scale}px`;
+        }
+      }
+      window.adrShell?.onLayout((layout) => {
+        state.chromeLayout = layout;
+        applyChromeLayout(layout);
+      });
+
+      /** Última montagem do rail — ver render(). */
+      let lastRailSignature = "";
+
+      function renderWorkspaces() {
+        const root = document.getElementById("workspace-tabs");
+        root.innerHTML = "";
+        for (const ws of state.workspaces || []) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "ws" + (ws.id === state.activeWorkspaceId ? " active" : "");
+          btn.title = ws.name + " · Alt+Shift+↑/↓ para reordenar";
+          const workspaceServices =
+            state.railGroups?.find((group) => group.workspaceId === ws.id)?.services ||
+            (ws.id === state.activeWorkspaceId ? state.services || [] : []);
+          const unreadTotal = workspaceServices.reduce(
+            (sum, service) => sum + Math.max(0, Number(state.badges?.[service.id]) || 0),
+            0,
+          );
+          btn.setAttribute(
+            "aria-label",
+            `Workspace: ${ws.name}${unreadTotal ? `, ${unreadTotal > 99 ? "99+" : unreadTotal} mensagens não lidas` : ""}`,
+          );
+          btn.setAttribute("aria-current", ws.id === state.activeWorkspaceId ? "page" : "false");
+          btn.dataset.navId = ws.id;
+          const avatar = document.createElement("span");
+          avatar.className = "ws-avatar";
+          avatar.textContent = (ws.name || "?").trim().slice(0, 1).toUpperCase();
+          avatar.style.background = ws.color || "#10B981";
+          avatar.style.color = "#04120A";
+          const label = document.createElement("span");
+          label.className = "ws-label";
+          label.textContent = ws.name || "Workspace";
+          btn.append(avatar, label);
+          if (unreadTotal > 0) {
+            const unread = document.createElement("span");
+            unread.className = "ws-unread";
+            unread.setAttribute("aria-hidden", "true");
+            unread.textContent = unreadTotal > 99 ? "99+" : String(unreadTotal);
+            btn.appendChild(unread);
+          }
+          btn.draggable = true;
+          btn.addEventListener("click", () => window.adrShell?.setWorkspace(ws.id));
+          btn.addEventListener("keydown", (event) => {
+            const horizontal = state.sidebarPosition === "top" || state.sidebarPosition === "bottom";
+            const backward = horizontal ? "ArrowLeft" : "ArrowUp";
+            const forward = horizontal ? "ArrowRight" : "ArrowDown";
+            if (!event.altKey || !event.shiftKey || ![backward, forward].includes(event.key)) return;
+            event.preventDefault();
+            const ids = (state.workspaces || []).map((item) => item.id);
+            const index = ids.indexOf(ws.id);
+            const target = index + (event.key === backward ? -1 : 1);
+            if (target < 0 || target >= ids.length) return;
+            const [moved] = ids.splice(index, 1);
+            ids.splice(target, 0, moved);
+            void window.adrShell?.reorderWorkspaces(ids).then(() => requestAnimationFrame(() => {
+              [...root.querySelectorAll("button.ws")].find((node) => node.dataset.navId === ws.id)?.focus();
+            }));
+          });
+          btn.addEventListener("dragstart", (e) => {
+            e.dataTransfer.setData("text/workspace-id", ws.id);
+            e.dataTransfer.effectAllowed = "move";
+          });
+          btn.addEventListener("dragover", (e) => e.preventDefault());
+          btn.addEventListener("drop", async (e) => {
+            e.preventDefault();
+            // Só o próprio arrasto: o id "do último arrasto" como reserva reordenava o
+            // workspace errado quando o que caía aqui era link, arquivo ou um serviço.
+            const from = e.dataTransfer.getData("text/workspace-id");
+            const ids = reorder((state.workspaces || []).map((w) => w.id), from, ws.id);
+            if (ids) await window.adrShell?.reorderWorkspaces(ids);
+          });
+          root.appendChild(btn);
+        }
+      }
+
+      function reorder(ids, from, to) {
+        if (!from || from === to) return null;
+        const fromIdx = ids.indexOf(from);
+        const toIdx = ids.indexOf(to);
+        if (fromIdx < 0 || toIdx < 0) return null;
+        ids.splice(fromIdx, 1);
+        ids.splice(toIdx, 0, from);
+        return ids;
+      }
+
+      function reorderByKeyboard(event, ids, id, commit, container, selector) {
+        const horizontal = state.sidebarPosition === "top" || state.sidebarPosition === "bottom";
+        const backward = horizontal ? "ArrowLeft" : "ArrowUp";
+        const forward = horizontal ? "ArrowRight" : "ArrowDown";
+        if (!event.altKey || !event.shiftKey || ![backward, forward].includes(event.key)) return;
+        event.preventDefault();
+        const index = ids.indexOf(id);
+        const target = index + (event.key === backward ? -1 : 1);
+        if (index < 0 || target < 0 || target >= ids.length) return;
+        const next = [...ids];
+        const [moved] = next.splice(index, 1);
+        next.splice(target, 0, moved);
+        void commit(next).then(() => requestAnimationFrame(() => {
+          [...container.querySelectorAll(selector)].find((node) => node.dataset.navId === id)?.focus();
+        }));
+      }
+
+      const CRM_TILE_ID = "crm";
+      const CRM_ICON_HTML = '<img src="./adr-logo.png" alt="ADR" draggable="false" />';
+
+      // Unified sidebar rail: service tiles + the CRM tile, all draggable
+      // into any position. Order comes from state.rail (service ids plus
+      // the "crm" sentinel); falls back to services-then-crm if an older
+      // main process hasn't sent `rail` yet.
+      function renderServices() {
+        const root = document.getElementById("service-tabs");
+        root.innerHTML = "";
+        const hibernated = new Set(state.hibernatedServiceIds || []);
+        const loading = new Set(state.loadingServiceIds || []);
+        const failed = new Set(state.failedServiceIds || []);
+        // Every workspace gets its own group of tiles, so all workspaces' icons
+        // are visible at once. Falls back to a single group built from the
+        // active workspace if an older main process hasn't sent railGroups.
+        const groups =
+          state.railGroups && state.railGroups.length
+            ? state.railGroups
+            : [
+                {
+                  workspaceId: state.activeWorkspaceId,
+                  rail: state.rail || [...(state.services || []).map((s) => s.id), CRM_TILE_ID],
+                  services: state.services || [],
+                },
+              ];
+
+        for (const group of groups) {
+        const isActiveGroup = group.workspaceId === state.activeWorkspaceId;
+        if (root.children.length) {
+          const sep = document.createElement("div");
+          sep.className = "rail-sep";
+          sep.title = group.name || "";
+          if (group.color) sep.style.background = group.color;
+          root.appendChild(sep);
+        }
+        const groupHeading = document.createElement("div");
+        groupHeading.className = "workspace-heading";
+        groupHeading.textContent = group.name || "Workspace";
+        groupHeading.title = group.name || "Workspace";
+        root.appendChild(groupHeading);
+        const servicesById = new Map((group.services || []).map((s) => [s.id, s]));
+        const rail = group.rail || [];
+
+        for (const railId of rail) {
+          const isCrm = railId === CRM_TILE_ID;
+          const svc = isCrm ? null : servicesById.get(railId);
+          if (!isCrm && !svc) continue;
+
+          const slot = document.createElement("div");
+          slot.className = "slot";
+          // Only the active workspace's own surfaces can be "active", and only
+          // its loaded-service list is meaningful.
+          const serviceHibernated = !isCrm && hibernated.has(svc.id);
+          const serviceLoading = !isCrm && loading.has(svc.id);
+          const serviceFailed = !isCrm && failed.has(svc.id);
+          if (serviceHibernated) slot.classList.add("hibernated");
+          if (serviceLoading) slot.classList.add("loading");
+          if (serviceFailed) slot.classList.add("failed");
+          if (!isActiveGroup) slot.classList.add("other-workspace");
+          if (!isCrm && svc.pinned) slot.classList.add("pinned");
+          if (
+            isActiveGroup &&
+            (isCrm ? state.activeSurface === "crm" : state.activeSurface === "service:" + svc.id)
+          ) {
+            slot.classList.add("active");
+          }
+
+          const btn = document.createElement("button");
+          btn.className = "tab";
+          btn.type = "button";
+          const wsSuffix = isActiveGroup ? "" : " — " + (group.name || "outro workspace");
+          btn.dataset.navId = railId;
+          btn.setAttribute(
+            "aria-current",
+            isActiveGroup &&
+              (isCrm ? state.activeSurface === "crm" : state.activeSurface === "service:" + svc.id)
+              ? "page"
+              : "false",
+          );
+          if (isCrm) {
+            if (isActiveGroup) btn.id = "tab-crm";
+            btn.title = "Now! — CRM ADR" + wsSuffix;
+            btn.setAttribute("aria-label", "Now! CRM ADR" + wsSuffix);
+            btn.innerHTML = CRM_ICON_HTML;
+          } else {
+            btn.title =
+              (serviceLoading ? svc.name + " (carregando)" : serviceFailed ? svc.name + " (falha ao carregar; tentando novamente)" : serviceHibernated ? svc.name + " (hibernado — clique para reabrir)" : svc.name) + wsSuffix;
+            btn.setAttribute(
+              "aria-label",
+              svc.name + (serviceLoading ? " (carregando)" : serviceFailed ? " (falha ao carregar; tentando novamente)" : serviceHibernated ? " (hibernado; clique para reabrir)" : "") + wsSuffix,
+            );
+            const tile = document.createElement("span");
+            tile.className = "tile k-" + svc.kind;
+            tile.appendChild(document.createElement("i"));
+            btn.appendChild(tile);
+          }
+          const serviceLabel = document.createElement("span");
+          serviceLabel.className = "service-label";
+          serviceLabel.textContent = isCrm ? "Now! — CRM ADR" : svc.name;
+          if (!isCrm && (serviceHibernated || serviceLoading || serviceFailed)) {
+            const status = document.createElement("span");
+            status.className = "service-status";
+            status.textContent = serviceLoading ? "Carregando" : serviceFailed ? "Falha ao carregar · tentando novamente" : "Hibernado · clique para reabrir";
+            status.setAttribute("role", "status");
+            status.setAttribute("aria-live", "polite");
+            serviceLabel.appendChild(status);
+          }
+          btn.appendChild(serviceLabel);
+          const surface = isCrm ? "crm" : "service:" + svc.id;
+          // Tiles from another workspace switch straight to the clicked surface:
+          // landing on the CRM first loaded its whole web app just to hide it.
+          const openSurface = async () => {
+            if (!isActiveGroup) await window.adrShell?.setWorkspace(group.workspaceId, surface);
+            else await window.adrShell?.show(surface);
+          };
+          // Reordering is per-workspace (crmPosition + serviceInstanceIds live
+          // on one workspace), so only the active group's tiles are draggable.
+          btn.draggable = isActiveGroup;
+          btn.addEventListener("click", openSurface);
+          btn.addEventListener("keydown", (event) => {
+            if (!isActiveGroup) return;
+            reorderByKeyboard(event, [...rail], railId,
+              (ids) => window.adrShell?.reorderServices(ids) || Promise.resolve(),
+              // Só o grupo ativo: todo workspace tem um tile "crm", e o primeiro
+              // achado podia ser o de outro workspace.
+              root, ".slot:not(.other-workspace) .tab[data-nav-id]");
+          });
+          if (isActiveGroup) {
+            btn.addEventListener("contextmenu", (event) => {
+              event.preventDefault();
+              if (isCrm) window.adrShell?.crmContextMenu();
+              else window.adrShell?.serviceContextMenu(svc.id);
+            });
+          }
+          if (isActiveGroup) {
+            btn.addEventListener("dragstart", (e) => {
+              e.dataTransfer.setData("text/service-id", railId);
+              e.dataTransfer.effectAllowed = "move";
+              slot.style.opacity = "0.35";
+            });
+            btn.addEventListener("dragend", () => (slot.style.opacity = ""));
+            btn.addEventListener("dragover", (e) => {
+              e.preventDefault();
+              btn.classList.add("drag-over");
+            });
+            btn.addEventListener("dragleave", () => btn.classList.remove("drag-over"));
+            btn.addEventListener("drop", async (e) => {
+              e.preventDefault();
+              btn.classList.remove("drag-over");
+              const from = e.dataTransfer.getData("text/service-id");
+              const ids = reorder([...rail], from, railId);
+              if (ids) await window.adrShell?.reorderServices(ids);
+            });
+          }
+          slot.appendChild(btn);
+
+          if (!isCrm) {
+            const unread = state.badges?.[svc.id];
+            if (unread > 0) {
+              const badge = document.createElement("button");
+              badge.type = "button";
+              badge.className = "badge";
+              badge.title = "Abrir " + svc.name;
+              badge.setAttribute("aria-label", `${unread} mensagens não lidas em ${svc.name}; abrir serviço`);
+              badge.textContent = unread > 99 ? "99+" : String(unread);
+              badge.addEventListener("click", (e) => {
+                e.stopPropagation();
+                void openSurface();
+              });
+              slot.appendChild(badge);
+            }
+          }
+
+          const ind = document.createElement("div");
+          ind.className = "ind";
+          slot.appendChild(ind);
+          root.appendChild(slot);
+        }
+        }
+      }
+
+      function renderNotifBadge() {
+        // Notificações não lidas do sino, não mensagens não lidas: mensagem já
+        // tem badge no ícone do próprio serviço, e somá-las aqui fazia "Limpar"
+        // parecer quebrado — a bolinha ficava lá com o histórico vazio. O
+        // contador do ícone na barra de tarefas continua somando mensagens.
+        const total = (state.feed || []).filter((n) => !n.read).length;
+        const el = document.getElementById("notif-badge");
+        el.style.display = total > 0 ? "grid" : "none";
+        el.textContent = total > 99 ? "99+" : String(total);
+        el.setAttribute("aria-hidden", "true");
+        document.getElementById("tab-notif").setAttribute(
+          "aria-label",
+          total > 0
+            ? `Notificações, ${total > 99 ? "99+" : total} não lidas`
+            : "Notificações",
+        );
+      }
+
+      function render() {
+        window.__adrState = state;
+        applyTheme(state);
+        document.getElementById("rail").dataset.position = state.sidebarPosition || "left";
+        const expanded = state.sidebarExpanded !== false;
+        document.getElementById("rail").dataset.expanded = String(expanded);
+        document.documentElement.style.zoom = String(Number(state.uiScale) || 1);
+        applyChromeLayout(state.chromeLayout);
+        const toggle = document.getElementById("sidebar-toggle");
+        toggle.setAttribute("aria-pressed", String(expanded));
+        toggle.setAttribute("aria-label", expanded ? "Recolher barra lateral" : "Expandir barra lateral");
+        toggle.title = expanded ? "Recolher barra lateral" : "Expandir barra lateral";
+        document.getElementById("sidebar-toggle-label").textContent = expanded
+          ? "Recolher barra lateral"
+          : "Expandir barra lateral";
+        // Remontar só quando o que o rail desenha mudou. Download em andamento
+        // transmite estado a cada 250 ms; refazer o DOM toda vez engolia o
+        // clique que caía entre mousedown e mouseup e derrubava o foco.
+        const railSignature = JSON.stringify([
+          state.workspaces, state.activeWorkspaceId, state.railGroups, state.services,
+          state.rail, state.badges, state.activeSurface, state.hibernatedServiceIds,
+          state.loadingServiceIds, state.failedServiceIds, state.sidebarPosition,
+        ]);
+        if (railSignature !== lastRailSignature) {
+          lastRailSignature = railSignature;
+          renderWorkspaces();
+          renderServices();
+        }
+        renderNotifBadge();
+      }
+
+      // #tab-crm is now built dynamically inside renderServices() (it lives
+      // in the unified draggable rail), so its click handler is attached
+      // there instead of here at load time.
+      document.getElementById("tab-add").addEventListener("click", () => window.adrShell?.show("settings", "servicos"));
+      document.getElementById("sidebar-toggle").addEventListener("click", () =>
+        window.adrShell?.updateSettings({ sidebarExpanded: state.sidebarExpanded === false }),
+      );
+      document.getElementById("tab-settings").addEventListener("click", () => window.adrShell?.show("settings", "geral"));
+      document.getElementById("tab-notif").addEventListener("click", () => window.adrShell?.toggleNotifPanel());
+      document.getElementById("tab-reload").addEventListener("click", (e) => window.adrShell?.reload(e.shiftKey));
+      document.getElementById("tab-ws-add").addEventListener("click", async () => {
+        const count = (state.workspaces || []).length + 1;
+        const name = await window.adrShell?.askText("Nome do workspace", "Workspace " + count, "Criar");
+        if (name) await window.adrShell?.createWorkspace(name);
+      });
+
+      window.adrShell?.onState?.((next) => {
+        state = { ...state, ...(next || {}) };
+        render();
+      });
+      window.adrShell?.onShown?.((surface) => {
+        state.activeSurface = surface;
+        render();
+      });
+      window.adrShell?.getState?.().then((next) => {
+        state = { ...state, ...(next || {}) };
+        render();
+      });
+    </script>
+  </body>
+</html>

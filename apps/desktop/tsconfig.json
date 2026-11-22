@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext"
+  },
+  "include": ["src/main/**/*.ts", "src/index.ts", "src/**/*.test.ts"],
+  "exclude": ["src/preload/**"],
+  "references": [
+    { "path": "../../packages/contracts" },
+    { "path": "../../packages/crm-core" },
+    { "path": "../../packages/crm-desktop-adapter" },
+    { "path": "../../packages/view-lifecycle" }
+  ]
+}

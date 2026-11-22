@@ -1,0 +1,20 @@
+{
+  "name": "@adr/crm-chrome-adapter",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "node ./scripts/build-extension.mjs",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.1",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.8"
+  },
+  "dependencies": {
+    "@adr/contracts": "workspace:^",
+    "@adr/crm-core": "workspace:^"
+  }
+}

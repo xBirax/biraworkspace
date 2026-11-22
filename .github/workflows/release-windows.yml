@@ -1,0 +1,232 @@
+name: Release Windows
+
+on:
+  workflow_dispatch:
+    inputs:
+      windows_smoke_confirmed:
+        description: "Instalação limpa e atualização com sessões conferidas no Windows"
+        required: false
+        type: boolean
+        default: false
+      smoke_evidence:
+        description: "Link ou referência ao registro do smoke de Windows"
+        required: false
+        type: string
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-windows-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    # O despacho estável não recompila: o job promote publica o artefato do push.
+    if: ${{ !(github.event_name == 'workflow_dispatch' && startsWith(github.ref, 'refs/tags/') && !contains(github.ref_name, '-rc.')) }}
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Preparar assinatura e publicação
+        shell: pwsh
+        env:
+          # Só booleanos aqui: falha cedo sem expor segredo aos passos seguintes
+          # (pnpm install roda postinstall de dependência).
+          HAS_EVS_CONFIG: ${{ secrets.EVS_CONFIG_B64 != '' }}
+          HAS_RELEASES_TOKEN: ${{ secrets.ADR_RELEASES_TOKEN != '' }}
+        run: |
+          if ($env:HAS_EVS_CONFIG -ne "true") {
+            throw "Secret EVS_CONFIG_B64 não configurado"
+          }
+          if ("${{ startsWith(github.ref, 'refs/tags/') }}" -eq "true" -and $env:HAS_RELEASES_TOKEN -ne "true") {
+            throw "Secret ADR_RELEASES_TOKEN não configurado"
+          }
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @adr/desktop ensure:electron
+      # Os pacotes workspace exportam tipos a partir de dist; o typecheck do
+      # Desktop precisa do build dos irmãos antes de resolver @adr/contracts.
+      - run: pnpm build
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - name: Compilar helper nativo sem elevação
+        shell: pwsh
+        run: |
+          rustup toolchain install 1.88.0 --profile minimal
+          rustup run 1.88.0 cargo test --manifest-path apps/desktop/optimizer-native/Cargo.toml --locked
+          rustup run 1.88.0 cargo build --manifest-path apps/desktop/optimizer-native/Cargo.toml --release --locked
+          if (!(Test-Path apps/desktop/optimizer-native/target/release/adr-workspace-optimizer.exe)) {
+            throw "Helper nativo ausente; pacote Windows bloqueado"
+          }
+      - name: Validar rede do Electron com resposta HTTP de erro
+        run: pnpm --filter @adr/desktop exec electron ../../scripts/verify-electron-network.cjs
+      - name: Conferir painel de configurações no Electron
+        run: pnpm --filter @adr/desktop exec electron ../../scripts/verify-settings-panel.cjs
+
+      - name: Validar abertura de conversas pelas notificações
+        run: pnpm --filter @adr/desktop exec electron ../../scripts/verify-notification-navigation.cjs
+      - name: Validar sessões sintéticas do Electron 35 no Electron 44
+        run: node scripts/verify-runtime-upgrade.cjs
+
+      - name: Validar versão da tag
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          $packageVersion = (Get-Content apps/desktop/package.json | ConvertFrom-Json).version
+          $tagVersion = $env:TAG_NAME
+          if ($tagVersion -notmatch '^v\d+\.\d+\.\d+(-rc\.\d+)?$') {
+            throw "Formato de tag inválido: $tagVersion"
+          }
+          $coreVersion = $tagVersion -replace '-rc\.\d+$', ''
+          $expectedTag = "v$packageVersion"
+          if ($coreVersion -ne $expectedTag) {
+            throw "A tag $tagVersion não corresponde à versão base $packageVersion"
+          }
+          # Candidata empacota a versão da tag (0.1.46-rc.1 < 0.1.46), senão quem
+          # testou a rc não recebe a estável. Altera só o checkout do runner.
+          if ($tagVersion -ne $coreVersion) {
+            node -e "const fs=require('fs');const f='apps/desktop/package.json';const p=JSON.parse(fs.readFileSync(f,'utf8'));p.version=process.env.TAG_NAME.slice(1);fs.writeFileSync(f,JSON.stringify(p,null,2)+'\n')"
+          }
+
+      # Credencial CastLabs só agora, depois de install/build/test: antes ela
+      # ficava num arquivo legível por todo postinstall de dependência.
+      - name: Preparar credencial CastLabs EVS
+        shell: pwsh
+        env:
+          EVS_CONFIG_B64: ${{ secrets.EVS_CONFIG_B64 }}
+        run: |
+          $configPath = Join-Path $env:RUNNER_TEMP "evs-config.json"
+          [IO.File]::WriteAllBytes($configPath, [Convert]::FromBase64String($env:EVS_CONFIG_B64))
+          "EVS_CONFIG_FILE=$configPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Instalar cliente CastLabs EVS
+        run: python -m pip install --disable-pip-version-check "castlabs-evs==1.3.2"
+
+      - name: Validar autenticação CastLabs EVS
+        shell: pwsh
+        env:
+          EVS_ACCOUNT_NAME: ${{ secrets.EVS_ACCOUNT_NAME }}
+          EVS_PASSWD: ${{ secrets.EVS_PASSWD }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:EVS_ACCOUNT_NAME) -and [string]::IsNullOrWhiteSpace($env:EVS_PASSWD)) {
+            python -m castlabs_evs.account -n refresh
+          } elseif ([string]::IsNullOrWhiteSpace($env:EVS_ACCOUNT_NAME) -or [string]::IsNullOrWhiteSpace($env:EVS_PASSWD)) {
+            throw "Configure EVS_ACCOUNT_NAME e EVS_PASSWD juntos ou apenas EVS_CONFIG_B64"
+          } else {
+            python -m castlabs_evs.account -n reauth
+          }
+
+      - name: Gerar instalador e metadados
+        run: pnpm --filter @adr/desktop exec electron-builder --win nsis --x64 --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+          EVS_ACCOUNT_NAME: ${{ secrets.EVS_ACCOUNT_NAME }}
+          EVS_PASSWD: ${{ secrets.EVS_PASSWD }}
+
+      - name: Apagar credencial CastLabs EVS
+        if: always()
+        shell: pwsh
+        run: |
+          if ($env:EVS_CONFIG_FILE) { Remove-Item -Force -ErrorAction SilentlyContinue $env:EVS_CONFIG_FILE }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: adr-workspace-windows-${{ github.ref_name }}
+          retention-days: 14
+          path: |
+            apps/desktop/release/*.exe
+            apps/desktop/release/latest.yml
+            apps/desktop/release/*.blockmap
+
+      - name: Publicar candidato de avaliação (pre-release)
+        # Sem token, "Preparar assinatura e publicação" já falhou em toda tag.
+        if: startsWith(github.ref, 'refs/tags/') && contains(github.ref_name, '-rc.')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.ADR_RELEASES_TOKEN }}
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          $notesArgs = @('--generate-notes')
+          $notesPath = "docs/release-notes-$($env:TAG_NAME.Substring(1)).md"
+          if (Test-Path $notesPath) { $notesArgs = @('--notes-file', $notesPath) }
+          gh release create "$env:TAG_NAME" `
+            apps/desktop/release/ADR-Workspace-Setup-*.exe `
+            apps/desktop/release/ADR-Workspace-Setup-*.exe.blockmap `
+            apps/desktop/release/latest.yml `
+            --repo ADRAGENCIACRM/adrworkspace-releases `
+            --title "ADR Workspace $env:TAG_NAME — avaliação" `
+            --prerelease `
+            @notesArgs
+
+  promote:
+    # A tag estável só gera o artefato. A publicação exige despacho manual
+    # pela mesma tag, depois do roteiro em docs/windows-release-smoke.md, e
+    # publica o artefato testado do push da tag, sem recompilar.
+    if: github.event_name == 'workflow_dispatch' && startsWith(github.ref, 'refs/tags/') && !contains(github.ref_name, '-rc.')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - name: Conferir smoke de Windows
+        env:
+          SMOKE_CONFIRMED: ${{ inputs.windows_smoke_confirmed }}
+          SMOKE_EVIDENCE: ${{ inputs.smoke_evidence }}
+        run: |
+          if [ "$SMOKE_CONFIRMED" != "true" ] || [ -z "${SMOKE_EVIDENCE//[[:space:]]/}" ]; then
+            echo "::error::Confirme o smoke de Windows e informe a evidência antes da publicação estável"
+            exit 1
+          fi
+
+      - name: Baixar artefato do push da tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          # Exige o mesmo commit da tag: se ela foi movida, não há execução e nada sai.
+          run_id=$(gh run list --workflow release-windows.yml --event push --branch "$TAG_NAME" --commit "$GITHUB_SHA" --status success --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+          if [ -z "$run_id" ]; then
+            echo "::error::Nenhum push bem-sucedido da tag $TAG_NAME no commit $GITHUB_SHA"
+            exit 1
+          fi
+          gh run download "$run_id" --name "adr-workspace-windows-$TAG_NAME" --dir release
+
+      - name: Publicar atualização estável
+        env:
+          GH_TOKEN: ${{ secrets.ADR_RELEASES_TOKEN }}
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::Secret ADR_RELEASES_TOKEN não configurado"
+            exit 1
+          fi
+          gh release create "$TAG_NAME" \
+            release/ADR-Workspace-Setup-*.exe \
+            release/ADR-Workspace-Setup-*.exe.blockmap \
+            release/latest.yml \
+            --repo ADRAGENCIACRM/adrworkspace-releases \
+            --title "ADR Workspace $TAG_NAME" \
+            --generate-notes

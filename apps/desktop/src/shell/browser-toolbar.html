@@ -1,0 +1,1263 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>ADR Browser Toolbar</title>
+    <link rel="stylesheet" href="./fonts.css" />
+    <link rel="stylesheet" href="./tokens.css" />
+    <style>
+      :root {
+        --adr-ink: #0b141b;
+        --adr-surface: #111c24;
+        --adr-raised: #18252f;
+        --adr-border: #2b3a45;
+        --adr-focus: #4da3ff;
+        --adr-muted: #94a3b8;
+        --adr-white: #ffffff;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: var(--adr-surface);
+        color: var(--adr-white);
+        font: 13px/1.3 var(--adr-font);
+        user-select: none;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+      /* Barra embaixo: as abas ficam na borda de fora, abaixo do endereço. */
+      body.edge-bottom {
+        flex-direction: column-reverse;
+      }
+      .bar {
+        flex: none;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 10px;
+        box-sizing: border-box;
+        border-bottom: 1px solid var(--adr-border);
+      }
+      button {
+        width: 34px;
+        height: 34px;
+        border: 1px solid var(--adr-border);
+        border-radius: 8px;
+        background: var(--adr-raised);
+        color: var(--adr-white);
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: var(--adr-focus);
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      form {
+        position: relative;
+        flex: 1;
+        display: flex;
+        gap: 8px;
+        min-width: 0;
+      }
+      #favicon {
+        position: absolute;
+        left: 10px;
+        top: 9px;
+        width: 16px;
+        height: 16px;
+        pointer-events: none;
+      }
+      form.has-icon input[type="text"] {
+        padding-left: 34px;
+      }
+      #reload.loading {
+        font-size: 15px;
+      }
+      .find {
+        display: none;
+        align-items: center;
+        gap: 4px;
+        flex: 0 1 320px;
+        min-width: 220px;
+        height: 34px;
+        padding: 0 4px 0 10px;
+        box-sizing: border-box;
+        border: 1px solid var(--adr-focus);
+        border-radius: 8px;
+        background: var(--adr-ink);
+      }
+      body.finding .find {
+        display: flex;
+      }
+      body.finding .bookmarks {
+        display: none;
+      }
+      .find input[type="text"] {
+        flex: 1;
+        height: 30px;
+        border: 0;
+        padding: 0;
+        background: transparent;
+      }
+      .find input[type="text"]:focus {
+        border: 0;
+      }
+      #find-count {
+        color: var(--adr-muted);
+        font-size: 12px;
+        white-space: nowrap;
+      }
+      #find-count.none {
+        color: #ef4444;
+      }
+      .find button {
+        width: 26px;
+        height: 26px;
+        border: 0;
+        background: transparent;
+      }
+      .find button:hover {
+        background: var(--adr-raised);
+      }
+      input[type="text"] {
+        flex: 1;
+        min-width: 0;
+        height: 34px;
+        border-radius: 8px;
+        border: 1px solid var(--adr-border);
+        background: var(--adr-ink);
+        color: var(--adr-white);
+        padding: 0 12px;
+        outline: none;
+      }
+      input[type="text"]:focus {
+        border-color: var(--adr-focus);
+      }
+      .bookmarks {
+        display: flex;
+        gap: 6px;
+        max-width: 42%;
+        overflow: hidden;
+      }
+      .bookmarks button.bm {
+        width: auto;
+        padding: 0 10px;
+        font-size: 12px;
+        color: var(--adr-muted);
+        white-space: nowrap;
+      }
+      #shield {
+        width: auto;
+        min-width: 50px;
+        padding: 0 8px;
+        color: #22c55e;
+        font-weight: 700;
+      }
+      #shield.off {
+        color: var(--adr-muted);
+      }
+      #site-shield {
+        width: auto;
+        padding: 0 8px;
+        font-size: 11px;
+      }
+      #site-shield.allowed {
+        color: var(--warn);
+      }
+      #vault {
+        width: auto;
+        min-width: 42px;
+        padding: 0 9px;
+        color: #fbbf24;
+        font-weight: 700;
+      }
+      #vault.empty {
+        color: var(--adr-muted);
+      }
+      #vault.unavailable {
+        color: #ef4444;
+      }
+
+      /* Página http: aviso dentro da barra de endereço, como o do Chrome. */
+      #insecure {
+        display: none;
+        position: absolute;
+        left: 6px;
+        top: 6px;
+        height: 22px;
+        padding: 0 8px;
+        border-radius: 11px;
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 22px;
+        pointer-events: none;
+      }
+      form.insecure #insecure {
+        display: block;
+      }
+      form.insecure #favicon {
+        display: none;
+      }
+      form.insecure input[type="text"] {
+        padding-left: 96px;
+      }
+      #zoom {
+        display: none;
+        width: auto;
+        padding: 0 8px;
+        font-size: 11px;
+      }
+      #zoom.on {
+        display: block;
+      }
+      .tabs .tab-audio {
+        flex: none;
+        width: 20px;
+        height: 20px;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: inherit;
+        font-size: 11px;
+        line-height: 20px;
+      }
+      .tabs .tab-audio:hover {
+        background: var(--adr-border);
+      }
+
+      /* Faixa de abas. O main só dá altura para ela no ADR Browser; com 48 px
+         (Instagram, Google fora do site) a faixa some sozinha. */
+      .tabs {
+        display: none;
+        flex: none;
+        height: 36px;
+        align-items: flex-end;
+        gap: 4px;
+        padding: 0 8px;
+        box-sizing: border-box;
+        background: var(--adr-ink);
+      }
+      @media (min-height: 70px) {
+        .tabs {
+          display: flex;
+        }
+      }
+      body.edge-bottom .tabs {
+        align-items: flex-start;
+      }
+      .tab-list {
+        display: flex;
+        align-items: inherit;
+        gap: 2px;
+        min-width: 0;
+        height: 100%;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      .tab-list::-webkit-scrollbar {
+        display: none;
+      }
+      .tab {
+        flex: 0 1 220px;
+        min-width: 56px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 4px 0 10px;
+        box-sizing: border-box;
+        border-radius: 8px 8px 0 0;
+        color: var(--adr-muted);
+        cursor: default;
+        outline: none;
+      }
+      body.edge-bottom .tab {
+        border-radius: 0 0 8px 8px;
+      }
+      .tab:hover {
+        background: var(--adr-raised);
+      }
+      .tab.active {
+        background: var(--adr-surface);
+        color: var(--adr-white);
+      }
+      .tab:focus-visible {
+        box-shadow: inset 0 0 0 2px var(--adr-focus);
+      }
+      .tab.dragging {
+        opacity: 0.5;
+      }
+      .tab.drop-before {
+        box-shadow: inset 2px 0 0 var(--adr-focus);
+      }
+      .tab.drop-after {
+        box-shadow: inset -2px 0 0 var(--adr-focus);
+      }
+      .tab-icon {
+        flex: none;
+        width: 16px;
+        height: 16px;
+      }
+      .tab-spinner {
+        flex: none;
+        width: 10px;
+        height: 10px;
+        margin: 0 1px;
+        border: 2px solid var(--adr-border);
+        border-top-color: var(--adr-focus);
+        border-radius: 50%;
+        animation: tab-spin 0.8s linear infinite;
+      }
+      @keyframes tab-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .tab-title {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-size: 12px;
+      }
+      .tabs .tab-close {
+        flex: none;
+        width: 20px;
+        height: 20px;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: inherit;
+        font-size: 10px;
+        line-height: 20px;
+      }
+      .tabs .tab-close:hover {
+        background: var(--adr-border);
+        color: var(--adr-white);
+      }
+      .tabs .tab-new {
+        flex: none;
+        width: 28px;
+        height: 28px;
+        margin-bottom: 1px;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        font-size: 18px;
+        line-height: 28px;
+      }
+      body.edge-bottom .tabs .tab-new {
+        margin: 1px 0 0;
+      }
+    </style>
+    <link rel="stylesheet" href="./internal-surfaces.css" />
+    <!-- Layout refinado da barra e da faixa. Depois do internal-surfaces de
+         propósito: mesma especificidade, e o que vem por último vale. -->
+    <style>
+      body[data-adr-surface="browser-toolbar"] {
+        /* Faixa de abas mais funda que a barra (a hierarquia dos navegadores):
+           a aba ativa tem a cor da barra e parece sair dela. */
+        --strip: #050912;
+        --tab-hover: rgba(255, 255, 255, 0.05);
+        --tab-sep: rgba(255, 255, 255, 0.12);
+        --pill: rgba(255, 255, 255, 0.06);
+        --pill-hover: rgba(255, 255, 255, 0.1);
+      }
+      :root[data-theme="light"] body[data-adr-surface="browser-toolbar"] {
+        --strip: #e9edf2;
+        --tab-hover: rgba(15, 23, 42, 0.05);
+        --tab-sep: rgba(15, 23, 42, 0.16);
+        --pill: #eef2f6;
+        --pill-hover: #e4e9ef;
+      }
+
+      /* — Faixa de abas — */
+      body[data-adr-surface="browser-toolbar"] .tabs {
+        background: var(--strip);
+        padding: 0 6px 0 8px;
+        gap: 2px;
+      }
+      body[data-adr-surface="browser-toolbar"] .tab-list {
+        gap: 0;
+      }
+      body[data-adr-surface="browser-toolbar"] .tab {
+        position: relative;
+        min-width: 40px;
+        height: 32px;
+        padding: 0 6px 0 12px;
+        border-radius: 10px 10px 0 0;
+        transition: background-color var(--fast), color var(--fast);
+      }
+      body[data-adr-surface="browser-toolbar"].edge-bottom .tab {
+        border-radius: 0 0 10px 10px;
+      }
+      body[data-adr-surface="browser-toolbar"] .tab:hover {
+        background: var(--tab-hover);
+        color: var(--fg);
+      }
+      body[data-adr-surface="browser-toolbar"] .tab.active {
+        background: var(--bar);
+        color: var(--fg);
+      }
+      /* Divisória fina entre abas; some ao lado da ativa e da que está sob o mouse. */
+      body[data-adr-surface="browser-toolbar"] .tab::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        top: 9px;
+        bottom: 9px;
+        width: 1px;
+        background: var(--tab-sep);
+        transition: opacity var(--fast);
+      }
+      body[data-adr-surface="browser-toolbar"] .tab.active::after,
+      body[data-adr-surface="browser-toolbar"] .tab:hover::after,
+      body[data-adr-surface="browser-toolbar"] .tab:has(+ .tab.active)::after,
+      body[data-adr-surface="browser-toolbar"] .tab:has(+ .tab:hover)::after,
+      body[data-adr-surface="browser-toolbar"] .tab:last-child::after {
+        opacity: 0;
+      }
+      body[data-adr-surface="browser-toolbar"] .tab.active .tab-title {
+        font-weight: 600;
+      }
+      /* Título que não cabe esmaece no fim, em vez de "…". */
+      body[data-adr-surface="browser-toolbar"] .tab-title {
+        text-overflow: clip;
+        -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 16px), transparent);
+        mask-image: linear-gradient(90deg, #000 calc(100% - 16px), transparent);
+      }
+      body[data-adr-surface="browser-toolbar"] .tabs .tab-close,
+      body[data-adr-surface="browser-toolbar"] .tabs .tab-audio {
+        display: grid;
+        place-items: center;
+        width: 20px;
+        height: 20px;
+        color: var(--muted);
+      }
+      body[data-adr-surface="browser-toolbar"] .tabs .tab-close:hover,
+      body[data-adr-surface="browser-toolbar"] .tabs .tab-audio:hover {
+        background: var(--pill-hover);
+        color: var(--fg);
+      }
+      body[data-adr-surface="browser-toolbar"] .tabs .tab-audio.muted {
+        color: var(--danger-fg);
+      }
+      body[data-adr-surface="browser-toolbar"] .tab-spinner {
+        border-color: var(--line2);
+        border-top-color: var(--accent);
+      }
+      /* Aba estreita (muitas abas): ✕ só na ativa e no hover; mais estreita
+         ainda, só o ícone — como o Chrome. As classes vêm de fitTabs(). */
+      body[data-adr-surface="browser-toolbar"] .tab-list.narrow .tab:not(.active):not(:hover) .tab-close {
+        display: none;
+      }
+      body[data-adr-surface="browser-toolbar"] .tab-list.tiny .tab {
+        justify-content: center;
+        padding: 0 4px;
+      }
+      body[data-adr-surface="browser-toolbar"] .tab-list.tiny .tab-title,
+      body[data-adr-surface="browser-toolbar"] .tab-list.tiny .tab-audio,
+      body[data-adr-surface="browser-toolbar"] .tab-list.tiny .tab:not(.active) .tab-close {
+        display: none;
+      }
+      body[data-adr-surface="browser-toolbar"] .tabs .tab-new {
+        display: grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        margin: 0 0 2px 4px;
+        color: var(--muted);
+      }
+      body[data-adr-surface="browser-toolbar"].edge-bottom .tabs .tab-new {
+        margin: 2px 0 0 4px;
+      }
+
+      /* — Barra — */
+      body[data-adr-surface="browser-toolbar"] .bar {
+        gap: 4px;
+        padding: 0 8px;
+      }
+      body[data-adr-surface="browser-toolbar"] button {
+        transition: background-color var(--fast), color var(--fast), opacity var(--fast);
+      }
+      body[data-adr-surface="browser-toolbar"] button:focus-visible,
+      body[data-adr-surface="browser-toolbar"] .tab:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: -2px;
+      }
+      /* Voltar/avançar/recarregar redondos, como nos navegadores. */
+      body[data-adr-surface="browser-toolbar"] .nav-btn,
+      body[data-adr-surface="browser-toolbar"] #star,
+      body[data-adr-surface="browser-toolbar"] #chrome {
+        display: grid;
+        place-items: center;
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        border-radius: 50%;
+        color: var(--fg2);
+      }
+      body[data-adr-surface="browser-toolbar"] .nav-btn:disabled {
+        opacity: 0.35;
+        background: transparent;
+      }
+      body[data-adr-surface="browser-toolbar"] #star.saved {
+        color: var(--accent);
+      }
+      body[data-adr-surface="browser-toolbar"] #star.saved svg {
+        fill: currentColor;
+      }
+
+      /* Endereço em pílula, sem borda até o foco. */
+      body[data-adr-surface="browser-toolbar"] form#nav {
+        margin: 0 4px;
+      }
+      body[data-adr-surface="browser-toolbar"] #url {
+        height: 34px;
+        border-radius: 17px;
+        border-color: transparent;
+        background: var(--pill);
+        padding: 0 16px;
+        font-size: 13.5px;
+        transition: background-color var(--fast), box-shadow var(--fast);
+      }
+      body[data-adr-surface="browser-toolbar"] #url:hover {
+        background: var(--pill-hover);
+      }
+      body[data-adr-surface="browser-toolbar"] #url:focus {
+        background: var(--bg);
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+      }
+      body[data-adr-surface="browser-toolbar"] form.has-icon #url {
+        padding-left: 38px;
+      }
+      body[data-adr-surface="browser-toolbar"] #favicon {
+        left: 13px;
+      }
+      body[data-adr-surface="browser-toolbar"] #insecure {
+        display: none;
+        align-items: center;
+        gap: 4px;
+        left: 6px;
+        top: 6px;
+        height: 22px;
+        padding: 0 9px 0 7px;
+        background: color-mix(in srgb, var(--danger) 16%, transparent);
+        color: var(--danger-fg);
+      }
+      body[data-adr-surface="browser-toolbar"] form.insecure #insecure {
+        display: inline-flex;
+      }
+      body[data-adr-surface="browser-toolbar"] form.insecure #url {
+        padding-left: 112px;
+      }
+
+      /* Zoom: pílula com lupa. */
+      body[data-adr-surface="browser-toolbar"] #zoom.on {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        height: 28px;
+        padding: 0 10px;
+        border-radius: 14px;
+        background: var(--pill);
+        color: var(--fg2);
+        font-size: 12px;
+        font-variant-numeric: tabular-nums;
+      }
+      body[data-adr-surface="browser-toolbar"] #zoom.on:hover {
+        background: var(--pill-hover);
+      }
+
+      /* Busca na página em pílula, contador separado por divisória. */
+      body[data-adr-surface="browser-toolbar"] .find {
+        height: 34px;
+        border-radius: 17px;
+        padding: 0 4px 0 14px;
+        background: var(--bg);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+      }
+      body[data-adr-surface="browser-toolbar"] #find-count {
+        padding: 0 8px 0 10px;
+        border-left: 1px solid var(--line2);
+        font-variant-numeric: tabular-nums;
+      }
+      body[data-adr-surface="browser-toolbar"] .find button {
+        display: grid;
+        place-items: center;
+        width: 26px;
+        height: 26px;
+        padding: 0;
+        border-radius: 50%;
+      }
+
+      /* Ferramentas do ADR agrupadas numa pílula só. */
+      body[data-adr-surface="browser-toolbar"] .tools {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        height: 34px;
+        padding: 0 3px;
+        margin: 0 4px;
+        border-radius: 17px;
+        background: var(--pill);
+      }
+      body[data-adr-surface="browser-toolbar"] .tools button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        height: 28px;
+        min-width: 28px;
+        border: 0;
+        border-radius: 14px;
+      }
+      body[data-adr-surface="browser-toolbar"] .tools button:hover {
+        background: var(--pill-hover);
+      }
+      body[data-adr-surface="browser-toolbar"] .tools #lusha {
+        width: 28px;
+        padding: 0;
+        color: var(--fg2);
+      }
+      body[data-adr-surface="browser-toolbar"] .tools #shield,
+      body[data-adr-surface="browser-toolbar"] .tools #vault {
+        min-width: 0;
+        padding: 0 9px;
+        font-variant-numeric: tabular-nums;
+      }
+      body[data-adr-surface="browser-toolbar"] .tools #site-shield {
+        padding: 0 10px;
+      }
+
+      /* Favoritos como na barra de favoritos: texto, sem moldura. */
+      body[data-adr-surface="browser-toolbar"] .bookmarks {
+        gap: 0;
+        margin-left: 2px;
+      }
+      body[data-adr-surface="browser-toolbar"] .bookmarks button.bm {
+        height: 28px;
+        padding: 0 10px;
+        border: 0;
+        border-radius: 14px;
+        background: transparent;
+        color: var(--fg2);
+      }
+      body[data-adr-surface="browser-toolbar"] .bookmarks button.bm:hover {
+        background: var(--pill-hover);
+      }
+    </style>
+  </head>
+  <body data-adr-surface="browser-toolbar">
+    <div class="tabs" id="tabs">
+      <div class="tab-list" id="tab-list" role="tablist" aria-label="Abas do ADR Browser"></div>
+      <button id="tab-new" class="tab-new" title="Nova aba (Ctrl+T)" aria-label="Nova aba" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+    </div>
+    <div class="bar">
+      <button id="back" class="nav-btn" title="Voltar (Alt+←)" aria-label="Voltar" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"></path></svg></button>
+      <button id="forward" class="nav-btn" title="Avançar (Alt+→)" aria-label="Avançar" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+      <button id="reload" class="nav-btn" title="Recarregar (Ctrl+R)" aria-label="Recarregar" type="button"></button>
+      <form id="nav">
+        <img id="favicon" alt="" referrerpolicy="no-referrer" hidden />
+        <span id="insecure" title="A conexão com este site não é criptografada"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 20h20z"></path><path d="M12 10v4M12 17.5v.5"></path></svg>Não seguro</span>
+        <input
+          id="url"
+          type="text"
+          aria-label="Pesquisar ou digitar endereço"
+          spellcheck="false"
+          placeholder="Pesquisar ou digitar endereço"
+        />
+      </form>
+      <button id="zoom" title="Zoom da página — clique para voltar a 100%" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m20 20-4.8-4.8"></path></svg><span id="zoom-value">100%</span></button>
+      <div class="find" id="find" role="search">
+        <input id="find-text" type="text" aria-label="Buscar na página" placeholder="Buscar na página" spellcheck="false" />
+        <span id="find-count" aria-live="polite"></span>
+        <button id="find-prev" title="Anterior (Shift+Enter)" aria-label="Resultado anterior" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6"></path></svg></button>
+        <button id="find-next" title="Próximo (Enter)" aria-label="Próximo resultado" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+        <button id="find-close" title="Fechar (Esc)" aria-label="Fechar busca" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+      </div>
+      <div class="tools" role="group" aria-label="Ferramentas ADR">
+      <button id="lusha" title="Consultar o perfil atual na Lusha" aria-label="Consultar na Lusha" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"></circle><path d="M2 21c0-3.9 3.1-7 7-7 1.3 0 2.5.3 3.5.9"></path><circle cx="17" cy="17" r="3"></circle><path d="m22 22-2.8-2.8"></path></svg></button>
+      <button id="shield" title="Ativar ou desativar bloqueio" aria-label="Bloqueio de anúncios" type="button">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 8 4v6c0 5-3.4 8.2-8 10-4.6-1.8-8-5-8-10V6z"></path><path d="m9 12 2 2 4-4"></path></svg>
+        <span id="blocked">0</span>
+      </button>
+      <button id="site-shield" title="Permitir anúncios neste site" aria-label="Permitir anúncios neste site" type="button"><span class="full-label">Liberar anúncios</span><span class="short-label">Liberar</span></button>
+      <button id="vault" class="empty" title="Cofre ADR" type="button">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="m11 12 9-9 2 2-2 2 1 1-2 2-1-1-2 2"></path></svg>
+        <span id="vault-count">0</span>
+      </button>
+      </div>
+      <button id="star" title="Adicionar aos favoritos (Ctrl+D)" aria-label="Adicionar aos favoritos" aria-pressed="false" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 17.4l-5.6 2.9 1.1-6.2L3 9.7l6.2-.9z"></path></svg></button>
+      <div class="bookmarks" id="bookmarks"></div>
+      <button id="chrome" title="Abrir no navegador padrão" aria-label="Abrir no navegador padrão" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M10 14 20 4"></path><path d="M20 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5"></path></svg></button>
+    </div>
+    <script src="./theme.js"></script>
+    <script>
+      // Ícones desenhados (traço na cor do texto): os caracteres ← ↻ ☆ 🔊 de
+      // antes mudavam de tamanho e cor conforme a fonte e o emoji do sistema.
+      const icon = (paths, size = 16, width = 2) =>
+        `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+      const ICONS = {
+        reload: icon('<path d="M20 11a8 8 0 1 0-2.3 5.7"></path><path d="M20 4v7h-7"></path>', 18),
+        stop: icon('<path d="M6 6l12 12M18 6 6 18"></path>', 18),
+        close: icon('<path d="M7 7l10 10M17 7 7 17"></path>', 12, 2.4),
+        audio: icon('<path d="M4 9v6h4l5 4V5L8 9z"></path><path d="M16.5 8.5a5 5 0 0 1 0 7"></path>', 13),
+        muted: icon('<path d="M4 9v6h4l5 4V5L8 9z"></path><path d="m17 9 5 5M22 9l-5 5"></path>', 13),
+      };
+
+      /** Endereço da página da aba ativa (o que o main mandou, não o digitado). */
+      let currentUrl = "";
+
+      const DEFAULT_BOOKMARKS = [
+        { title: "Google", url: "https://www.google.com/" },
+        { title: "YouTube", url: "https://www.youtube.com/" },
+        { title: "Gmail", url: "https://mail.google.com/" },
+        { title: "ADR", url: "https://app.adragencia.com.br/" },
+      ];
+
+      function loadBookmarks() {
+        try {
+          const raw = localStorage.getItem("adr-browser-bookmarks");
+          if (raw) return JSON.parse(raw);
+        } catch {}
+        return DEFAULT_BOOKMARKS.slice();
+      }
+
+      function saveBookmarks(list) {
+        localStorage.setItem("adr-browser-bookmarks", JSON.stringify(list));
+        renderBookmarks();
+      }
+
+      // Favorito é da PÁGINA: com texto digitado (e não enviado) na barra, o
+      // Ctrl+D/estrela guardava o rascunho em vez do endereço. Até a primeira
+      // URL chegar do main, vale o campo.
+      function bookmarkTarget() {
+        return currentUrl || document.getElementById("url").value.trim();
+      }
+
+      function renderFavorite() {
+        const url = bookmarkTarget();
+        const saved = Boolean(url && bookmarks.some((item) => item.url === url));
+        const button = document.getElementById("star");
+        button.classList.toggle("saved", saved);
+        button.title = saved ? "Remover dos favoritos (Ctrl+D)" : "Adicionar aos favoritos (Ctrl+D)";
+        button.setAttribute("aria-label", button.title);
+        button.setAttribute("aria-pressed", String(saved));
+      }
+
+      let bookmarks = loadBookmarks();
+      let adBlockState = {
+        enabled: true,
+        siteAllowed: false,
+        blockedCount: 0,
+        filterCount: 0,
+        externalBrowser: "brave",
+      };
+      let vaultState = {
+        available: true,
+        total: 0,
+        matchCount: 0,
+        origin: null,
+        error: null,
+      };
+
+      function renderBookmarks() {
+        const root = document.getElementById("bookmarks");
+        root.innerHTML = "";
+        for (const bm of bookmarks.slice(0, 6)) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "bm";
+          btn.textContent = bm.title;
+          btn.title = bm.url;
+          btn.addEventListener("click", () => window.adrBrowser?.navigate(bm.url));
+          root.appendChild(btn);
+        }
+        renderFavorite();
+      }
+
+      function renderAdBlock() {
+        const shield = document.getElementById("shield");
+        const site = document.getElementById("site-shield");
+        shield.classList.toggle("off", !adBlockState.enabled);
+        shield.title = adBlockState.enabled
+          ? `Bloqueio ativo · ${adBlockState.filterCount || 0} filtros`
+          : "Bloqueio desativado";
+        document.getElementById("blocked").textContent = String(adBlockState.blockedCount || 0);
+        site.classList.toggle("allowed", adBlockState.siteAllowed);
+        site.querySelector(".full-label").textContent = adBlockState.siteAllowed ? "Anúncios liberados" : "Liberar anúncios";
+        site.querySelector(".short-label").textContent = adBlockState.siteAllowed ? "Bloquear" : "Liberar";
+        site.title = adBlockState.siteAllowed
+          ? "Voltar a bloquear anúncios neste site"
+          : "Permitir anúncios neste site";
+        site.setAttribute("aria-label", site.title);
+        const external = document.getElementById("chrome");
+        const browserName =
+          adBlockState.externalBrowser === "chrome"
+            ? "Chrome"
+            : adBlockState.externalBrowser === "brave"
+              ? "Brave"
+              : "navegador padrão";
+        external.title =
+          browserName === "navegador padrão"
+            ? "Abrir no navegador padrão"
+            : `Abrir no ${browserName}`;
+        external.setAttribute("aria-label", external.title);
+      }
+
+      function renderVault() {
+        const button = document.getElementById("vault");
+        const count = document.getElementById("vault-count");
+        button.classList.toggle("empty", vaultState.available && !vaultState.matchCount);
+        button.classList.toggle("unavailable", !vaultState.available);
+        count.textContent = String(vaultState.matchCount || 0);
+        if (!vaultState.available) {
+          button.title = vaultState.error || "Cofre ADR indisponível";
+        } else if (vaultState.matchCount) {
+          button.title = `${vaultState.matchCount} ${vaultState.matchCount === 1 ? "credencial" : "credenciais"} para este site`;
+        } else {
+          button.title = `Cofre ADR · ${vaultState.total || 0} ${vaultState.total === 1 ? "credencial" : "credenciais"}`;
+        }
+        button.setAttribute("aria-label", button.title);
+      }
+
+      let pageLoading = false;
+      function renderLoading(loading) {
+        pageLoading = Boolean(loading);
+        const button = document.getElementById("reload");
+        button.classList.toggle("loading", pageLoading);
+        button.innerHTML = pageLoading ? ICONS.stop : ICONS.reload;
+        button.title = pageLoading ? "Parar" : "Recarregar (Ctrl+R)";
+        button.setAttribute("aria-label", pageLoading ? "Parar" : "Recarregar");
+      }
+
+      function renderFavicon(url) {
+        const img = document.getElementById("favicon");
+        const form = document.getElementById("nav");
+        if (!url) {
+          img.hidden = true;
+          img.removeAttribute("src");
+          form.classList.remove("has-icon");
+          return;
+        }
+        if (img.getAttribute("src") === url) return;
+        img.onload = () => {
+          img.hidden = false;
+          form.classList.add("has-icon");
+        };
+        img.onerror = () => renderFavicon(null);
+        img.src = url;
+      }
+
+      // Faixa de abas: espelho do que o main manda (as abas são os serviços
+      // "browser" da lateral). Clicar, fechar e arrastar só pedem ao main;
+      // quem muda a lista é ele, e a faixa redesenha quando a lista volta.
+      const tabList = document.getElementById("tab-list");
+      let tabStrip = { tabs: [], edge: "top" };
+      let draggingTabId = null;
+      let pendingStrip = null;
+
+      function tabIcon(tab) {
+        if (tab.loading) {
+          const spinner = document.createElement("span");
+          spinner.className = "tab-spinner";
+          spinner.setAttribute("aria-hidden", "true");
+          return spinner;
+        }
+        const img = document.createElement("img");
+        img.className = "tab-icon";
+        img.alt = "";
+        img.referrerPolicy = "no-referrer";
+        img.draggable = false;
+        img.src = tab.favicon || "./browser.svg";
+        img.onerror = () => {
+          img.onerror = null;
+          img.src = "./browser.svg";
+        };
+        return img;
+      }
+
+      function renderTabs(strip) {
+        if (draggingTabId) {
+          // Redesenhar no meio do arrasto cancelava o arrasto.
+          pendingStrip = strip;
+          return;
+        }
+        tabStrip = strip && Array.isArray(strip.tabs) ? strip : { tabs: [], edge: "top" };
+        document.body.classList.toggle("edge-bottom", tabStrip.edge === "bottom");
+        tabList.textContent = "";
+        let activeEl = null;
+        for (const tab of tabStrip.tabs) {
+          const el = document.createElement("div");
+          el.className = "tab" + (tab.active ? " active" : "");
+          el.dataset.id = tab.id;
+          // Dica com o endereço, para distinguir abas de mesmo título.
+          el.title = tab.url && tab.url !== tab.title ? `${tab.title}\n${tab.url}` : tab.title;
+          el.draggable = true;
+          el.tabIndex = tab.active ? 0 : -1;
+          el.setAttribute("role", "tab");
+          el.setAttribute("aria-selected", String(Boolean(tab.active)));
+          const title = document.createElement("span");
+          title.className = "tab-title";
+          title.textContent = tab.title;
+          const close = document.createElement("button");
+          close.type = "button";
+          close.className = "tab-close";
+          close.innerHTML = ICONS.close;
+          close.title = "Fechar aba (Ctrl+W)";
+          close.setAttribute("aria-label", "Fechar " + tab.title);
+          close.draggable = false;
+          el.append(tabIcon(tab), title);
+          // Alto-falante: aba tocando som, ou silenciada. Clique alterna.
+          if (tab.audible || tab.muted) {
+            const audio = document.createElement("button");
+            audio.type = "button";
+            audio.className = "tab-audio";
+            audio.innerHTML = tab.muted ? ICONS.muted : ICONS.audio;
+            audio.classList.toggle("muted", Boolean(tab.muted));
+            audio.title = tab.muted ? "Ativar som da aba" : "Silenciar aba";
+            audio.setAttribute("aria-label", audio.title);
+            audio.draggable = false;
+            el.append(audio);
+          }
+          el.append(close);
+          tabList.appendChild(el);
+          if (tab.active) activeEl = el;
+        }
+        fitTabs();
+        activeEl?.scrollIntoView({ block: "nearest", inline: "nearest" });
+      }
+
+      // Largura que cada aba tem de fato decide o quanto ela mostra (ver o CSS
+      // de .narrow/.tiny). Medida aqui porque o container query no CSS zerava
+      // a largura natural das abas.
+      function fitTabs() {
+        const first = tabList.querySelector(".tab:not(.active)") || tabList.querySelector(".tab");
+        const width = first ? first.getBoundingClientRect().width : 999;
+        tabList.classList.toggle("narrow", width < 110);
+        tabList.classList.toggle("tiny", width < 72);
+      }
+      new ResizeObserver(fitTabs).observe(document.getElementById("tabs"));
+
+      function tabFromEvent(e) {
+        const el = e.target instanceof Element ? e.target.closest(".tab") : null;
+        return el && tabList.contains(el) ? el : null;
+      }
+
+      tabList.addEventListener("click", (e) => {
+        const el = tabFromEvent(e);
+        if (!el) return;
+        if (e.target instanceof Element && e.target.closest(".tab-close")) {
+          window.adrBrowser?.closeTab(el.dataset.id);
+        } else if (e.target instanceof Element && e.target.closest(".tab-audio")) {
+          window.adrBrowser?.tabMute(el.dataset.id);
+        } else if (!el.classList.contains("active")) {
+          window.adrBrowser?.activateTab(el.dataset.id);
+        }
+      });
+      tabList.addEventListener("keydown", (e) => {
+        const el = tabFromEvent(e);
+        if (!el || e.target !== el || (e.key !== "Enter" && e.key !== " ")) return;
+        e.preventDefault();
+        window.adrBrowser?.activateTab(el.dataset.id);
+      });
+      // Botão do meio fecha a aba, como no Chrome (e sem o autoscroll).
+      tabList.addEventListener("mousedown", (e) => {
+        if (e.button === 1) e.preventDefault();
+      });
+      tabList.addEventListener("auxclick", (e) => {
+        const el = tabFromEvent(e);
+        if (el && e.button === 1) window.adrBrowser?.closeTab(el.dataset.id);
+      });
+      // Botão direito na aba: menu do main (duplicar, silenciar, fechar outras…).
+      tabList.addEventListener("contextmenu", (e) => {
+        const el = tabFromEvent(e);
+        if (!el) return;
+        e.preventDefault();
+        window.adrBrowser?.tabMenu(el.dataset.id);
+      });
+      // Duplo clique no espaço vazio da faixa abre aba nova.
+      document.getElementById("tabs").addEventListener("dblclick", (e) => {
+        if (e.target === e.currentTarget || e.target === tabList) window.adrBrowser?.newTab();
+      });
+      document.getElementById("tab-new").onclick = () => window.adrBrowser?.newTab();
+      tabList.addEventListener(
+        "wheel",
+        (e) => {
+          if (!e.deltaY || tabList.scrollWidth <= tabList.clientWidth) return;
+          e.preventDefault();
+          tabList.scrollLeft += e.deltaY;
+        },
+        { passive: false },
+      );
+
+      function clearDropMarks() {
+        for (const el of tabList.querySelectorAll(".drop-before, .drop-after")) {
+          el.classList.remove("drop-before", "drop-after");
+        }
+      }
+      function dropsAfter(el, e) {
+        const box = el.getBoundingClientRect();
+        return e.clientX > box.left + box.width / 2;
+      }
+      tabList.addEventListener("dragstart", (e) => {
+        const el = tabFromEvent(e);
+        if (!el) return;
+        draggingTabId = el.dataset.id;
+        el.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", draggingTabId);
+      });
+      tabList.addEventListener("dragover", (e) => {
+        const el = tabFromEvent(e);
+        if (!draggingTabId || !el) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        clearDropMarks();
+        if (el.dataset.id !== draggingTabId) {
+          el.classList.add(dropsAfter(el, e) ? "drop-after" : "drop-before");
+        }
+      });
+      tabList.addEventListener("drop", (e) => {
+        const el = tabFromEvent(e);
+        if (!draggingTabId || !el) return;
+        e.preventDefault();
+        if (el.dataset.id === draggingTabId) return;
+        const ids = tabStrip.tabs.map((tab) => tab.id);
+        const order = ids.filter((id) => id !== draggingTabId);
+        order.splice(order.indexOf(el.dataset.id) + (dropsAfter(el, e) ? 1 : 0), 0, draggingTabId);
+        if (order.some((id, i) => id !== ids[i])) window.adrBrowser?.reorderTabs(order);
+      });
+      tabList.addEventListener("dragend", () => {
+        draggingTabId = null;
+        clearDropMarks();
+        for (const el of tabList.querySelectorAll(".dragging")) el.classList.remove("dragging");
+        if (pendingStrip) {
+          const strip = pendingStrip;
+          pendingStrip = null;
+          renderTabs(strip);
+        }
+      });
+
+      // Buscar na página: a barra só manda o texto; quem busca é a view da página.
+      const findBox = document.getElementById("find-text");
+      // `null` = ainda sem resposta da página: contador vazio, em vez de piscar
+      // "Nenhum resultado" a cada tecla (e de guardá-lo escondido depois do Esc).
+      function renderFindResult(result) {
+        const count = document.getElementById("find-count");
+        const total = result?.total || 0;
+        const hasText = Boolean(findBox.value) && Boolean(result);
+        count.textContent = !hasText ? "" : total ? `${result.active || 0} de ${total}` : "Nenhum resultado";
+        count.classList.toggle("none", hasText && !total);
+      }
+      function openFind(seed) {
+        // Texto selecionado na página entra como termo (o main já limpou).
+        if (seed) findBox.value = seed;
+        document.body.classList.add("finding");
+        findBox.focus();
+        findBox.select();
+        if (findBox.value) window.adrBrowser?.find(findBox.value, true, true);
+      }
+      function closeFind(notifyMain) {
+        if (!document.body.classList.contains("finding")) return;
+        document.body.classList.remove("finding");
+        renderFindResult(null);
+        if (notifyMain) window.adrBrowser?.findStop();
+      }
+      findBox.addEventListener("input", () => {
+        if (findBox.value) window.adrBrowser?.find(findBox.value, true, true);
+        else window.adrBrowser?.findStop();
+        renderFindResult(null);
+      });
+      findBox.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          closeFind(true);
+        } else if (e.key === "Enter" && findBox.value) {
+          e.preventDefault();
+          window.adrBrowser?.find(findBox.value, !e.shiftKey, false);
+        }
+      });
+      document.getElementById("find-next").onclick = () => {
+        if (findBox.value) window.adrBrowser?.find(findBox.value, true, false);
+      };
+      document.getElementById("find-prev").onclick = () => {
+        if (findBox.value) window.adrBrowser?.find(findBox.value, false, false);
+      };
+      document.getElementById("find-close").onclick = () => closeFind(true);
+      // F3/Ctrl+G vêm do main (o atalho é pego antes da página).
+      function stepFind(forward) {
+        if (findBox.value) window.adrBrowser?.find(findBox.value, forward, false);
+      }
+
+      // Barra de endereço como a do Chrome.
+      const urlInput = document.getElementById("url");
+      // currentUrl: declarado no topo do script (o favorito o lê antes daqui).
+      // Primeiro clique seleciona o endereço inteiro; o seguinte posiciona o cursor.
+      let selectOnMouseUp = false;
+      urlInput.addEventListener("mousedown", () => {
+        selectOnMouseUp = document.activeElement !== urlInput || !document.hasFocus();
+      });
+      urlInput.addEventListener("mouseup", () => {
+        if (!selectOnMouseUp) return;
+        selectOnMouseUp = false;
+        // Arrastou para selecionar um trecho: respeita. Senão, seleciona tudo
+        // depois que o clique termina — dentro do próprio mouseup o Chromium
+        // ainda reposiciona o cursor por cima.
+        if (urlInput.selectionStart !== urlInput.selectionEnd) return;
+        setTimeout(() => {
+          if (document.activeElement === urlInput && urlInput.selectionStart === urlInput.selectionEnd) {
+            urlInput.select();
+          }
+        }, 0);
+      });
+      urlInput.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          // 1º Esc desfaz o que foi digitado; o 2º devolve o teclado à página.
+          e.preventDefault();
+          if (urlInput.value !== currentUrl) {
+            urlInput.value = currentUrl;
+            urlInput.select();
+            renderSecurity(currentUrl);
+          } else {
+            urlInput.blur();
+            window.adrBrowser?.focusPage();
+          }
+        } else if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+          // Ctrl+Enter: "exemplo" → www.exemplo.com (o main completa).
+          e.preventDefault();
+          urlInput.blur();
+          window.adrBrowser?.navigate(urlInput.value, true);
+        }
+      });
+
+      function renderSecurity(url) {
+        const insecure =
+          /^http:\/\//i.test(url || "") && !/^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\/|$)/i.test(url);
+        document.getElementById("nav").classList.toggle("insecure", insecure);
+      }
+
+      function renderZoom(percent) {
+        const button = document.getElementById("zoom");
+        document.getElementById("zoom-value").textContent = `${percent}%`;
+        button.classList.toggle("on", percent !== 100);
+      }
+      document.getElementById("zoom").onclick = () => window.adrBrowser?.zoomReset();
+
+      document.getElementById("back").onclick = () => window.adrBrowser?.back();
+      document.getElementById("forward").onclick = () => window.adrBrowser?.forward();
+      document.getElementById("reload").onclick = (e) => {
+        if (pageLoading) window.adrBrowser?.stop();
+        else window.adrBrowser?.reload(e.shiftKey);
+      };
+      document.getElementById("chrome").onclick = () => window.adrBrowser?.openExternal();
+      document.getElementById("lusha").onclick = () => window.adrBrowser?.lushaSearch();
+      document.getElementById("vault").onclick = () => window.adrBrowser?.openVaultMenu();
+      document.getElementById("shield").onclick = async () => {
+        adBlockState =
+          (await window.adrBrowser?.toggleAdBlock(!adBlockState.enabled)) || adBlockState;
+        renderAdBlock();
+      };
+      document.getElementById("site-shield").onclick = async () => {
+        adBlockState = (await window.adrBrowser?.toggleSiteAllowlist()) || adBlockState;
+        renderAdBlock();
+        window.adrBrowser?.reload(false);
+      };
+      document.getElementById("star").onclick = async () => {
+        const url = bookmarkTarget();
+        if (!url) return;
+        if (bookmarks.some((item) => item.url === url)) {
+          bookmarks = bookmarks.filter((item) => item.url !== url);
+          saveBookmarks(bookmarks);
+          return;
+        }
+        let title = url;
+        try {
+          title = new URL(url).hostname.replace(/^www\./, "");
+        } catch {}
+        bookmarks.unshift({ title, url });
+        bookmarks = bookmarks.slice(0, 20);
+        saveBookmarks(bookmarks);
+      };
+      document.getElementById("nav").onsubmit = (e) => {
+        e.preventDefault();
+        const input = document.getElementById("url");
+        // Enviado, o campo volta a mostrar para onde a página foi (redirect etc.).
+        input.blur();
+        window.adrBrowser?.navigate(input.value);
+      };
+
+      window.adrBrowser?.onUrl?.((url) => {
+        // Chega sozinho (bloqueio de anúncio, ajuste salvo): com o campo em uso,
+        // sobrescrever apagava o endereço que a pessoa estava digitando.
+        // `hasFocus` junto: depois do clique na página o activeElement continua
+        // sendo o campo, e a barra parava de acompanhar a navegação.
+        const input = document.getElementById("url");
+        const typing = document.hasFocus() && document.activeElement === input;
+        currentUrl = url || "";
+        if (!typing) input.value = currentUrl;
+        renderSecurity(currentUrl);
+        renderFavorite();
+      });
+      function renderAppearance(appearance) {
+        window.__adrState = appearance || { theme: "system" };
+        applyTheme(window.__adrState);
+      }
+      renderAppearance({ theme: "system" });
+      window.adrBrowser?.onAppearance?.(renderAppearance);
+      window.adrBrowser?.getAppearance?.().then(renderAppearance).catch(() => undefined);
+      window.adrBrowser?.onNavState?.((state) => {
+        document.getElementById("back").disabled = !state.canGoBack;
+        document.getElementById("forward").disabled = !state.canGoForward;
+      });
+      window.adrBrowser?.onAdBlockState?.((state) => {
+        adBlockState = state || adBlockState;
+        renderAdBlock();
+      });
+      window.adrBrowser?.onVaultState?.((state) => {
+        vaultState = state || vaultState;
+        renderVault();
+      });
+      window.adrBrowser?.onLoading?.(renderLoading);
+      window.adrBrowser?.onFavicon?.(renderFavicon);
+      window.adrBrowser?.onTabs?.(renderTabs);
+      window.adrBrowser?.onFindOpen?.(openFind);
+      window.adrBrowser?.onFindStep?.(stepFind);
+      window.adrBrowser?.onZoom?.(renderZoom);
+      window.adrBrowser?.onToggleBookmark?.(() => document.getElementById("star").click());
+      window.adrBrowser?.onFindClose?.(() => closeFind(false));
+      window.adrBrowser?.onFindResult?.(renderFindResult);
+
+      renderBookmarks();
+      renderAdBlock();
+      renderVault();
+      renderLoading(false);
+      window.adrBrowser?.getUrl?.().then((url) => {
+        if (url) document.getElementById("url").value = currentUrl = url;
+        renderSecurity(currentUrl);
+        renderFavorite();
+      });
+      window.adrBrowser?.getAdBlockState?.().then((state) => {
+        if (state) adBlockState = state;
+        renderAdBlock();
+      });
+      window.adrBrowser?.getVaultState?.().then((state) => {
+        if (state) vaultState = state;
+        renderVault();
+      });
+    </script>
+  </body>
+</html>

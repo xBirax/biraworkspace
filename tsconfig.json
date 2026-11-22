@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "references": [
+    { "path": "./packages/contracts" },
+    { "path": "./packages/crm-core" },
+    { "path": "./apps/desktop" }
+  ],
+  "files": []
+}

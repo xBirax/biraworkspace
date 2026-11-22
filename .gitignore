@@ -1,0 +1,17 @@
+node_modules
+dist
+dist-extension
+coverage
+*.log
+.DS_Store
+.turbo
+release
+# release-new/, release-wv/, release-backup/: saídas de empacotamento com
+# win-unpacked de ~190 MB dentro. O padrão sem * deixava as três rastreáveis.
+apps/desktop/release*
+*.tsbuildinfo
+.vscode
+.idea
+.env
+.env.*
+!.env.example

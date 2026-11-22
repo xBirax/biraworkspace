@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'"
+    />
+    <title>Reunião</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #0b141b;
+        color: #e8eef3;
+        font: 12px/1 "Segoe UI", system-ui, sans-serif;
+        user-select: none;
+        overflow: hidden;
+      }
+      .bar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        height: 100%;
+        padding: 0 4px 0 10px;
+        border-bottom: 1px solid #1f2c36;
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #e5484d;
+        flex: none;
+      }
+      .title {
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      button {
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: inherit;
+        height: 22px;
+        min-width: 26px;
+        padding: 0 6px;
+        font: inherit;
+        cursor: pointer;
+      }
+      button:hover,
+      button:focus-visible {
+        background: #1f2c36;
+        outline: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bar">
+      <span class="dot" aria-hidden="true"></span>
+      <span class="title">Reunião em andamento</span>
+      <button type="button" id="expand" title="Voltar para a reunião" aria-label="Voltar para a reunião">
+        Abrir
+      </button>
+      <button type="button" id="hide" title="Ocultar nesta reunião" aria-label="Ocultar a mini-janela nesta reunião">
+        ✕
+      </button>
+    </div>
+    <script>
+      document.getElementById("expand").addEventListener("click", () => window.adrMini?.expand());
+      document.getElementById("hide").addEventListener("click", () => window.adrMini?.hide());
+    </script>
+  </body>
+</html>

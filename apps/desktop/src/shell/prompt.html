@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>ADR Prompt</title>
+    <link rel="stylesheet" href="./fonts.css" />
+    <link rel="stylesheet" href="./tokens.css" />
+    <style>
+      :root {
+        --ink: #0b141b;
+        --surface: #111c24;
+        --raised: #18252f;
+        --border: #2b3a45;
+        --focus: #4da3ff;
+        --muted: #94a3b8;
+        --white: #ffffff;
+      }
+      html, body {
+        margin: 0;
+        height: 100%;
+        background: rgba(5, 12, 18, 0.62);
+        color: var(--white);
+        font: 14px/1.4 var(--adr-font);
+      }
+      .wrap {
+        height: 100%;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        box-sizing: border-box;
+      }
+      .card {
+        width: min(420px, 100%);
+        background: linear-gradient(180deg, #15222c, var(--surface));
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 22px 22px 18px;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+      }
+      h1 {
+        margin: 0 0 6px;
+        font-size: 18px;
+        font-weight: 650;
+      }
+      p {
+        margin: 0 0 16px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        height: 44px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--ink);
+        color: var(--white);
+        padding: 0 14px;
+        font-size: 15px;
+        outline: none;
+      }
+      input:focus { border-color: var(--focus); }
+      .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 18px;
+      }
+      button {
+        min-width: 96px;
+        height: 40px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--raised);
+        color: var(--white);
+        font-size: 14px;
+        cursor: pointer;
+      }
+      button.primary {
+        background: linear-gradient(90deg, #4da3ff, #6b8cff);
+        border-color: transparent;
+        color: #041018;
+        font-weight: 700;
+      }
+      button:hover { filter: brightness(1.08); }
+    </style>
+    <link rel="stylesheet" href="./internal-surfaces.css" />
+  </head>
+  <body data-adr-surface="prompt">
+    <div class="wrap" id="backdrop">
+      <form class="card" id="form">
+        <div class="prompt-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"></rect><path d="M8 9h8M8 14h5"></path></svg>
+        </div>
+        <h1 id="title">Nome do workspace</h1>
+        <p id="hint">Escolha um nome curto para identificar este ambiente.</p>
+        <label for="value" id="label">Nome</label>
+        <input id="value" name="value" type="text" autocomplete="off" maxlength="512" />
+        <div class="actions">
+          <button type="button" id="cancel">Cancelar</button>
+          <button type="submit" class="primary">Criar</button>
+        </div>
+        <div class="prompt-footer">Pressione Esc para cancelar</div>
+      </form>
+    </div>
+    <script src="./theme.js"></script>
+    <script>
+      const params = new URLSearchParams(location.search);
+      window.__adrState = { theme: params.get("theme") || "system" };
+      applyTheme(window.__adrState);
+      document.documentElement.style.zoom = String(Number(params.get("zoom")) || 1);
+      const title = params.get("title") || "Nome do workspace";
+      const initial = params.get("initial") || "";
+      const okLabel = params.get("ok") || "OK";
+      const secret = params.get("secret") === "1";
+      // Teclado numérico e texto de PIN só no PIN: a senha do cofre e a mestra do
+      // Bitwarden também são "secret".
+      const numeric = params.get("numeric") === "1";
+      const hintParam = params.get("hint");
+      const labelParam = params.get("label");
+
+      document.getElementById("title").textContent = title;
+      document.getElementById("value").value = initial;
+      document.querySelector("button.primary").textContent = okLabel;
+
+      const hintEl = document.getElementById("hint");
+      const defaultHint = numeric
+        ? "Digite o PIN numérico (4 a 12 dígitos)."
+        : title.toLowerCase().includes("workspace")
+          ? "Escolha um nome curto para identificar este ambiente."
+          : "";
+      const hintText = hintParam != null ? hintParam : defaultHint;
+      if (hintText) {
+        hintEl.textContent = hintText;
+        hintEl.style.display = "block";
+      } else {
+        hintEl.textContent = "";
+        hintEl.style.display = "none";
+      }
+
+      const labelEl = document.getElementById("label");
+      labelEl.textContent = labelParam != null ? labelParam : (numeric ? "PIN" : secret ? "Senha" : "Nome");
+
+      const input = document.getElementById("value");
+      input.type = secret ? "password" : "text";
+      input.autocomplete = secret ? "new-password" : "off";
+      if (numeric) {
+        input.inputMode = "numeric";
+        input.placeholder = "••••";
+      }
+      if (secret) {
+        document.querySelector(".prompt-mark").innerHTML = '<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>';
+      }
+      setTimeout(() => { input.focus(); input.select(); }, 30);
+
+      function done(value) {
+        window.adrPrompt?.submit(value, params.get("id"));
+      }
+      document.getElementById("form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        // Segredo vai como digitado: main não apara PIN/senha de propósito.
+        const v = secret ? input.value : input.value.trim();
+        // Campo opcional (anotação da reunião): em branco também confirma.
+        if (!v.trim() && params.get("empty") !== "1") { input.focus(); return; }
+        done(v);
+      });
+      document.getElementById("cancel").addEventListener("click", () => done(null));
+      document.getElementById("backdrop").addEventListener("click", (e) => {
+        if (e.target.id === "backdrop") done(null);
+      });
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") done(null);
+      });
+    </script>
+  </body>
+</html>

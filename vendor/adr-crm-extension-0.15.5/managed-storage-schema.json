@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "baseUrl": {
+      "type": "string",
+      "title": "URL do ADR CRM"
+    },
+    "tenantId": {
+      "type": "string",
+      "title": "Tenant ADR"
+    }
+  }
+}

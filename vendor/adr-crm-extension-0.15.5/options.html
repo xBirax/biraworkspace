@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>ADR CRM no WhatsApp Web — Opções</title>
+    <link rel="icon" href="icons/adr-32.png" />
+    <style>
+      :root { --accent: #006b55; }
+      body { font-family: system-ui, sans-serif; max-width: 480px; margin: 32px auto; padding: 0 18px; color: #111b21; }
+      h1 { font-size: 19px; display: flex; align-items: center; gap: 8px; }
+      h1::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); display: inline-block; }
+      label { display: block; font-weight: 600; font-size: 13px; margin: 16px 0 4px; }
+      input { width: 100%; box-sizing: border-box; padding: 9px 11px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; }
+      input:focus { border-color: var(--accent); }
+      input:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+      small { color: #667781; display: block; margin-top: 4px; }
+      .row { display: flex; gap: 10px; margin-top: 20px; }
+      button { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+      button:hover { background: #005744; }
+      button.secondary { background: #fff; color: var(--accent); border: 1px solid var(--accent); }
+      button.secondary:hover { background: #f0fdf9; }
+      #status { margin-top: 14px; font-size: 13px; min-height: 18px; }
+      #status.ok { color: #047857; }
+      #status.err { color: #b91c1c; }
+    </style>
+  </head>
+  <body>
+    <h1>ADR CRM no WhatsApp Web</h1>
+    <label for="baseUrl">URL do CRM</label>
+    <input id="baseUrl" type="url" placeholder="https://app.adragencia.com.br" autocomplete="url" />
+    <small>A extensão usa a sessão da sua conta já conectada nessa URL. Use http://localhost:3000 apenas em desenvolvimento.</small>
+
+    <label for="tenantId">Tenant ID (opcional)</label>
+    <input id="tenantId" placeholder="Somente se usar multi-tenant" autocomplete="off" spellcheck="false" />
+
+    <div class="row">
+      <button id="save">Salvar</button>
+      <button id="test" class="secondary">Testar conexão</button>
+    </div>
+    <div id="status" role="status" aria-live="polite"></div>
+
+    <script src="options.js"></script>
+  </body>
+</html>

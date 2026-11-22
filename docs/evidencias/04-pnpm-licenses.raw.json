@@ -1,0 +1,1941 @@
+{
+  "MIT": [
+    {
+      "name": "@esbuild/linux-x64",
+      "versions": [
+        "0.28.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@esbuild+linux-x64@0.28.1/node_modules/@esbuild/linux-x64"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/evanw/esbuild#readme",
+      "description": "The Linux 64-bit binary for esbuild, a JavaScript bundler."
+    },
+    {
+      "name": "@eslint-community/eslint-utils",
+      "versions": [
+        "4.10.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@eslint-community+eslint-utils@4.10.0_eslint@9.39.5/node_modules/@eslint-community/eslint-utils"
+      ],
+      "license": "MIT",
+      "author": "Toru Nagashima",
+      "homepage": "https://github.com/eslint-community/eslint-utils#readme",
+      "description": "Utilities for ESLint plugins."
+    },
+    {
+      "name": "@eslint-community/regexpp",
+      "versions": [
+        "4.12.2"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@eslint-community+regexpp@4.12.2/node_modules/@eslint-community/regexpp"
+      ],
+      "license": "MIT",
+      "author": "Toru Nagashima",
+      "homepage": "https://github.com/eslint-community/regexpp#readme",
+      "description": "Regular expression parser for ECMAScript."
+    },
+    {
+      "name": "@eslint/eslintrc",
+      "versions": [
+        "3.3.6"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@eslint+eslintrc@3.3.6/node_modules/@eslint/eslintrc"
+      ],
+      "license": "MIT",
+      "author": "Nicholas C. Zakas",
+      "homepage": "https://github.com/eslint/eslintrc#readme",
+      "description": "The legacy ESLintRC config file format for ESLint"
+    },
+    {
+      "name": "@eslint/js",
+      "versions": [
+        "9.39.5"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@eslint+js@9.39.5/node_modules/@eslint/js"
+      ],
+      "license": "MIT",
+      "homepage": "https://eslint.org",
+      "description": "ESLint JavaScript language implementation"
+    },
+    {
+      "name": "@jridgewell/sourcemap-codec",
+      "versions": [
+        "1.5.5"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@jridgewell+sourcemap-codec@1.5.5/node_modules/@jridgewell/sourcemap-codec"
+      ],
+      "license": "MIT",
+      "author": "Justin Ridgewell",
+      "homepage": "https://github.com/jridgewell/sourcemaps/tree/main/packages/sourcemap-codec",
+      "description": "Encode/decode sourcemap mappings"
+    },
+    {
+      "name": "@rollup/rollup-linux-x64-gnu",
+      "versions": [
+        "4.62.2"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@rollup+rollup-linux-x64-gnu@4.62.2/node_modules/@rollup/rollup-linux-x64-gnu"
+      ],
+      "license": "MIT",
+      "author": "Lukas Taegert-Atkinson",
+      "homepage": "https://rollupjs.org/",
+      "description": "Native bindings for Rollup"
+    },
+    {
+      "name": "@rollup/rollup-linux-x64-musl",
+      "versions": [
+        "4.62.2"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@rollup+rollup-linux-x64-musl@4.62.2/node_modules/@rollup/rollup-linux-x64-musl"
+      ],
+      "license": "MIT",
+      "author": "Lukas Taegert-Atkinson",
+      "homepage": "https://rollupjs.org/",
+      "description": "Native bindings for Rollup"
+    },
+    {
+      "name": "@types/chai",
+      "versions": [
+        "5.2.3"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@types+chai@5.2.3/node_modules/@types/chai"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/chai",
+      "description": "TypeScript definitions for chai"
+    },
+    {
+      "name": "@types/deep-eql",
+      "versions": [
+        "4.0.2"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@types+deep-eql@4.0.2/node_modules/@types/deep-eql"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/deep-eql",
+      "description": "TypeScript definitions for deep-eql"
+    },
+    {
+      "name": "@types/estree",
+      "versions": [
+        "1.0.9"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@types+estree@1.0.9/node_modules/@types/estree"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/estree",
+      "description": "TypeScript definitions for estree"
+    },
+    {
+      "name": "@types/json-schema",
+      "versions": [
+        "7.0.15"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@types+json-schema@7.0.15/node_modules/@types/json-schema"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/json-schema",
+      "description": "TypeScript definitions for json-schema"
+    },
+    {
+      "name": "@types/node",
+      "versions": [
+        "22.20.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@types+node@22.20.1/node_modules/@types/node"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/node",
+      "description": "TypeScript definitions for node"
+    },
+    {
+      "name": "@typescript-eslint/eslint-plugin",
+      "versions": [
+        "8.65.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@typescript-eslint+eslint-plugin@8.65.0_@typescript-eslint+parser@8.65.0_eslint@9.39.5_typesc_6rm5tda36gp2ofni4iurt4vmva/node_modules/@typescript-eslint/eslint-plugin"
+      ],
+      "license": "MIT",
+      "homepage": "https://typescript-eslint.io/packages/eslint-plugin",
+      "description": "TypeScript plugin for ESLint"
+    },
+    {
+      "name": "@typescript-eslint/parser",
+      "versions": [
+        "8.65.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@typescript-eslint+parser@8.65.0_eslint@9.39.5_typescript@5.9.3/node_modules/@typescript-eslint/parser"
+      ],
+      "license": "MIT",
+      "homepage": "https://typescript-eslint.io/packages/parser",
+      "description": "An ESLint custom parser which leverages TypeScript ESTree"
+    },
+    {
+      "name": "@typescript-eslint/project-service",
+      "versions": [
+        "8.65.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@typescript-eslint+project-service@8.65.0_typescript@5.9.3/node_modules/@typescript-eslint/project-service"
+      ],
+      "license": "MIT",
+      "homepage": "https://typescript-eslint.io",
+      "description": "Standalone TypeScript project service wrapper for linting."
+    },
+    {
+      "name": "@typescript-eslint/scope-manager",
+      "versions": [
+        "8.65.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@typescript-eslint+scope-manager@8.65.0/node_modules/@typescript-eslint/scope-manager"
+      ],
+      "license": "MIT",
+      "homepage": "https://typescript-eslint.io/packages/scope-manager",
+      "description": "TypeScript scope analyser for ESLint"
+    },
+    {
+      "name": "@typescript-eslint/tsconfig-utils",
+      "versions": [
+        "8.65.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@typescript-eslint+tsconfig-utils@8.65.0_typescript@5.9.3/node_modules/@typescript-eslint/tsconfig-utils"
+      ],
+      "license": "MIT",
+      "homepage": "https://typescript-eslint.io",
+      "description": "Utilities for collecting TSConfigs for linting scenarios."
+    },
+    {
+      "name": "@typescript-eslint/type-utils",
+      "versions": [
+        "8.65.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@typescript-eslint+type-utils@8.65.0_eslint@9.39.5_typescript@5.9.3/node_modules/@typescript-eslint/type-utils"
+      ],
+      "license": "MIT",
+      "homepage": "https://typescript-eslint.io",
+      "description": "Type utilities for working with TypeScript + ESLint together"
+    },
+    {
+      "name": "@typescript-eslint/types",
+      "versions": [
+        "8.65.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@typescript-eslint+types@8.65.0/node_modules/@typescript-eslint/types"
+      ],
+      "license": "MIT",
+      "homepage": "https://typescript-eslint.io",
+      "description": "Types for the TypeScript-ESTree AST spec"
+    },
+    {
+      "name": "@typescript-eslint/typescript-estree",
+      "versions": [
+        "8.65.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@typescript-eslint+typescript-estree@8.65.0_typescript@5.9.3/node_modules/@typescript-eslint/typescript-estree"
+      ],
+      "license": "MIT",
+      "homepage": "https://typescript-eslint.io/packages/typescript-estree",
+      "description": "A parser that converts TypeScript source code into an ESTree compatible form"
+    },
+    {
+      "name": "@typescript-eslint/utils",
+      "versions": [
+        "8.65.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@typescript-eslint+utils@8.65.0_eslint@9.39.5_typescript@5.9.3/node_modules/@typescript-eslint/utils"
+      ],
+      "license": "MIT",
+      "homepage": "https://typescript-eslint.io/packages/utils",
+      "description": "Utilities for working with TypeScript + ESLint together"
+    },
+    {
+      "name": "@typescript-eslint/visitor-keys",
+      "versions": [
+        "8.65.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@typescript-eslint+visitor-keys@8.65.0/node_modules/@typescript-eslint/visitor-keys"
+      ],
+      "license": "MIT",
+      "homepage": "https://typescript-eslint.io",
+      "description": "Visitor keys used to help traverse the TypeScript-ESTree AST"
+    },
+    {
+      "name": "@vitest/expect",
+      "versions": [
+        "3.2.7"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@vitest+expect@3.2.7/node_modules/@vitest/expect"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/vitest-dev/vitest/tree/main/packages/expect#readme",
+      "description": "Jest's expect matchers as a Chai plugin"
+    },
+    {
+      "name": "@vitest/mocker",
+      "versions": [
+        "3.2.7"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@vitest+mocker@3.2.7_vite@7.3.6_@types+node@22.20.1_/node_modules/@vitest/mocker"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/vitest-dev/vitest/tree/main/packages/mocker#readme",
+      "description": "Vitest module mocker implementation"
+    },
+    {
+      "name": "@vitest/pretty-format",
+      "versions": [
+        "3.2.7"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@vitest+pretty-format@3.2.7/node_modules/@vitest/pretty-format"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/vitest-dev/vitest/tree/main/packages/utils#readme",
+      "description": "Fork of pretty-format with support for ESM"
+    },
+    {
+      "name": "@vitest/runner",
+      "versions": [
+        "3.2.7"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@vitest+runner@3.2.7/node_modules/@vitest/runner"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/vitest-dev/vitest/tree/main/packages/runner#readme",
+      "description": "Vitest test runner"
+    },
+    {
+      "name": "@vitest/snapshot",
+      "versions": [
+        "3.2.7"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@vitest+snapshot@3.2.7/node_modules/@vitest/snapshot"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/vitest-dev/vitest/tree/main/packages/snapshot#readme",
+      "description": "Vitest snapshot manager"
+    },
+    {
+      "name": "@vitest/spy",
+      "versions": [
+        "3.2.7"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@vitest+spy@3.2.7/node_modules/@vitest/spy"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/vitest-dev/vitest/tree/main/packages/spy#readme",
+      "description": "Lightweight Jest compatible spy implementation"
+    },
+    {
+      "name": "@vitest/utils",
+      "versions": [
+        "3.2.7"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@vitest+utils@3.2.7/node_modules/@vitest/utils"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/vitest-dev/vitest/tree/main/packages/utils#readme",
+      "description": "Shared Vitest utility functions"
+    },
+    {
+      "name": "acorn",
+      "versions": [
+        "8.17.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/acorn@8.17.0/node_modules/acorn"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/acornjs/acorn",
+      "description": "ECMAScript parser"
+    },
+    {
+      "name": "acorn-jsx",
+      "versions": [
+        "5.3.2"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/acorn-jsx@5.3.2_acorn@8.17.0/node_modules/acorn-jsx"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/acornjs/acorn-jsx",
+      "description": "Modern, fast React.js JSX parser"
+    },
+    {
+      "name": "ajv",
+      "versions": [
+        "6.15.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/ajv@6.15.0/node_modules/ajv"
+      ],
+      "license": "MIT",
+      "author": "Evgeny Poberezkin",
+      "homepage": "https://github.com/ajv-validator/ajv",
+      "description": "Another JSON Schema Validator"
+    },
+    {
+      "name": "ansi-styles",
+      "versions": [
+        "4.3.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/ansi-styles@4.3.0/node_modules/ansi-styles"
+      ],
+      "license": "MIT",
+      "author": "Sindre Sorhus",
+      "homepage": "https://github.com/chalk/ansi-styles#readme",
+      "description": "ANSI escape codes for styling strings in the terminal"
+    },
+    {
+      "name": "assertion-error",
+      "versions": [
+        "2.0.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/assertion-error@2.0.1/node_modules/assertion-error"
+      ],
+      "license": "MIT",
+      "author": "Jake Luer",
+      "homepage": "https://github.com/chaijs/assertion-error#readme",
+      "description": "Error constructor for test and validation frameworks that implements standardized AssertionError specification."
+    },
+    {
+      "name": "balanced-match",
+      "versions": [
+        "1.0.2",
+        "4.0.4"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/balanced-match@1.0.2/node_modules/balanced-match",
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/balanced-match@4.0.4/node_modules/balanced-match"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/juliangruber/balanced-match#readme",
+      "description": "Match balanced character pairs, like \"{\" and \"}\""
+    },
+    {
+      "name": "brace-expansion",
+      "versions": [
+        "1.1.16",
+        "5.0.7"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/brace-expansion@1.1.16/node_modules/brace-expansion",
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/brace-expansion@5.0.7/node_modules/brace-expansion"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/juliangruber/brace-expansion#readme",
+      "description": "Brace expansion as known from sh/bash"
+    },
+    {
+      "name": "cac",
+      "versions": [
+        "6.7.14"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/cac@6.7.14/node_modules/cac"
+      ],
+      "license": "MIT",
+      "author": "egoist",
+      "homepage": "https://github.com/egoist/cac#readme",
+      "description": "Simple yet powerful framework for building command-line apps."
+    },
+    {
+      "name": "callsites",
+      "versions": [
+        "3.1.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/callsites@3.1.0/node_modules/callsites"
+      ],
+      "license": "MIT",
+      "author": "Sindre Sorhus",
+      "homepage": "https://github.com/sindresorhus/callsites#readme",
+      "description": "Get callsites from the V8 stack trace API"
+    },
+    {
+      "name": "chai",
+      "versions": [
+        "5.3.3"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/chai@5.3.3/node_modules/chai"
+      ],
+      "license": "MIT",
+      "author": "Jake Luer",
+      "homepage": "http://chaijs.com",
+      "description": "BDD/TDD assertion library for node.js and the browser. Test framework agnostic."
+    },
+    {
+      "name": "chalk",
+      "versions": [
+        "4.1.2"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/chalk@4.1.2/node_modules/chalk"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/chalk/chalk#readme",
+      "description": "Terminal string styling done right"
+    },
+    {
+      "name": "check-error",
+      "versions": [
+        "2.1.3"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/check-error@2.1.3/node_modules/check-error"
+      ],
+      "license": "MIT",
+      "author": "Jake Luer",
+      "homepage": "https://github.com/chaijs/check-error#readme",
+      "description": "Error comparison and information related utility for node and the browser"
+    },
+    {
+      "name": "color-convert",
+      "versions": [
+        "2.0.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/color-convert@2.0.1/node_modules/color-convert"
+      ],
+      "license": "MIT",
+      "author": "Heather Arthur",
+      "homepage": "https://github.com/Qix-/color-convert#readme",
+      "description": "Plain color conversion functions"
+    },
+    {
+      "name": "color-name",
+      "versions": [
+        "1.1.4"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/color-name@1.1.4/node_modules/color-name"
+      ],
+      "license": "MIT",
+      "author": "DY",
+      "homepage": "https://github.com/colorjs/color-name",
+      "description": "A list of color names and its values"
+    },
+    {
+      "name": "concat-map",
+      "versions": [
+        "0.0.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/concat-map@0.0.1/node_modules/concat-map"
+      ],
+      "license": "MIT",
+      "author": "James Halliday",
+      "homepage": "https://github.com/substack/node-concat-map#readme",
+      "description": "concatenative mapdashery"
+    },
+    {
+      "name": "cross-spawn",
+      "versions": [
+        "7.0.6"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/cross-spawn@7.0.6/node_modules/cross-spawn"
+      ],
+      "license": "MIT",
+      "author": "André Cruz",
+      "homepage": "https://github.com/moxystudio/node-cross-spawn",
+      "description": "Cross platform child_process#spawn and child_process#spawnSync"
+    },
+    {
+      "name": "debug",
+      "versions": [
+        "4.4.3"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/debug@4.4.3/node_modules/debug"
+      ],
+      "license": "MIT",
+      "author": "Josh Junon",
+      "homepage": "https://github.com/debug-js/debug#readme",
+      "description": "Lightweight debugging utility for Node.js and the browser"
+    },
+    {
+      "name": "deep-eql",
+      "versions": [
+        "5.0.2"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/deep-eql@5.0.2/node_modules/deep-eql"
+      ],
+      "license": "MIT",
+      "author": "Jake Luer",
+      "homepage": "https://github.com/chaijs/deep-eql#readme",
+      "description": "Improved deep equality testing for Node.js and the browser."
+    },
+    {
+      "name": "deep-is",
+      "versions": [
+        "0.1.4"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/deep-is@0.1.4/node_modules/deep-is"
+      ],
+      "license": "MIT",
+      "author": "Thorsten Lorenz",
+      "homepage": "https://github.com/thlorenz/deep-is#readme",
+      "description": "node's assert.deepEqual algorithm except for NaN being equal to NaN"
+    },
+    {
+      "name": "es-module-lexer",
+      "versions": [
+        "1.7.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/es-module-lexer@1.7.0/node_modules/es-module-lexer"
+      ],
+      "license": "MIT",
+      "author": "Guy Bedford",
+      "homepage": "https://github.com/guybedford/es-module-lexer#readme",
+      "description": "Lexes ES modules returning their import/export metadata"
+    },
+    {
+      "name": "esbuild",
+      "versions": [
+        "0.28.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/esbuild@0.28.1/node_modules/esbuild"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/evanw/esbuild#readme",
+      "description": "An extremely fast JavaScript and CSS bundler and minifier."
+    },
+    {
+      "name": "escape-string-regexp",
+      "versions": [
+        "4.0.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/escape-string-regexp@4.0.0/node_modules/escape-string-regexp"
+      ],
+      "license": "MIT",
+      "author": "Sindre Sorhus",
+      "homepage": "https://github.com/sindresorhus/escape-string-regexp#readme",
+      "description": "Escape RegExp special characters"
+    },
+    {
+      "name": "eslint",
+      "versions": [
+        "9.39.5"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/eslint@9.39.5/node_modules/eslint"
+      ],
+      "license": "MIT",
+      "author": "Nicholas C. Zakas",
+      "homepage": "https://eslint.org",
+      "description": "An AST-based pattern checker for JavaScript."
+    },
+    {
+      "name": "estree-walker",
+      "versions": [
+        "3.0.3"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/estree-walker@3.0.3/node_modules/estree-walker"
+      ],
+      "license": "MIT",
+      "author": "Rich Harris",
+      "homepage": "https://github.com/Rich-Harris/estree-walker#readme",
+      "description": "Traverse an ESTree-compliant AST"
+    },
+    {
+      "name": "fast-deep-equal",
+      "versions": [
+        "3.1.3"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/fast-deep-equal@3.1.3/node_modules/fast-deep-equal"
+      ],
+      "license": "MIT",
+      "author": "Evgeny Poberezkin",
+      "homepage": "https://github.com/epoberezkin/fast-deep-equal#readme",
+      "description": "Fast deep equal"
+    },
+    {
+      "name": "fast-json-stable-stringify",
+      "versions": [
+        "2.1.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/fast-json-stable-stringify@2.1.0/node_modules/fast-json-stable-stringify"
+      ],
+      "license": "MIT",
+      "author": "James Halliday",
+      "homepage": "https://github.com/epoberezkin/fast-json-stable-stringify",
+      "description": "deterministic `JSON.stringify()` - a faster version of substack's json-stable-strigify without jsonify"
+    },
+    {
+      "name": "fast-levenshtein",
+      "versions": [
+        "2.0.6"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/fast-levenshtein@2.0.6/node_modules/fast-levenshtein"
+      ],
+      "license": "MIT",
+      "author": "Ramesh Nair",
+      "homepage": "https://github.com/hiddentao/fast-levenshtein#readme",
+      "description": "Efficient implementation of Levenshtein algorithm  with locale-specific collator support."
+    },
+    {
+      "name": "fdir",
+      "versions": [
+        "6.5.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/fdir@6.5.0_picomatch@4.0.5/node_modules/fdir"
+      ],
+      "license": "MIT",
+      "author": "thecodrr",
+      "homepage": "https://github.com/thecodrr/fdir#readme",
+      "description": "The fastest directory crawler & globbing alternative to glob, fast-glob, & tiny-glob. Crawls 1m files in < 1s"
+    },
+    {
+      "name": "file-entry-cache",
+      "versions": [
+        "8.0.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/file-entry-cache@8.0.0/node_modules/file-entry-cache"
+      ],
+      "license": "MIT",
+      "author": "Jared Wray",
+      "homepage": "https://github.com/jaredwray/file-entry-cache#readme",
+      "description": "Super simple cache for file metadata, useful for process that work o a given series of files and that only need to repeat the job on the changed ones since the previous run of the process"
+    },
+    {
+      "name": "find-up",
+      "versions": [
+        "5.0.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/find-up@5.0.0/node_modules/find-up"
+      ],
+      "license": "MIT",
+      "author": "Sindre Sorhus",
+      "homepage": "https://github.com/sindresorhus/find-up#readme",
+      "description": "Find a file or directory by walking up parent directories"
+    },
+    {
+      "name": "flat-cache",
+      "versions": [
+        "4.0.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/flat-cache@4.0.1/node_modules/flat-cache"
+      ],
+      "license": "MIT",
+      "author": "Jared Wray",
+      "homepage": "https://github.com/jaredwray/flat-cache#readme",
+      "description": "A stupidly simple key/value storage using files to persist some data"
+    },
+    {
+      "name": "globals",
+      "versions": [
+        "14.0.0",
+        "16.5.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/globals@14.0.0/node_modules/globals",
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/globals@16.5.0/node_modules/globals"
+      ],
+      "license": "MIT",
+      "author": "Sindre Sorhus",
+      "homepage": "https://github.com/sindresorhus/globals#readme",
+      "description": "Global identifiers from different JavaScript environments"
+    },
+    {
+      "name": "has-flag",
+      "versions": [
+        "4.0.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/has-flag@4.0.0/node_modules/has-flag"
+      ],
+      "license": "MIT",
+      "author": "Sindre Sorhus",
+      "homepage": "https://github.com/sindresorhus/has-flag#readme",
+      "description": "Check if argv has a specific flag"
+    },
+    {
+      "name": "ignore",
+      "versions": [
+        "5.3.2",
+        "7.0.6"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/ignore@5.3.2/node_modules/ignore",
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/ignore@7.0.6/node_modules/ignore"
+      ],
+      "license": "MIT",
+      "author": "kael",
+      "homepage": "https://github.com/kaelzhang/node-ignore#readme",
+      "description": "Ignore is a manager and filter for .gitignore rules, the one used by eslint, gitbook and many others."
+    },
+    {
+      "name": "import-fresh",
+      "versions": [
+        "3.3.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/import-fresh@3.3.1/node_modules/import-fresh"
+      ],
+      "license": "MIT",
+      "author": "Sindre Sorhus",
+      "homepage": "https://github.com/sindresorhus/import-fresh#readme",
+      "description": "Import a module while bypassing the cache"
+    },
+    {
+      "name": "imurmurhash",
+      "versions": [
+        "0.1.4"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/imurmurhash@0.1.4/node_modules/imurmurhash"
+      ],
+      "license": "MIT",
+      "author": "Jens Taylor",
+      "homepage": "https://github.com/jensyt/imurmurhash-js",
+      "description": "An incremental implementation of MurmurHash3"
+    },
+    {
+      "name": "is-extglob",
+      "versions": [
+        "2.1.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/is-extglob@2.1.1/node_modules/is-extglob"
+      ],
+      "license": "MIT",
+      "author": "Jon Schlinkert",
+      "homepage": "https://github.com/jonschlinkert/is-extglob",
+      "description": "Returns true if a string has an extglob."
+    },
+    {
+      "name": "is-glob",
+      "versions": [
+        "4.0.3"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/is-glob@4.0.3/node_modules/is-glob"
+      ],
+      "license": "MIT",
+      "author": "Jon Schlinkert",
+      "homepage": "https://github.com/micromatch/is-glob",
+      "description": "Returns `true` if the given string looks like a glob pattern or an extglob pattern. This makes it easy to create code that only uses external modules like node-glob when necessary, resulting in much faster code execution and initialization time, and a better user experience."
+    },
+    {
+      "name": "js-tokens",
+      "versions": [
+        "9.0.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/js-tokens@9.0.1/node_modules/js-tokens"
+      ],
+      "license": "MIT",
+      "author": "Simon Lydell",
+      "homepage": "https://github.com/lydell/js-tokens#readme",
+      "description": "Tiny JavaScript tokenizer."
+    },
+    {
+      "name": "js-yaml",
+      "versions": [
+        "4.3.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/js-yaml@4.3.0/node_modules/js-yaml"
+      ],
+      "license": "MIT",
+      "author": "Vladimir Zapparov",
+      "homepage": "https://github.com/nodeca/js-yaml#readme",
+      "description": "YAML 1.2 parser and serializer"
+    },
+    {
+      "name": "json-buffer",
+      "versions": [
+        "3.0.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/json-buffer@3.0.1/node_modules/json-buffer"
+      ],
+      "license": "MIT",
+      "author": "Dominic Tarr",
+      "homepage": "https://github.com/dominictarr/json-buffer",
+      "description": "JSON parse & stringify that supports binary via bops & base64"
+    },
+    {
+      "name": "json-schema-traverse",
+      "versions": [
+        "0.4.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/json-schema-traverse@0.4.1/node_modules/json-schema-traverse"
+      ],
+      "license": "MIT",
+      "author": "Evgeny Poberezkin",
+      "homepage": "https://github.com/epoberezkin/json-schema-traverse#readme",
+      "description": "Traverse JSON Schema passing each schema object to callback"
+    },
+    {
+      "name": "json-stable-stringify-without-jsonify",
+      "versions": [
+        "1.0.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/json-stable-stringify-without-jsonify@1.0.1/node_modules/json-stable-stringify-without-jsonify"
+      ],
+      "license": "MIT",
+      "author": "James Halliday",
+      "homepage": "https://github.com/samn/json-stable-stringify",
+      "description": "deterministic JSON.stringify() with custom sorting to get deterministic hashes from stringified results, with no public domain dependencies"
+    },
+    {
+      "name": "keyv",
+      "versions": [
+        "4.5.4"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/keyv@4.5.4/node_modules/keyv"
+      ],
+      "license": "MIT",
+      "author": "Jared Wray",
+      "homepage": "https://github.com/jaredwray/keyv",
+      "description": "Simple key-value storage with support for multiple backends"
+    },
+    {
+      "name": "levn",
+      "versions": [
+        "0.4.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/levn@0.4.1/node_modules/levn"
+      ],
+      "license": "MIT",
+      "author": "George Zahariev",
+      "homepage": "https://github.com/gkz/levn",
+      "description": "Light ECMAScript (JavaScript) Value Notation - human written, concise, typed, flexible"
+    },
+    {
+      "name": "locate-path",
+      "versions": [
+        "6.0.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/locate-path@6.0.0/node_modules/locate-path"
+      ],
+      "license": "MIT",
+      "author": "Sindre Sorhus",
+      "homepage": "https://github.com/sindresorhus/locate-path#readme",
+      "description": "Get the first path that exists on disk of multiple paths"
+    },
+    {
+      "name": "lodash.merge",
+      "versions": [
+        "4.6.2"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/lodash.merge@4.6.2/node_modules/lodash.merge"
+      ],
+      "license": "MIT",
+      "author": "John-David Dalton",
+      "homepage": "https://lodash.com/",
+      "description": "The Lodash method `_.merge` exported as a module."
+    },
+    {
+      "name": "loupe",
+      "versions": [
+        "3.2.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/loupe@3.2.1/node_modules/loupe"
+      ],
+      "license": "MIT",
+      "author": "Veselin Todorov",
+      "homepage": "https://github.com/chaijs/loupe",
+      "description": "Inspect utility for Node.js and browsers"
+    },
+    {
+      "name": "magic-string",
+      "versions": [
+        "0.30.21"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/magic-string@0.30.21/node_modules/magic-string"
+      ],
+      "license": "MIT",
+      "author": "Rich Harris",
+      "homepage": "https://github.com/Rich-Harris/magic-string#readme",
+      "description": "Modify strings, generate sourcemaps"
+    },
+    {
+      "name": "ms",
+      "versions": [
+        "2.1.3"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/ms@2.1.3/node_modules/ms"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/vercel/ms#readme",
+      "description": "Tiny millisecond conversion utility"
+    },
+    {
+      "name": "nanoid",
+      "versions": [
+        "3.3.16"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/nanoid@3.3.16/node_modules/nanoid"
+      ],
+      "license": "MIT",
+      "author": "Andrey Sitnik",
+      "homepage": "https://github.com/ai/nanoid#readme",
+      "description": "A tiny (116 bytes), secure URL-friendly unique string ID generator"
+    },
+    {
+      "name": "natural-compare",
+      "versions": [
+        "1.4.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/natural-compare@1.4.0/node_modules/natural-compare"
+      ],
+      "license": "MIT",
+      "author": "Lauri Rooden",
+      "homepage": "https://github.com/litejs/natural-compare-lite#readme",
+      "description": "Compare strings containing a mix of letters and numbers in the way a human being would in sort order."
+    },
+    {
+      "name": "optionator",
+      "versions": [
+        "0.9.4"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/optionator@0.9.4/node_modules/optionator"
+      ],
+      "license": "MIT",
+      "author": "George Zahariev",
+      "homepage": "https://github.com/gkz/optionator",
+      "description": "option parsing and help generation"
+    },
+    {
+      "name": "p-limit",
+      "versions": [
+        "3.1.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/p-limit@3.1.0/node_modules/p-limit"
+      ],
+      "license": "MIT",
+      "author": "Sindre Sorhus",
+      "homepage": "https://github.com/sindresorhus/p-limit#readme",
+      "description": "Run multiple promise-returning & async functions with limited concurrency"
+    },
+    {
+      "name": "p-locate",
+      "versions": [
+        "5.0.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/p-locate@5.0.0/node_modules/p-locate"
+      ],
+      "license": "MIT",
+      "author": "Sindre Sorhus",
+      "homepage": "https://github.com/sindresorhus/p-locate#readme",
+      "description": "Get the first fulfilled promise that satisfies the provided testing function"
+    },
+    {
+      "name": "parent-module",
+      "versions": [
+        "1.0.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/parent-module@1.0.1/node_modules/parent-module"
+      ],
+      "license": "MIT",
+      "author": "Sindre Sorhus",
+      "homepage": "https://github.com/sindresorhus/parent-module#readme",
+      "description": "Get the path of the parent module"
+    },
+    {
+      "name": "path-exists",
+      "versions": [
+        "4.0.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/path-exists@4.0.0/node_modules/path-exists"
+      ],
+      "license": "MIT",
+      "author": "Sindre Sorhus",
+      "homepage": "https://github.com/sindresorhus/path-exists#readme",
+      "description": "Check if a path exists"
+    },
+    {
+      "name": "path-key",
+      "versions": [
+        "3.1.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/path-key@3.1.1/node_modules/path-key"
+      ],
+      "license": "MIT",
+      "author": "Sindre Sorhus",
+      "homepage": "https://github.com/sindresorhus/path-key#readme",
+      "description": "Get the PATH environment variable key cross-platform"
+    },
+    {
+      "name": "pathe",
+      "versions": [
+        "2.0.3"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/pathe@2.0.3/node_modules/pathe"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/unjs/pathe#readme",
+      "description": "Universal filesystem path utils"
+    },
+    {
+      "name": "pathval",
+      "versions": [
+        "2.0.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/pathval@2.0.1/node_modules/pathval"
+      ],
+      "license": "MIT",
+      "author": "Veselin Todorov",
+      "homepage": "https://github.com/chaijs/pathval",
+      "description": "Object value retrieval given a string path"
+    },
+    {
+      "name": "picomatch",
+      "versions": [
+        "4.0.5"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/picomatch@4.0.5/node_modules/picomatch"
+      ],
+      "license": "MIT",
+      "author": "Jon Schlinkert",
+      "homepage": "https://github.com/micromatch/picomatch",
+      "description": "Blazing fast and accurate glob matcher written in JavaScript, with no dependencies and full support for standard and extended Bash glob features, including braces, extglobs, POSIX brackets, and regular expressions."
+    },
+    {
+      "name": "postcss",
+      "versions": [
+        "8.5.22"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/postcss@8.5.22/node_modules/postcss"
+      ],
+      "license": "MIT",
+      "author": "Andrey Sitnik",
+      "homepage": "https://postcss.org/",
+      "description": "Tool for transforming styles with JS plugins"
+    },
+    {
+      "name": "prelude-ls",
+      "versions": [
+        "1.2.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/prelude-ls@1.2.1/node_modules/prelude-ls"
+      ],
+      "license": "MIT",
+      "author": "George Zahariev",
+      "homepage": "http://preludels.com",
+      "description": "prelude.ls is a functionally oriented utility library. It is powerful and flexible. Almost all of its functions are curried. It is written in, and is the recommended base library for, LiveScript."
+    },
+    {
+      "name": "prettier",
+      "versions": [
+        "3.9.6"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/prettier@3.9.6/node_modules/prettier"
+      ],
+      "license": "MIT",
+      "author": "James Long",
+      "homepage": "https://prettier.io",
+      "description": "Prettier is an opinionated code formatter"
+    },
+    {
+      "name": "punycode",
+      "versions": [
+        "2.3.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/punycode@2.3.1/node_modules/punycode"
+      ],
+      "license": "MIT",
+      "author": "Mathias Bynens",
+      "homepage": "https://mths.be/punycode",
+      "description": "A robust Punycode converter that fully complies to RFC 3492 and RFC 5891, and works on nearly all JavaScript platforms."
+    },
+    {
+      "name": "resolve-from",
+      "versions": [
+        "4.0.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/resolve-from@4.0.0/node_modules/resolve-from"
+      ],
+      "license": "MIT",
+      "author": "Sindre Sorhus",
+      "homepage": "https://github.com/sindresorhus/resolve-from#readme",
+      "description": "Resolve the path of a module like `require.resolve()` but from a given path"
+    },
+    {
+      "name": "rollup",
+      "versions": [
+        "4.62.2"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/rollup@4.62.2/node_modules/rollup"
+      ],
+      "license": "MIT",
+      "author": "Rich Harris",
+      "homepage": "https://rollupjs.org/",
+      "description": "Next-generation ES module bundler"
+    },
+    {
+      "name": "shebang-command",
+      "versions": [
+        "2.0.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/shebang-command@2.0.0/node_modules/shebang-command"
+      ],
+      "license": "MIT",
+      "author": "Kevin Mårtensson",
+      "homepage": "https://github.com/kevva/shebang-command#readme",
+      "description": "Get the command from a shebang"
+    },
+    {
+      "name": "shebang-regex",
+      "versions": [
+        "3.0.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/shebang-regex@3.0.0/node_modules/shebang-regex"
+      ],
+      "license": "MIT",
+      "author": "Sindre Sorhus",
+      "homepage": "https://github.com/sindresorhus/shebang-regex#readme",
+      "description": "Regular expression for matching a shebang line"
+    },
+    {
+      "name": "stackback",
+      "versions": [
+        "0.0.2"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/stackback@0.0.2/node_modules/stackback"
+      ],
+      "license": "MIT",
+      "author": "Roman Shtylman",
+      "homepage": "https://github.com/shtylman/node-stackback#readme",
+      "description": "return list of CallSite objects from a captured stacktrace"
+    },
+    {
+      "name": "std-env",
+      "versions": [
+        "3.10.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/std-env@3.10.0/node_modules/std-env"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/unjs/std-env#readme",
+      "description": "Runtime agnostic JS utils"
+    },
+    {
+      "name": "strip-json-comments",
+      "versions": [
+        "3.1.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/strip-json-comments@3.1.1/node_modules/strip-json-comments"
+      ],
+      "license": "MIT",
+      "author": "Sindre Sorhus",
+      "homepage": "https://github.com/sindresorhus/strip-json-comments#readme",
+      "description": "Strip comments from JSON. Lets you use comments in your JSON files!"
+    },
+    {
+      "name": "strip-literal",
+      "versions": [
+        "3.1.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/strip-literal@3.1.0/node_modules/strip-literal"
+      ],
+      "license": "MIT",
+      "author": "Anthony Fu",
+      "homepage": "https://github.com/antfu/strip-literal#readme",
+      "description": "Strip comments and string literals from JavaScript code"
+    },
+    {
+      "name": "supports-color",
+      "versions": [
+        "7.2.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/supports-color@7.2.0/node_modules/supports-color"
+      ],
+      "license": "MIT",
+      "author": "Sindre Sorhus",
+      "homepage": "https://github.com/chalk/supports-color#readme",
+      "description": "Detect whether a terminal supports color"
+    },
+    {
+      "name": "tinybench",
+      "versions": [
+        "2.9.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/tinybench@2.9.0/node_modules/tinybench"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/tinylibs/tinybench#readme"
+    },
+    {
+      "name": "tinyexec",
+      "versions": [
+        "0.3.2"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/tinyexec@0.3.2/node_modules/tinyexec"
+      ],
+      "license": "MIT",
+      "author": "James Garbutt",
+      "homepage": "https://github.com/tinylibs/tinyexec#readme",
+      "description": "A minimal library for executing processes in Node"
+    },
+    {
+      "name": "tinyglobby",
+      "versions": [
+        "0.2.17"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/tinyglobby@0.2.17/node_modules/tinyglobby"
+      ],
+      "license": "MIT",
+      "author": "Superchupu",
+      "homepage": "https://superchupu.dev/tinyglobby",
+      "description": "A fast and minimal alternative to globby and fast-glob"
+    },
+    {
+      "name": "tinypool",
+      "versions": [
+        "1.1.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/tinypool@1.1.1/node_modules/tinypool"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/tinylibs/tinypool#readme",
+      "description": "A minimal and tiny Node.js Worker Thread Pool implementation, a fork of piscina, but with fewer features"
+    },
+    {
+      "name": "tinyrainbow",
+      "versions": [
+        "2.0.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/tinyrainbow@2.0.0/node_modules/tinyrainbow"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/tinylibs/tinyrainbow#readme",
+      "description": "A small library to print colourful messages."
+    },
+    {
+      "name": "tinyspy",
+      "versions": [
+        "4.0.4"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/tinyspy@4.0.4/node_modules/tinyspy"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/tinylibs/tinyspy#readme",
+      "description": "A minimal fork of nanospy, with more features"
+    },
+    {
+      "name": "ts-api-utils",
+      "versions": [
+        "2.5.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/ts-api-utils@2.5.0_typescript@5.9.3/node_modules/ts-api-utils"
+      ],
+      "license": "MIT",
+      "author": "JoshuaKGoldberg",
+      "homepage": "https://github.com/JoshuaKGoldberg/ts-api-utils#readme",
+      "description": "Utility functions for working with TypeScript's API. Successor to the wonderful tsutils. 🛠️️"
+    },
+    {
+      "name": "type-check",
+      "versions": [
+        "0.4.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/type-check@0.4.0/node_modules/type-check"
+      ],
+      "license": "MIT",
+      "author": "George Zahariev",
+      "homepage": "https://github.com/gkz/type-check",
+      "description": "type-check allows you to check the types of JavaScript values at runtime with a Haskell like type syntax."
+    },
+    {
+      "name": "typescript-eslint",
+      "versions": [
+        "8.65.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/typescript-eslint@8.65.0_eslint@9.39.5_typescript@5.9.3/node_modules/typescript-eslint"
+      ],
+      "license": "MIT",
+      "homepage": "https://typescript-eslint.io/packages/typescript-eslint",
+      "description": "Tooling which enables you to use TypeScript with ESLint"
+    },
+    {
+      "name": "undici-types",
+      "versions": [
+        "6.21.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/undici-types@6.21.0/node_modules/undici-types"
+      ],
+      "license": "MIT",
+      "homepage": "https://undici.nodejs.org",
+      "description": "A stand-alone types package for Undici"
+    },
+    {
+      "name": "vite",
+      "versions": [
+        "7.3.6"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/vite@7.3.6_@types+node@22.20.1/node_modules/vite"
+      ],
+      "license": "MIT",
+      "author": "Evan You",
+      "homepage": "https://vite.dev",
+      "description": "Native-ESM powered web dev build tool"
+    },
+    {
+      "name": "vite-node",
+      "versions": [
+        "3.2.4"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/vite-node@3.2.4_@types+node@22.20.1/node_modules/vite-node"
+      ],
+      "license": "MIT",
+      "author": "Anthony Fu",
+      "homepage": "https://github.com/vitest-dev/vitest/blob/main/packages/vite-node#readme",
+      "description": "Vite as Node.js runtime"
+    },
+    {
+      "name": "vitest",
+      "versions": [
+        "3.2.7"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/vitest@3.2.7_@types+node@22.20.1/node_modules/vitest"
+      ],
+      "license": "MIT",
+      "author": "Anthony Fu",
+      "homepage": "https://github.com/vitest-dev/vitest#readme",
+      "description": "Next generation testing framework powered by Vite"
+    },
+    {
+      "name": "why-is-node-running",
+      "versions": [
+        "2.3.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/why-is-node-running@2.3.0/node_modules/why-is-node-running"
+      ],
+      "license": "MIT",
+      "author": "Mathias Buus",
+      "homepage": "https://github.com/mafintosh/why-is-node-running",
+      "description": "Node is running but you don't know why? why-is-node-running is here to help you."
+    },
+    {
+      "name": "word-wrap",
+      "versions": [
+        "1.2.5"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/word-wrap@1.2.5/node_modules/word-wrap"
+      ],
+      "license": "MIT",
+      "author": "Jon Schlinkert",
+      "homepage": "https://github.com/jonschlinkert/word-wrap",
+      "description": "Wrap words to a specified length."
+    },
+    {
+      "name": "yocto-queue",
+      "versions": [
+        "0.1.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/yocto-queue@0.1.0/node_modules/yocto-queue"
+      ],
+      "license": "MIT",
+      "author": "Sindre Sorhus",
+      "homepage": "https://github.com/sindresorhus/yocto-queue#readme",
+      "description": "Tiny queue data structure"
+    }
+  ],
+  "Apache-2.0": [
+    {
+      "name": "@eslint/config-array",
+      "versions": [
+        "0.21.2"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@eslint+config-array@0.21.2/node_modules/@eslint/config-array"
+      ],
+      "license": "Apache-2.0",
+      "author": "Nicholas C. Zakas",
+      "homepage": "https://github.com/eslint/rewrite/tree/main/packages/config-array#readme",
+      "description": "General purpose glob-based configuration matching."
+    },
+    {
+      "name": "@eslint/config-helpers",
+      "versions": [
+        "0.4.2"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@eslint+config-helpers@0.4.2/node_modules/@eslint/config-helpers"
+      ],
+      "license": "Apache-2.0",
+      "homepage": "https://github.com/eslint/rewrite/tree/main/packages/config-helpers#readme",
+      "description": "Helper utilities for creating ESLint configuration"
+    },
+    {
+      "name": "@eslint/core",
+      "versions": [
+        "0.17.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@eslint+core@0.17.0/node_modules/@eslint/core"
+      ],
+      "license": "Apache-2.0",
+      "author": "Nicholas C. Zakas",
+      "homepage": "https://github.com/eslint/rewrite/tree/main/packages/core#readme",
+      "description": "Runtime-agnostic core of ESLint"
+    },
+    {
+      "name": "@eslint/object-schema",
+      "versions": [
+        "2.1.7"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@eslint+object-schema@2.1.7/node_modules/@eslint/object-schema"
+      ],
+      "license": "Apache-2.0",
+      "author": "Nicholas C. Zakas",
+      "homepage": "https://github.com/eslint/rewrite/tree/main/packages/object-schema#readme",
+      "description": "An object schema merger/validator"
+    },
+    {
+      "name": "@eslint/plugin-kit",
+      "versions": [
+        "0.4.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@eslint+plugin-kit@0.4.1/node_modules/@eslint/plugin-kit"
+      ],
+      "license": "Apache-2.0",
+      "author": "Nicholas C. Zakas",
+      "homepage": "https://github.com/eslint/rewrite/tree/main/packages/plugin-kit#readme",
+      "description": "Utilities for building ESLint plugins."
+    },
+    {
+      "name": "@humanfs/core",
+      "versions": [
+        "0.19.2"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@humanfs+core@0.19.2/node_modules/@humanfs/core"
+      ],
+      "license": "Apache-2.0",
+      "author": "Nicholas C. Zakas",
+      "homepage": "https://github.com/humanwhocodes/humanfs#readme",
+      "description": "The core of the humanfs library."
+    },
+    {
+      "name": "@humanfs/node",
+      "versions": [
+        "0.16.8"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@humanfs+node@0.16.8/node_modules/@humanfs/node"
+      ],
+      "license": "Apache-2.0",
+      "author": "Nicholas C. Zakas",
+      "homepage": "https://github.com/humanwhocodes/humanfs#readme",
+      "description": "The Node.js bindings of the humanfs library."
+    },
+    {
+      "name": "@humanfs/types",
+      "versions": [
+        "0.15.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@humanfs+types@0.15.0/node_modules/@humanfs/types"
+      ],
+      "license": "Apache-2.0",
+      "author": "Nicholas C. Zakas",
+      "homepage": "https://github.com/humanwhocodes/humanfs#readme",
+      "description": "The TypeScript types for the hfs project."
+    },
+    {
+      "name": "@humanwhocodes/module-importer",
+      "versions": [
+        "1.0.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@humanwhocodes+module-importer@1.0.1/node_modules/@humanwhocodes/module-importer"
+      ],
+      "license": "Apache-2.0",
+      "author": "Nicholas C. Zaks",
+      "homepage": "https://github.com/humanwhocodes/module-importer#readme",
+      "description": "Universal module importer for Node.js"
+    },
+    {
+      "name": "@humanwhocodes/retry",
+      "versions": [
+        "0.4.3"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/@humanwhocodes+retry@0.4.3/node_modules/@humanwhocodes/retry"
+      ],
+      "license": "Apache-2.0",
+      "author": "Nicholas C. Zaks",
+      "homepage": "https://github.com/humanwhocodes/retry#readme",
+      "description": "A utility to retry failed async methods."
+    },
+    {
+      "name": "eslint-visitor-keys",
+      "versions": [
+        "4.2.1",
+        "5.0.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/eslint-visitor-keys@4.2.1/node_modules/eslint-visitor-keys",
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/eslint-visitor-keys@5.0.1/node_modules/eslint-visitor-keys"
+      ],
+      "license": "Apache-2.0",
+      "author": "Toru Nagashima",
+      "homepage": "https://github.com/eslint/js/blob/main/packages/eslint-visitor-keys/README.md",
+      "description": "Constants and utilities about visitor keys to traverse AST."
+    },
+    {
+      "name": "expect-type",
+      "versions": [
+        "1.4.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/expect-type@1.4.0/node_modules/expect-type"
+      ],
+      "license": "Apache-2.0",
+      "homepage": "https://github.com/mmkal/expect-type#readme"
+    },
+    {
+      "name": "typescript",
+      "versions": [
+        "5.9.3"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript"
+      ],
+      "license": "Apache-2.0",
+      "author": "Microsoft Corp.",
+      "homepage": "https://www.typescriptlang.org/",
+      "description": "TypeScript is a language for application scale JavaScript development"
+    }
+  ],
+  "Python-2.0": [
+    {
+      "name": "argparse",
+      "versions": [
+        "2.0.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/argparse@2.0.1/node_modules/argparse"
+      ],
+      "license": "Python-2.0",
+      "homepage": "https://github.com/nodeca/argparse#readme",
+      "description": "CLI arguments parser. Native port of python's argparse."
+    }
+  ],
+  "BSD-2-Clause": [
+    {
+      "name": "eslint-scope",
+      "versions": [
+        "8.4.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/eslint-scope@8.4.0/node_modules/eslint-scope"
+      ],
+      "license": "BSD-2-Clause",
+      "homepage": "https://github.com/eslint/js/blob/main/packages/eslint-scope/README.md",
+      "description": "ECMAScript scope analyzer for ESLint"
+    },
+    {
+      "name": "espree",
+      "versions": [
+        "10.4.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/espree@10.4.0/node_modules/espree"
+      ],
+      "license": "BSD-2-Clause",
+      "author": "Nicholas C. Zakas",
+      "homepage": "https://github.com/eslint/js/blob/main/packages/espree/README.md",
+      "description": "An Esprima-compatible JavaScript parser built on Acorn"
+    },
+    {
+      "name": "esrecurse",
+      "versions": [
+        "4.3.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/esrecurse@4.3.0/node_modules/esrecurse"
+      ],
+      "license": "BSD-2-Clause",
+      "homepage": "https://github.com/estools/esrecurse",
+      "description": "ECMAScript AST recursive visitor"
+    },
+    {
+      "name": "estraverse",
+      "versions": [
+        "5.3.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/estraverse@5.3.0/node_modules/estraverse"
+      ],
+      "license": "BSD-2-Clause",
+      "homepage": "https://github.com/estools/estraverse",
+      "description": "ECMAScript JS AST traversal functions"
+    },
+    {
+      "name": "esutils",
+      "versions": [
+        "2.0.3"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/esutils@2.0.3/node_modules/esutils"
+      ],
+      "license": "BSD-2-Clause",
+      "homepage": "https://github.com/estools/esutils",
+      "description": "utility box for ECMAScript language tools"
+    },
+    {
+      "name": "uri-js",
+      "versions": [
+        "4.4.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/uri-js@4.4.1/node_modules/uri-js"
+      ],
+      "license": "BSD-2-Clause",
+      "author": "Gary Court",
+      "homepage": "https://github.com/garycourt/uri-js",
+      "description": "An RFC 3986/3987 compliant, scheme extendable URI/IRI parsing/validating/resolving library for JavaScript."
+    }
+  ],
+  "BSD-3-Clause": [
+    {
+      "name": "esquery",
+      "versions": [
+        "1.7.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/esquery@1.7.0/node_modules/esquery"
+      ],
+      "license": "BSD-3-Clause",
+      "author": "Joel Feenstra",
+      "homepage": "https://github.com/estools/esquery/",
+      "description": "A query library for ECMAScript AST using a CSS selector like query language."
+    },
+    {
+      "name": "source-map-js",
+      "versions": [
+        "1.2.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/source-map-js@1.2.1/node_modules/source-map-js"
+      ],
+      "license": "BSD-3-Clause",
+      "author": "Valentin 7rulnik Semirulnik",
+      "homepage": "https://github.com/7rulnik/source-map-js",
+      "description": "Generates and consumes source maps"
+    }
+  ],
+  "ISC": [
+    {
+      "name": "flatted",
+      "versions": [
+        "3.4.2"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/flatted@3.4.2/node_modules/flatted"
+      ],
+      "license": "ISC",
+      "author": "Andrea Giammarchi",
+      "homepage": "https://github.com/WebReflection/flatted#readme",
+      "description": "A super light and fast circular JSON parser."
+    },
+    {
+      "name": "glob-parent",
+      "versions": [
+        "6.0.2"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/glob-parent@6.0.2/node_modules/glob-parent"
+      ],
+      "license": "ISC",
+      "author": "Gulp Team",
+      "homepage": "https://github.com/gulpjs/glob-parent#readme",
+      "description": "Extract the non-magic parent path from a glob string."
+    },
+    {
+      "name": "isexe",
+      "versions": [
+        "2.0.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/isexe@2.0.0/node_modules/isexe"
+      ],
+      "license": "ISC",
+      "author": "Isaac Z. Schlueter",
+      "homepage": "https://github.com/isaacs/isexe#readme",
+      "description": "Minimal module to check if a file is executable."
+    },
+    {
+      "name": "minimatch",
+      "versions": [
+        "3.1.5"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/minimatch@3.1.5/node_modules/minimatch"
+      ],
+      "license": "ISC",
+      "author": "Isaac Z. Schlueter",
+      "homepage": "https://github.com/isaacs/minimatch#readme",
+      "description": "a glob matcher in javascript"
+    },
+    {
+      "name": "picocolors",
+      "versions": [
+        "1.1.1"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/picocolors@1.1.1/node_modules/picocolors"
+      ],
+      "license": "ISC",
+      "author": "Alexey Raspopov",
+      "homepage": "https://github.com/alexeyraspopov/picocolors#readme",
+      "description": "The tiniest and the fastest library for terminal output formatting with ANSI colors"
+    },
+    {
+      "name": "semver",
+      "versions": [
+        "7.8.5"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/semver@7.8.5/node_modules/semver"
+      ],
+      "license": "ISC",
+      "author": "GitHub Inc.",
+      "homepage": "https://github.com/npm/node-semver#readme",
+      "description": "The semantic version parser used by npm."
+    },
+    {
+      "name": "siginfo",
+      "versions": [
+        "2.0.0"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/siginfo@2.0.0/node_modules/siginfo"
+      ],
+      "license": "ISC",
+      "author": "Emil Bay",
+      "homepage": "https://github.com/emilbayes/siginfo#readme",
+      "description": "Utility module to print pretty messages on SIGINFO/SIGUSR1"
+    },
+    {
+      "name": "which",
+      "versions": [
+        "2.0.2"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/which@2.0.2/node_modules/which"
+      ],
+      "license": "ISC",
+      "author": "Isaac Z. Schlueter",
+      "homepage": "https://github.com/isaacs/node-which#readme",
+      "description": "Like which(1) unix command. Find the first instance of an executable in the PATH."
+    }
+  ],
+  "BlueOak-1.0.0": [
+    {
+      "name": "minimatch",
+      "versions": [
+        "10.2.5"
+      ],
+      "paths": [
+        "/home/bira/Documentos/SoftwareADR/node_modules/.pnpm/minimatch@10.2.5/node_modules/minimatch"
+      ],
+      "license": "BlueOak-1.0.0",
+      "author": "Isaac Z. Schlueter",
+      "homepage": "https://github.com/isaacs/minimatch#readme",
+      "description": "a glob matcher in javascript"
+    }
+  ]
+}

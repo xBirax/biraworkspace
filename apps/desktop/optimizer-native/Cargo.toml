@@ -1,0 +1,19 @@
+[package]
+name = "adr-workspace-optimizer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+winreg = "0.55"
+sha2 = "0.10.9"
+
+[dev-dependencies]
+filetime = "0.2.27"
+tempfile = "3.23.0"
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1

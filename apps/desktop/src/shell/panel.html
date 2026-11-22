@@ -1,0 +1,1703 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>ADR Painel</title>
+    <link rel="stylesheet" href="./fonts.css" />
+    <link rel="stylesheet" href="./tokens.css" />
+    <link rel="stylesheet" href="./panel.css" />
+  </head>
+  <body>
+    <nav id="nav" aria-label="Configurações">
+      <div class="nav-heading">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 7h16M4 17h16" />
+          <circle cx="9" cy="7" r="3" />
+          <circle cx="15" cy="17" r="3" /></svg
+        >Configurações
+      </div>
+      <div class="kicker">Preferências</div>
+      <button type="button" data-tab="geral">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 7h16M4 17h16" />
+          <circle cx="9" cy="7" r="3" />
+          <circle cx="15" cy="17" r="3" /></svg
+        ><span>Geral</span>
+      </button>
+      <button type="button" data-tab="servicos">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="3" width="7" height="7" rx="2" />
+          <rect x="14" y="3" width="7" height="7" rx="2" />
+          <rect x="3" y="14" width="7" height="7" rx="2" />
+          <rect x="14" y="14" width="7" height="7" rx="2" /></svg
+        ><span>Serviços</span>
+      </button>
+      <button type="button" data-tab="desempenho">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 18a8 8 0 0 1 16 0M12 14l4-5" />
+          <circle cx="12" cy="14" r="1" /></svg
+        ><span>Desempenho</span>
+      </button>
+      <button type="button" data-tab="tema">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="8" />
+          <path d="M12 4v16" /></svg
+        ><span>Aparência</span>
+      </button>
+      <button type="button" data-tab="perfil">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 21v-2a8 8 0 0 1 16 0v2" /></svg
+        ><span>Perfil e contas</span>
+      </button>
+      <button type="button" data-tab="notif">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg
+        ><span>Notificações</span>
+      </button>
+      <button type="button" data-tab="privacidade">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6z" />
+          <path d="m8 12 3 3 5-6" /></svg
+        ><span>Privacidade</span>
+      </button>
+      <div class="nav-footer"><strong>ADR Workspace</strong>Seu trabalho, em um só lugar.</div>
+    </nav>
+
+    <main id="main">
+      <section data-pane="geral" class="hidden">
+        <header class="page-header">
+          <div class="eyebrow">Preferências</div>
+          <h2>Geral</h2>
+          <p class="page-description">
+            Personalize seu workspace e escolha como o aplicativo funciona.
+          </p>
+        </header>
+        <div class="settings-card workspace-card">
+          <div class="workspace-mark">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="3" width="7" height="7" rx="2" />
+              <rect x="14" y="3" width="7" height="7" rx="2" />
+              <rect x="3" y="14" width="7" height="7" rx="2" />
+              <rect x="14" y="14" width="7" height="7" rx="2" />
+            </svg>
+          </div>
+          <div class="field-stack">
+            <label class="field" for="ws-name">Nome do workspace</label
+            ><input type="text" id="ws-name" />
+          </div>
+        </div>
+        <div class="settings-card">
+          <div class="card-heading">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 18a9 9 0 1 1 16 0M12 12l4-4" />
+              <circle cx="12" cy="12" r="2" />
+            </svg>
+            <h3>Rotina e desempenho</h3>
+          </div>
+          <div class="row">
+            <div class="name">
+              Iniciar com o Windows
+              <div class="meta">Abra seu workspace automaticamente ao ligar o computador.</div>
+            </div>
+            <input type="checkbox" id="autostart" aria-label="Iniciar com o Windows" />
+          </div>
+          <div class="row">
+            <div class="name">
+              Tamanho da interface
+              <div class="meta">Ajuste textos e controles entre 80% e 200%.</div>
+            </div>
+            <div class="number-control">
+              <input
+                type="number"
+                id="ui-scale"
+                min="80"
+                max="200"
+                step="10"
+                aria-label="Tamanho da interface em porcentagem"
+              /><span aria-hidden="true">%</span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="name">
+              Serviços mantidos em memória
+              <div class="meta">Acima deste limite, serviços ociosos podem ser hibernados.</div>
+            </div>
+            <input
+              type="number"
+              id="max-views"
+              min="1"
+              max="32"
+              step="1"
+              aria-label="Máximo de serviços em memória"
+            />
+          </div>
+        </div>
+        <div class="settings-card">
+          <div class="card-heading">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="16" rx="3" />
+              <path d="M3 9h18M7 6.5h.01M10 6.5h.01" />
+            </svg>
+            <h3>Navegação</h3>
+          </div>
+          <div class="row">
+            <div class="name">
+              Bloquear anúncios e rastreadores
+              <div class="meta">Você pode liberar sites individualmente no ADR Browser.</div>
+            </div>
+            <input
+              type="checkbox"
+              id="adblock-enabled"
+              aria-label="Bloquear anúncios e rastreadores"
+            />
+          </div>
+          <div class="row">
+            <div class="name">
+              Abrir links externos com
+              <div class="meta">Usado ao abrir links fora do Workspace, inclusive no WhatsApp.</div>
+            </div>
+            <select id="external-browser" aria-label="Navegador para links externos">
+              <option value="auto">Padrão do sistema</option>
+              <option value="brave">Brave</option>
+              <option value="chrome">Chrome</option>
+            </select>
+          </div>
+          <div class="row">
+            <div class="name">
+              Barra de navegação
+              <div class="meta">Escolha onde os controles do navegador aparecem.</div>
+            </div>
+            <select id="browser-toolbar-position" aria-label="Posição da barra de navegação">
+              <option value="top">Na parte superior</option>
+              <option value="bottom">Na parte inferior</option>
+            </select>
+          </div>
+        </div>
+        <div class="settings-card">
+          <div class="card-heading">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 7V3l-4 1M4 17v4l4-1M20 7a9 9 0 0 0-16 0M4 17a9 9 0 0 0 16 0" />
+            </svg>
+            <h3>Atualização e suporte</h3>
+          </div>
+          <div class="row">
+            <div class="name">
+              ADR Workspace
+              <div class="meta">Versão instalada: <span id="app-version">—</span></div>
+            </div>
+            <span class="pill">Desktop</span>
+          </div>
+          <div class="row">
+            <div class="name">
+              Atualizações
+              <div class="meta">
+                <span id="update-meta">Verifique se há uma nova versão disponível.</span>
+              </div>
+            </div>
+            <button class="btn" id="btn-update" type="button">Verificar</button>
+          </div>
+          <div class="row">
+            <div class="name">
+              Versões de avaliação
+              <div class="meta">Instalação manual para quem deseja testar novidades antes da publicação estável.</div>
+            </div>
+            <button class="btn" id="btn-update-candidates" type="button">Ver candidatas</button>
+          </div>
+          <div class="row">
+            <div class="name">
+              Backup do perfil
+              <div class="meta" id="backup-meta">
+                Logins, conversas e configurações. Uma cópia também é feita a cada atualização.
+              </div>
+            </div>
+            <span style="display: flex; gap: 6px">
+              <button class="btn" id="btn-backup" type="button">Fazer backup agora</button>
+              <button class="btn secondary" id="btn-backups-open" type="button">Abrir pasta</button>
+            </span>
+          </div>
+          <div class="row">
+            <div class="name">
+              Diagnóstico para suporte
+              <div class="meta">Exporte um relatório em Downloads, sem tokens de acesso.</div>
+            </div>
+            <button class="btn" id="btn-diag" type="button">Exportar relatório</button>
+          </div>
+        </div>
+        <p class="msg" id="geral-msg" role="status" aria-live="polite"></p>
+        <div class="settings-card performance-link">
+          <div class="name">Central de Desempenho<div class="meta">Analise o computador, revise sugestões e escolha os ajustes que deseja aplicar.</div></div>
+          <button class="btn" id="open-performance" type="button">Abrir Desempenho</button>
+        </div>
+        <h3>Downloads recentes</h3>
+        <div class="list" id="downloads"></div>
+      </section>
+
+      <section data-pane="desempenho" class="hidden" aria-labelledby="performance-title">
+        <header class="page-header">
+          <div class="eyebrow">Central de Desempenho</div>
+          <h2 id="performance-title">Desempenho</h2>
+          <p class="page-description">Analise o computador, escolha ações e confira cada alteração antes de aplicar.</p>
+        </header>
+        <div class="performance-toolbar">
+          <button class="btn primary" id="performance-analyze" type="button">Analisar agora</button>
+          <button class="btn" id="performance-cancel" type="button" hidden>Cancelar operação</button>
+          <button class="btn" id="performance-export" type="button">Exportar relatório</button>
+        </div>
+        <p class="performance-status" id="performance-status" role="status" aria-live="polite">Abra esta página para ver a última análise.</p>
+        <div class="performance-tabs" role="tablist" aria-label="Seções de Desempenho">
+          <button type="button" role="tab" id="performance-tab-overview" aria-controls="performance-page-overview" aria-selected="true" tabindex="0" data-performance-tab="overview">Visão geral</button>
+          <button type="button" role="tab" id="performance-tab-recommendations" aria-controls="performance-page-recommendations" aria-selected="false" tabindex="-1" data-performance-tab="recommendations">Recomendações</button>
+          <button type="button" role="tab" id="performance-tab-cleanup" aria-controls="performance-page-cleanup" aria-selected="false" tabindex="-1" data-performance-tab="cleanup">Limpeza</button>
+          <button type="button" role="tab" id="performance-tab-history" aria-controls="performance-page-history" aria-selected="false" tabindex="-1" data-performance-tab="history">Histórico</button>
+        </div>
+        <div id="performance-page-overview" role="tabpanel" aria-labelledby="performance-tab-overview">
+          <div id="performance-overview" class="performance-content"></div>
+        </div>
+        <div id="performance-page-recommendations" role="tabpanel" aria-labelledby="performance-tab-recommendations" hidden>
+          <p class="meta performance-help">Selecione apenas os ajustes que deseja revisar. A prévia mostra efeitos e condições antes da aplicação.</p>
+          <div id="performance-recommendations" class="performance-content"></div>
+        </div>
+        <div id="performance-page-cleanup" role="tabpanel" aria-labelledby="performance-tab-cleanup" hidden>
+          <p class="meta performance-help">Arquivos removidos na limpeza podem não ser recuperados. Confira os itens antes de confirmar.</p>
+          <div id="performance-cleanup" class="performance-content"></div>
+        </div>
+        <div id="performance-page-history" role="tabpanel" aria-labelledby="performance-tab-history" hidden>
+          <div id="performance-history" class="performance-content"></div>
+        </div>
+        <div id="performance-selection" class="performance-selection" hidden>
+          <span id="performance-selected-count">Nenhuma ação selecionada</span>
+          <button class="btn primary" id="performance-preview-button" type="button">Ver prévia</button>
+        </div>
+        <section id="performance-preview" class="settings-card performance-preview" aria-labelledby="performance-preview-title" hidden>
+          <div class="card-heading"><h3 id="performance-preview-title" tabindex="-1">Prévia das alterações</h3></div>
+          <div id="performance-preview-content"></div>
+          <label id="performance-cleanup-confirm-row" class="performance-confirm" hidden>
+            <input id="performance-cleanup-confirm" type="checkbox" />
+            <span>Entendo que os arquivos selecionados serão excluídos e que esta limpeza não pode ser desfeita.</span>
+          </label>
+          <div class="performance-preview-actions">
+            <button class="btn" id="performance-back" type="button">Revisar seleção</button>
+            <button class="btn primary" id="performance-apply" type="button">Aplicar alterações</button>
+          </div>
+        </section>
+      </section>
+
+      <section data-pane="servicos" class="hidden">
+        <header class="page-header">
+          <div class="eyebrow">Seu workspace</div>
+          <h2>Serviços conectados</h2>
+          <p class="page-description">
+            Abra suas contas, ajuste o uso de memória e organize a barra lateral.
+          </p>
+        </header>
+        <div class="section-heading">
+          <div><h3>Neste workspace <span id="installed-count" class="count-pill"></span></h3><p class="meta">Cada conta mantém sua própria sessão.</p></div>
+          <label class="search-field" for="service-filter"><span class="sr-only">Buscar serviços conectados</span><input id="service-filter" type="search" placeholder="Buscar serviço" autocomplete="off" /></label>
+        </div>
+        <div class="list service-list" id="installed"></div>
+        <div class="section-heading catalog-heading"><div><h3>Adicionar serviço</h3><p class="meta">Escolha uma ferramenta para adicionar ao workspace.</p></div></div>
+        <div class="grid3" id="catalog"></div>
+        <p class="msg" id="servicos-msg" role="status" aria-live="polite"></p>
+      </section>
+
+      <section data-pane="tema" class="hidden">
+        <header class="page-header">
+          <div class="eyebrow">Preferências</div>
+          <h2>Tema e aparência</h2>
+          <p class="page-description">Escolha as cores e a posição dos atalhos do seu workspace.</p>
+        </header>
+        <p class="meta helper-note">
+          A barra lateral pode ser recolhida pelo botão da própria barra. Reordene workspaces e
+          serviços arrastando ou usando Alt+Shift+setas quando estiverem focados.
+        </p>
+        <div class="theme-options">
+          <button class="theme-card" type="button" data-theme="dark">
+            <span class="theme-preview" aria-hidden="true"></span>Escuro (padrão)
+          </button>
+          <button class="theme-card" type="button" data-theme="light">
+            <span class="theme-preview" aria-hidden="true"></span>Claro
+          </button>
+          <button class="theme-card" type="button" data-theme="system">
+            <span class="theme-preview" aria-hidden="true"></span>Sistema
+          </button>
+        </div>
+        <h3>Posição da barra de atalhos</h3>
+        <div class="theme-options position-options">
+          <button class="theme-card" type="button" data-sidebar-position="left"><span class="position-preview pos-left" aria-hidden="true"></span>Esquerda</button>
+          <button class="theme-card" type="button" data-sidebar-position="right"><span class="position-preview pos-right" aria-hidden="true"></span>Direita</button>
+          <button class="theme-card" type="button" data-sidebar-position="top"><span class="position-preview pos-top" aria-hidden="true"></span>Em cima</button>
+          <button class="theme-card" type="button" data-sidebar-position="bottom"><span class="position-preview pos-bottom" aria-hidden="true"></span>Embaixo</button>
+        </div>
+      </section>
+
+      <section data-pane="perfil" class="hidden">
+        <header class="page-header">
+          <div class="eyebrow">Preferências</div>
+          <h2>Perfil e contas</h2>
+          <p class="page-description">Veja quais sessões estão neste workspace e escolha a conta usada para salvar contatos.</p>
+        </header>
+        <div class="profile-card">
+          <div class="avatar" id="avatar">?</div>
+          <div>
+            <div class="profile-name" id="perfil-ws"></div>
+            <div class="meta">
+              Nome, e-mail e cargo vêm da sessão do ADR CRM
+            </div>
+          </div>
+        </div>
+        <h3 style="margin-top: 0">Google Contacts</h3>
+        <div class="list">
+          <div class="row">
+            <div class="name">
+              Conta que recebe os contatos
+              <div class="meta">
+                Opcional. O botão “Salvar no Google” do WhatsApp abre o formulário nesta conta; em
+                branco, abre na conta padrão do navegador
+              </div>
+            </div>
+            <input
+              type="email"
+              id="contacts-account"
+              aria-label="Conta para salvar contatos Google"
+              placeholder="voce@gmail.com"
+              style="width: 220px"
+            />
+          </div>
+        </div>
+
+        <h3>Contas Google</h3>
+        <div class="list" id="google-accounts"></div>
+        <div class="row add-account-row">
+          <div class="name">
+            Adicionar outra conta
+            <div class="meta">Entra com sessão própria e pede login do zero</div>
+          </div>
+          <select id="google-add-kind" aria-label="Serviço da nova conta Google">
+            <option value="gmail">Gmail</option>
+            <option value="calendar">Calendar</option>
+            <option value="youtube">YouTube</option>
+            <option value="spotify">Spotify</option>
+            <option value="browser">ADR Browser</option>
+          </select>
+          <button class="btn primary" id="google-add" type="button">Adicionar conta</button>
+        </div>
+
+        <h3>Contas Microsoft</h3>
+        <div class="list" id="microsoft-accounts"></div>
+        <div class="row add-account-row">
+          <div class="name">
+            Adicionar conta Microsoft
+            <div class="meta">Outlook e Teams da mesma conta dividem o login</div>
+          </div>
+          <select id="microsoft-add-kind" aria-label="Serviço da nova conta Microsoft">
+            <option value="outlook">Outlook</option>
+            <option value="teams">Teams</option>
+          </select>
+          <button class="btn primary" id="microsoft-add" type="button">Adicionar conta</button>
+        </div>
+        <div class="account-danger-zone">
+          <button class="btn danger" id="btn-crm-logout" type="button">
+            Sair da conta ADR CRM
+          </button>
+        </div>
+        <p class="msg" id="perfil-msg" role="status" aria-live="polite"></p>
+      </section>
+
+      <section data-pane="notif" class="hidden">
+        <header class="page-header">
+          <div class="eyebrow">Preferências</div>
+          <h2>Notificações</h2>
+          <p class="page-description">Escolha o que merece sua atenção e quando receber alertas.</p>
+        </header>
+        <div class="toggles">
+          <div>
+            <div class="name">
+              Notificações do sistema
+              <div class="meta">Exibir alertas do Windows para novas mensagens</div>
+            </div>
+            <input type="checkbox" id="notif-enabled" aria-label="Notificações do sistema" />
+          </div>
+          <div>
+            <div class="name">
+              Respeitar silenciado do WhatsApp
+              <div class="meta">Conversas silenciadas não disparam alerta</div>
+            </div>
+            <input
+              type="checkbox"
+              id="notif-mute"
+              aria-label="Respeitar conversas silenciadas no WhatsApp"
+            />
+          </div>
+          <div>
+            <div class="name">
+              Contador de não lidas na barra de tarefas
+              <div class="meta">Mostrar contagem no ícone da barra de tarefas</div>
+            </div>
+            <input
+              type="checkbox"
+              id="notif-tray"
+              aria-label="Contagem de não lidos na barra de tarefas"
+            />
+          </div>
+          <div>
+            <div class="name">
+              Não perturbe
+              <div class="meta" id="notif-quiet-meta">Silenciar notificações das 19h às 8h</div>
+            </div>
+            <input type="checkbox" id="notif-quiet" aria-label="Não perturbe" />
+          </div>
+          <div>
+            <div class="name">
+              Horário do não perturbe
+              <div class="meta">Das … às … (cruza a meia-noite normalmente)</div>
+            </div>
+            <span>
+              <input
+                type="number"
+                id="notif-quiet-from"
+                aria-label="Início do não perturbe, em horas"
+                min="0"
+                max="23"
+                step="1"
+                style="width: 60px"
+              />
+              <input
+                type="number"
+                id="notif-quiet-to"
+                aria-label="Fim do não perturbe, em horas"
+                min="0"
+                max="23"
+                step="1"
+                style="width: 60px"
+              />
+            </span>
+          </div>
+        </div>
+        <h3>Mensagens e reuniões</h3>
+        <div class="toggles">
+          <div>
+            <div class="name">
+              Silenciar avisos durante reuniões
+              <div class="meta">WhatsApp e Gmail ficam calados enquanto você está numa chamada do Meet.</div>
+            </div>
+            <input type="checkbox" id="meet-quiet" aria-label="Silenciar avisos durante reuniões do Meet" />
+          </div>
+          <div>
+            <div class="name">
+              Mini-janela da reunião
+              <div class="meta">Ao trocar de serviço no meio da chamada, ela continua visível num canto.</div>
+            </div>
+            <input type="checkbox" id="meet-mini" aria-label="Mini-janela da reunião do Meet" />
+          </div>
+          <div>
+            <div class="name">
+              Atalho do microfone (Ctrl+Alt+M)
+              <div class="meta">Liga e desliga o microfone da chamada mesmo com o app em segundo plano.</div>
+            </div>
+            <input type="checkbox" id="meet-shortcut" aria-label="Atalho global do microfone do Meet" />
+          </div>
+          <div>
+            <div class="name">
+              Registrar reuniões no CRM
+              <div class="meta">Ao sair de uma reunião de 2 min ou mais, oferecer o registro no contato.</div>
+            </div>
+            <input type="checkbox" id="meet-crm" aria-label="Oferecer registro da reunião no CRM" />
+          </div>
+        </div>
+        <h3>Lembrete de reunião</h3>
+        <p class="meta helper-note">
+          No Google Calendar: Configurações → sua agenda → Integrar agenda → copie o
+          <strong>Endereço secreto no formato iCal</strong> e cole aqui. Ele fica cifrado neste
+          computador e só é usado para ler os horários das reuniões com Google Meet.
+        </p>
+        <div class="toggles">
+          <div>
+            <div class="name">
+              Endereço secreto iCal
+              <div class="meta" id="calendar-meta">Não configurado</div>
+            </div>
+            <!-- Quebra a linha em tela estreita/zoom alto: lado a lado, o "Remover" saía da tela. -->
+            <span
+              style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; align-items: center; min-width: 0; max-width: 100%"
+            >
+              <input
+                type="password"
+                id="calendar-url"
+                autocomplete="off"
+                placeholder="https://calendar.google.com/calendar/ical/…/basic.ics"
+                aria-label="Endereço secreto iCal do Google Calendar"
+                style="width: 240px; max-width: 100%; min-width: 0"
+              />
+              <button class="btn" id="calendar-save" type="button">Salvar</button>
+              <button class="btn secondary" id="calendar-remove" type="button">Remover</button>
+            </span>
+          </div>
+          <div>
+            <div class="name">
+              Avisar antes
+              <div class="meta">Notificação do Windows; clicar nela entra na reunião.</div>
+            </div>
+            <select id="calendar-minutes" aria-label="Antecedência do lembrete de reunião">
+              <option value="1">1 min</option>
+              <option value="2">2 min</option>
+              <option value="5">5 min</option>
+              <option value="10">10 min</option>
+              <option value="0">Desligado</option>
+            </select>
+          </div>
+        </div>
+        <p class="msg" id="notif-msg" role="status" aria-live="polite"></p>
+        <h3>Por serviço</h3>
+        <p class="meta helper-note">Desative os alertas apenas das contas que não precisam interromper seu trabalho.</p>
+        <div class="list" id="notif-services"></div>
+      </section>
+
+      <section data-pane="privacidade" class="hidden">
+        <header class="page-header">
+          <div class="eyebrow">Preferências</div>
+          <h2>Privacidade</h2>
+          <p class="page-description">Proteja suas contas com bloqueios individuais.</p>
+        </header>
+        <div class="meta helper-note">
+          Escolha quais contas exigem PIN e configure o comportamento de cada uma separadamente.
+        </div>
+        <div id="wa-lock-list" class="list"></div>
+        <div style="margin-top: 14px; display: flex; gap: 8px">
+          <button class="btn secondary" id="wa-lock-all" type="button">
+            Bloquear todas as sessões agora
+          </button>
+        </div>
+        <h3>Permissões dadas a sites</h3>
+        <p class="meta helper-note">
+          Microfone, câmera, notificações e outros acessos que você permitiu. Revogar faz o site
+          perguntar de novo na próxima vez.
+        </p>
+        <div id="permission-list" class="list"></div>
+        <div style="margin-top: 10px">
+          <button class="btn secondary" id="permission-revoke-all" type="button">Revogar todas</button>
+        </div>
+        <p class="msg" id="privacidade-msg" role="status" aria-live="polite"></p>
+      </section>
+    </main>
+
+    <div id="view-empty" class="hidden">
+      <div class="box">
+        <svg
+          width="30"
+          height="30"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="var(--dim)"
+          stroke-width="1.6"
+          stroke-linecap="round"
+        >
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </div>
+      <div>
+        <div style="font-size: 16px; font-weight: 700; color: var(--fg2); margin-bottom: 6px">
+          Nenhum serviço adicionado
+        </div>
+        <div style="font-size: 13px; color: var(--muted); max-width: 320px">
+          Conecte WhatsApp, Gmail, Calendar e outros serviços para começar a trabalhar neste
+          workspace.
+        </div>
+      </div>
+      <button class="btn primary" type="button" id="empty-add">Adicionar serviço</button>
+    </div>
+
+    <script src="./theme.js"></script>
+    <script>
+      let state = {
+        catalog: [],
+        services: [],
+        notifications: {
+          enabled: true,
+          respectWhatsAppMute: true,
+          trayBadge: true,
+          quietHours: false,
+          serviceEnabled: {},
+        },
+        panel: "settings",
+      };
+      let tab = "geral";
+      let shownPanel = "settings";
+      /** Serviços que compartilham a sessão Google (ver GOOGLE_SESSION_KINDS). */
+      const GOOGLE_KINDS = ["gmail", "calendar", "drive", "gemini", "meet", "youtube", "spotify", "browser"];
+      const MICROSOFT_KINDS = ["outlook", "teams"];
+
+      const el = (id) => document.getElementById(id);
+      const tile = (kind) => `<span class="tile k-${kind}"><i></i></span>`;
+      const focusKey = (node, key) => {
+        node.dataset.focusKey = key;
+        return node;
+      };
+      const actionButton = (label, key, onClick, className = "btn") => {
+        const button = focusKey(document.createElement("button"), key);
+        button.type = "button";
+        button.className = className;
+        button.textContent = label;
+        button.addEventListener("click", onClick);
+        return button;
+      };
+      const msg = (id, text, color) => {
+        const node = el(id);
+        node.textContent = text;
+        // Cor de texto, não a do botão: verde/vermelho cheios ficavam abaixo de 3:1.
+        node.style.color =
+          color === "var(--danger)"
+            ? "var(--danger-fg)"
+            : color === "var(--accent)"
+              ? "var(--accent-soft)"
+              : color || "var(--muted)";
+        node.dataset.feedback =
+          color === "var(--danger)" ? "error" : color === "var(--accent)" ? "success" : "neutral";
+      };
+
+      function showPanel(panel) {
+        const empty = panel === "empty";
+        el("nav").classList.toggle("hidden", empty);
+        el("main").classList.toggle("hidden", empty);
+        el("view-empty").classList.toggle("hidden", !empty);
+        if (panel === "notifications" && shownPanel !== "notifications") setTab("notif");
+        shownPanel = panel;
+      }
+
+      function setTab(next) {
+        if (
+          ![...document.querySelectorAll("nav button")].some(
+            (button) => button.dataset.tab === next,
+          )
+        )
+          return;
+        const changed = tab !== next;
+        tab = next;
+        for (const btn of document.querySelectorAll("nav button")) {
+          btn.classList.toggle("active", btn.dataset.tab === tab);
+          btn.setAttribute("aria-current", btn.dataset.tab === tab ? "page" : "false");
+        }
+        for (const pane of document.querySelectorAll("section[data-pane]")) {
+          pane.classList.toggle("hidden", pane.dataset.pane !== tab);
+        }
+        // Instantâneo: o scroll-behavior smooth do main animava a troca de aba.
+        if (changed) el("main").scrollTo({ top: 0, behavior: "instant" });
+      }
+
+      for (const btn of document.querySelectorAll("nav button")) {
+        btn.addEventListener("click", () => {
+          setTab(btn.dataset.tab);
+          if (btn.dataset.tab === "privacidade") void loadPermissions();
+          if (btn.dataset.tab === "geral") void loadBackups();
+        });
+      }
+      el("empty-add").addEventListener("click", () =>
+        window.adrShell?.show("settings", "servicos"),
+      );
+      el("service-filter").addEventListener("input", renderInstalled);
+
+      function moveRailItem(rail, id, delta) {
+        const at = rail.indexOf(id);
+        const to = at + delta;
+        if (at < 0 || to < 0 || to >= rail.length) return;
+        const next = [...rail];
+        next.splice(at, 1);
+        next.splice(to, 0, id);
+        void window.adrShell?.reorderServices(next);
+      }
+
+      function managementMenu(id, rail) {
+        const details = document.createElement("details");
+        details.className = "service-menu";
+        details.dataset.menuId = id;
+        const summary = focusKey(document.createElement("summary"), `menu:${id}`);
+        summary.textContent = "Gerenciar";
+        summary.setAttribute("aria-label", `Gerenciar ${id === "crm" ? "CRM" : state.services.find((s) => s.id === id)?.name || "serviço"}`);
+        details.appendChild(summary);
+        const actions = document.createElement("div");
+        actions.className = "service-menu-actions";
+        for (const [label, delta] of [["Mover para cima", -1], ["Mover para baixo", 1]]) {
+          const button = actionButton(label, `${id}:move:${delta}`, () => moveRailItem(rail, id, delta));
+          const adjacentId = rail[rail.indexOf(id) + delta];
+          const current = state.services?.find((service) => service.id === id);
+          const adjacent = state.services?.find((service) => service.id === adjacentId);
+          // Fixed tiles are sorted first by the state model; crossing that
+          // boundary would look like a working button but leave order unchanged.
+          button.disabled = !adjacentId || (current && adjacent && Boolean(current.pinned) !== Boolean(adjacent.pinned));
+          actions.appendChild(button);
+        }
+        details.appendChild(actions);
+        details.addEventListener("keydown", (event) => {
+          if (event.key !== "Escape" || !details.open) return;
+          details.open = false;
+          summary.focus();
+          event.preventDefault();
+        });
+        details.addEventListener("toggle", () => {
+          if (!details.open) return;
+          for (const other of document.querySelectorAll("#installed details[open]")) {
+            if (other !== details) other.open = false;
+          }
+          details.classList.remove("drop-up");
+          const mainBounds = el("main").getBoundingClientRect();
+          const menuBounds = actions.getBoundingClientRect();
+          if (menuBounds.bottom > mainBounds.bottom && details.getBoundingClientRect().top - mainBounds.top > menuBounds.height) {
+            details.classList.add("drop-up");
+          }
+        });
+        return { details, actions };
+      }
+
+      // The CRM is a fixed surface, not a service instance: it cannot be
+      // renamed, hibernated or removed. It only needs a position in the rail,
+      // so it gets explicit move buttons instead of relying on drag alone.
+      function crmRow(rail) {
+        const row = document.createElement("div");
+        row.className = "row service-row";
+        row.innerHTML =
+          '<span class="tile" style="display:grid;place-items:center">' +
+          '<img src="./adr-logo.png" alt="ADR" style="width:100%;height:100%;object-fit:contain" /></span>' +
+          '<div class="name"></div>';
+        row.querySelector(".name").textContent = "Now! — CRM ADR";
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.textContent = "Integrado ao workspace · sempre disponível";
+        row.querySelector(".name").appendChild(meta);
+
+        const pill = document.createElement("span");
+        pill.className = "pill";
+        pill.textContent = "Integrado";
+        pill.title = "O CRM não pode ser removido nem hibernado";
+        row.appendChild(pill);
+
+        const { details, actions } = managementMenu("crm", rail);
+        const muted = state.crmAudioMuted === true;
+        actions.appendChild(actionButton(muted ? "Ativar áudio" : "Silenciar áudio", "crm:audio", () => window.adrShell?.setCrmMuted(!muted)));
+        const open = actionButton("Abrir", "crm:open", () => window.adrShell?.show("crm"), "btn service-open");
+        row.appendChild(open);
+        row.appendChild(details);
+        return row;
+      }
+
+      function renderInstalled() {
+        const root = el("installed");
+        const openedMenus = new Set([...root.querySelectorAll("details[open]")].map((node) => node.dataset.menuId));
+        root.innerHTML = "";
+        const loaded = state.loadedServiceIds;
+        const filter = el("service-filter").value.trim().toLocaleLowerCase("pt-BR");
+        {
+          const total = (state.services || []).length + 1;
+          el("installed-count").textContent = `${total} ${total === 1 ? "item" : "itens"}`;
+        }
+        // Walk the sidebar rail, not state.services, so this list mirrors the
+        // real icon order and can show the CRM tile alongside the services.
+        const byId = new Map((state.services || []).map((s) => [s.id, s]));
+        const rail = [...new Set([...(state.rail || []), ...byId.keys(), "crm"])].filter((id) => id === "crm" || byId.has(id));
+        let visible = 0;
+        for (const railId of rail) {
+          if (railId === "crm") {
+            if (!filter || "now! crm adr".includes(filter)) {
+              root.appendChild(crmRow(rail));
+              visible++;
+            }
+            continue;
+          }
+          const svc = byId.get(railId);
+          if (!svc) continue;
+          if (filter && !`${svc.name} ${svc.kind}`.toLocaleLowerCase("pt-BR").includes(filter)) continue;
+          const hibernated = Array.isArray(loaded) && !loaded.includes(svc.id);
+          const failed = (state.failedServiceIds || []).includes(svc.id);
+          const loading = (state.loadingServiceIds || []).includes(svc.id);
+          const row = document.createElement("div");
+          row.className = "row service-row";
+          row.innerHTML = `${tile(svc.kind)}<div class="name"></div>`;
+          row.querySelector(".name").textContent = svc.name;
+          const info = document.createElement("div");
+          info.className = "meta";
+          info.textContent = `${svc.pinned ? "Fixado no início · " : ""}${svc.keepAwake ? "Mantido em memória" : "Pode hibernar quando ocioso"}`;
+          row.querySelector(".name").appendChild(info);
+          const pill = document.createElement("span");
+          pill.className = `pill service-status${failed ? " is-error" : ""}`;
+          pill.textContent = failed ? "Falha" : loading ? "Carregando" : hibernated ? "Hibernado" : state.activeSurface === `service:${svc.id}` ? "Em uso" : "Em memória";
+          row.appendChild(pill);
+          const { details, actions } = managementMenu(svc.id, rail);
+          if (svc.ownSession) {
+            actions.appendChild(actionButton("Renomear", `${svc.id}:rename`, async () => {
+              const name = await window.adrShell.askText("Renomear serviço", svc.name, "Salvar");
+              if (name) await window.adrShell.renameService(svc.id, name);
+            }));
+          }
+          // Trocar a conta de um serviço Google/Microsoft sem logar de novo: as
+          // sessões já estão autenticadas, é só apontar o serviço para outra partição.
+          const accountPicker = (title, accounts, current, change) => {
+            if (!current || accounts.length < 2) return;
+            const label = document.createElement("label");
+            label.className = "service-account";
+            label.textContent = title;
+            const select = focusKey(document.createElement("select"), `${svc.id}:account`);
+            select.setAttribute("aria-label", `${title} de ${svc.name}`);
+            for (const account of accounts) {
+              const option = document.createElement("option");
+              option.value = account.id;
+              option.textContent = account.name;
+              option.selected = account.id === current;
+              select.appendChild(option);
+            }
+            select.addEventListener("change", () => change(select.value));
+            label.appendChild(select);
+            actions.appendChild(label);
+          };
+          accountPicker("Conta Google", state.googleAccounts || [], svc.googleAccountId, (id) =>
+            window.adrShell.setServiceGoogleAccount(svc.id, id),
+          );
+          accountPicker("Conta Microsoft", state.microsoftAccounts || [], svc.microsoftAccountId, (id) =>
+            window.adrShell.setServiceMicrosoftAccount(svc.id, id),
+          );
+
+          actions.appendChild(actionButton(svc.keepAwake ? "Permitir hibernação" : "Manter em memória", `${svc.id}:awake`, () =>
+            window.adrShell.setKeepAwake(svc.id, !svc.keepAwake),
+          ));
+
+          const idleLabel = document.createElement("label");
+          idleLabel.className = "service-account";
+          idleLabel.textContent = "Hibernar após ociosidade";
+          const idleSelect = focusKey(document.createElement("select"), `${svc.id}:idle`);
+          idleSelect.setAttribute("aria-label", `Prazo de hibernação de ${svc.name}`);
+          idleSelect.disabled = svc.keepAwake;
+          const idleChoices = [...new Set([1, 2, 5, 10, 15, 30, 60, 120, ...(svc.hibernateAfterMinutes ? [svc.hibernateAfterMinutes] : [])])].sort((a, b) => a - b);
+          for (const minutes of [null, ...idleChoices]) {
+            const option = document.createElement("option");
+            option.value = minutes === null ? "" : String(minutes);
+            option.textContent = minutes === null ? "Padrão (10 min)" : `${minutes} min`;
+            option.selected = minutes === (svc.hibernateAfterMinutes ?? null);
+            idleSelect.appendChild(option);
+          }
+          idleSelect.addEventListener("change", async () => {
+            const result = await window.adrShell.setHibernateAfter(svc.id, idleSelect.value === "" ? null : Number(idleSelect.value));
+            if (!result?.ok) msg("servicos-msg", result?.message || "Não foi possível salvar o prazo.", "var(--danger)");
+          });
+          idleLabel.appendChild(idleSelect);
+          actions.appendChild(idleLabel);
+          const idleHint = document.createElement("small");
+          idleHint.textContent = svc.keepAwake ? "Permita a hibernação para escolher um prazo." : "O teto de serviços, a janela minimizada e a pressão de RAM podem antecipar este prazo.";
+          actions.appendChild(idleHint);
+
+          if (!hibernated) actions.appendChild(actionButton("Hibernar agora", `${svc.id}:hibernate`, () => window.adrShell.hibernateService(svc.id)));
+          actions.appendChild(actionButton("Remover serviço", `${svc.id}:remove`, async () => {
+            const answer = await window.adrShell.confirm(
+              `Remover ${svc.name}?`,
+              "Remover",
+              "A sessão fica preservada para recuperação durante 30 dias.",
+            );
+            if (!answer?.ok) return;
+            await window.adrShell.removeService(svc.id);
+          }, "btn danger"));
+          const open = actionButton(failed ? "Tentar novamente" : hibernated ? "Reabrir" : "Abrir", `${svc.id}:open`, async () => {
+            try {
+              await window.adrShell.show("service:" + svc.id);
+              if (failed) await window.adrShell.reload(false);
+            } catch (error) {
+              msg("servicos-msg", String(error?.message || error), "var(--danger)");
+            }
+          }, "btn service-open");
+          row.appendChild(open);
+          row.appendChild(details);
+          root.appendChild(row);
+          visible++;
+        }
+        for (const menu of root.querySelectorAll("details[data-menu-id]")) menu.open = openedMenus.has(menu.dataset.menuId);
+        if (!visible) {
+          const empty = document.createElement("div");
+          empty.className = "empty-downloads";
+          empty.textContent = `Nenhum serviço corresponde a “${el("service-filter").value.trim()}”.`;
+          root.appendChild(empty);
+        }
+      }
+
+      function renderCatalog() {
+        const root = el("catalog");
+        root.innerHTML = "";
+        for (const item of state.catalog || []) {
+          const btn = focusKey(document.createElement("button"), `catalog:${item.kind}`);
+          btn.type = "button";
+          btn.className = "card-btn";
+          btn.disabled = !item.available;
+          btn.title = item.note || (item.available ? "Adicionar" : "Em breve");
+          btn.innerHTML = `${tile(item.kind)}<span></span>`;
+          btn.lastChild.textContent = item.name;
+          btn.addEventListener("click", async () => {
+            msg("servicos-msg", "");
+            // Serviço Google/Microsoft que já existe: em vez de recusar ("já
+            // adicionado"), oferece a segunda conta, que é o que a pessoa quer.
+            const multiAccount = GOOGLE_KINDS.includes(item.kind) || MICROSOFT_KINDS.includes(item.kind);
+            const exists = (state.services || []).some((s) => s.kind === item.kind);
+            let newGoogleAccount = false;
+            if (multiAccount && exists) {
+              const answer = await window.adrShell.confirm(
+                `Já existe ${item.name} neste workspace.`,
+                "Adicionar outra conta",
+                "A nova conta entra com sessão própria e pede login do zero.",
+              );
+              if (!answer?.ok) return;
+              newGoogleAccount = true;
+            }
+            try {
+              await window.adrShell.addService(item.kind, undefined, newGoogleAccount);
+            } catch (e) {
+              msg("servicos-msg", String(e.message || e), "var(--danger)");
+            }
+          });
+          root.appendChild(btn);
+        }
+      }
+
+      const DOWNLOAD_STATUS = {
+        progressing: "Baixando",
+        completed: "Concluído",
+        cancelled: "Cancelado",
+        interrupted: "Interrompido",
+      };
+      function downloadMeta(dl) {
+        const pct =
+          dl.totalBytes > 0
+            ? Math.min(100, Math.round((100 * dl.receivedBytes) / dl.totalBytes))
+            : null;
+        return (DOWNLOAD_STATUS[dl.state] || dl.state) + (dl.state === "progressing" && pct != null ? " · " + pct + "%" : "");
+      }
+
+      function renderDownloads() {
+        const root = el("downloads");
+        root.innerHTML = "";
+        const rows = state.downloads || [];
+        if (!rows.length) {
+          root.innerHTML =
+            '<div class="empty-downloads"><strong>Nenhum download por aqui</strong>Os arquivos baixados nos serviços aparecem nesta área.</div>';
+          return;
+        }
+        for (const dl of rows.slice(0, 12)) {
+          const row = document.createElement("div");
+          row.className = "row";
+          row.dataset.downloadId = dl.id;
+          row.innerHTML = '<div class="name"><span></span><div class="meta"></div></div>';
+          row.querySelector("span").textContent = dl.filename;
+          row.querySelector(".meta").textContent = downloadMeta(dl);
+          if (dl.state === "progressing") {
+            const btn = actionButton("Cancelar", `download:${dl.id}:cancel`, () => window.adrShell.cancelDownload(dl.id));
+            row.appendChild(btn);
+          } else {
+            const pill = document.createElement("span");
+            pill.className = "pill";
+            pill.textContent = DOWNLOAD_STATUS[dl.state] || dl.state;
+            row.appendChild(pill);
+          }
+          root.appendChild(row);
+        }
+      }
+
+      // Uma linha por conta Google (ou Microsoft) do workspace: renomear (para
+      // saber qual é qual) e sair só daquela sessão.
+      function renderGoogleAccounts() {
+        renderAccounts("google-accounts", state.googleAccounts, "googleAccountId", "Google", {
+          rename: (id, name) => window.adrShell.renameGoogleAccount(id, name),
+          logout: (id) => window.adrShell.googleLogout(id),
+        });
+      }
+      function renderMicrosoftAccounts() {
+        renderAccounts("microsoft-accounts", state.microsoftAccounts, "microsoftAccountId", "Microsoft", {
+          rename: (id, name) => window.adrShell.renameMicrosoftAccount(id, name),
+          logout: (id) => window.adrShell.microsoftLogout(id),
+        });
+      }
+      function renderAccounts(rootId, list, accountField, provider, api) {
+        const root = el(rootId);
+        root.innerHTML = "";
+        const accounts = list || [];
+        if (!accounts.length) {
+          root.innerHTML = `<div style="font-size:13px;color:var(--muted)">Nenhuma conta ${provider} neste workspace.</div>`;
+          return;
+        }
+        for (const account of accounts) {
+          const used = (state.services || []).filter((s) => s[accountField] === account.id);
+          const row = document.createElement("div");
+          row.className = "row";
+          row.innerHTML = '<div class="name"><span></span><div class="meta"></div></div>';
+          row.querySelector("span").textContent = account.name;
+          row.querySelector(".meta").textContent = used.length
+            ? used.map((s) => s.name).join(" · ")
+            : "Sem serviço usando esta conta";
+
+          const rename = actionButton("Renomear", `account:${account.id}:rename`, async () => {
+            const name = await window.adrShell.askText("Nome da conta", account.name, "Salvar");
+            if (name) await api.rename(account.id, name);
+          });
+          row.appendChild(rename);
+
+          const logout = actionButton("Sair desta conta", `account:${account.id}:logout`, async () => {
+            const answer = await window.adrShell.confirm(
+              `Sair de ${account.name}?`,
+              "Sair",
+              "Limpa a sessão desta conta e recarrega os serviços que a usam.",
+            );
+            if (!answer?.ok) return;
+            const res = await api.logout(account.id);
+            msg(
+              "perfil-msg",
+              res.ok ? "Sessão limpa" : res.message || "Falha",
+              res.ok ? "var(--accent)" : "var(--danger)",
+            );
+          }, "btn danger");
+          row.appendChild(logout);
+          root.appendChild(row);
+        }
+      }
+
+      function renderNotif() {
+        const n = state.notifications || {};
+        el("notif-enabled").checked = n.enabled !== false;
+        el("notif-mute").checked = n.respectWhatsAppMute !== false;
+        el("notif-tray").checked = n.trayBadge !== false;
+        el("notif-quiet").checked = n.quietHours === true;
+        const from = Number.isFinite(n.quietFromHour) ? n.quietFromHour : 19;
+        const to = Number.isFinite(n.quietToHour) ? n.quietToHour : 8;
+        el("notif-quiet-from").value = from;
+        el("notif-quiet-to").value = to;
+        el("notif-quiet-meta").textContent =
+          from === to
+            ? "Janela vazia: nada é silenciado"
+            : `Silenciar notificações das ${from}h às ${to}h`;
+        const root = el("notif-services");
+        root.innerHTML = "";
+        // O CRM entra na lista como qualquer serviço: era a única superfície sem
+        // como desligar notificação (id "crm" em notifications.serviceEnabled).
+        const crmTile =
+          '<span class="tile" style="display:grid;place-items:center">' +
+          '<img src="./adr-logo.png" alt="ADR" style="width:100%;height:100%;object-fit:contain" /></span>';
+        const rows = [
+          { id: "crm", name: "Now! — CRM ADR", kind: "crm" },
+          ...(state.services || []),
+        ];
+        for (const svc of rows) {
+          const row = document.createElement("div");
+          row.className = "row";
+          row.innerHTML = `${svc.kind === "crm" ? crmTile : tile(svc.kind)}<div class="name"></div>`;
+          row.querySelector(".name").textContent = svc.name;
+          const input = focusKey(document.createElement("input"), `notification:${svc.id}`);
+          input.type = "checkbox";
+          input.setAttribute("aria-label", "Notificações de " + svc.name);
+          input.checked = svc.kind !== "crm" && n.serviceEnabled?.[svc.id] !== false;
+          if (svc.kind === "crm") {
+            input.disabled = true;
+            input.title = "Notificações do CRM bloqueadas";
+          }
+          input.addEventListener("change", () =>
+            window.adrShell.updateNotifications({
+              serviceEnabled: { ...(n.serviceEnabled || {}), [svc.id]: input.checked },
+            }),
+          );
+          row.appendChild(input);
+          root.appendChild(row);
+        }
+      }
+
+      const hhmm = (ms) => new Date(ms).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+      /** "Agenda conectada — próxima: Título, hoje às 15:00 (lida às 14:32)". */
+      function agendaOk(status) {
+        const next = status.next;
+        const read = " (lida às " + hhmm(status.checkedAt) + ")";
+        if (!next) return "Agenda conectada — nenhuma reunião com Meet nas próximas 24 h" + read;
+        const day = new Date(next.startsAt).toDateString() === new Date().toDateString() ? "hoje" : "amanhã";
+        return "Agenda conectada — próxima: " + next.title + ", " + day + " às " + hhmm(next.startsAt) + read;
+      }
+
+      function renderMeet() {
+        const meet = state.meet || {};
+        el("meet-quiet").checked = meet.quietNotifications !== false;
+        el("meet-mini").checked = meet.miniWindow !== false;
+        el("meet-shortcut").checked = meet.muteShortcut !== false;
+        el("meet-crm").checked = meet.logToCrm !== false;
+        const calendar = state.calendar || {};
+        el("calendar-minutes").value = String(
+          Number.isFinite(calendar.reminderMinutes) ? calendar.reminderMinutes : 1,
+        );
+        const status = calendar.status;
+        el("calendar-meta").textContent = !calendar.configured
+          ? "Não configurado"
+          : !status
+            ? "Verificando a agenda…"
+            : status.ok === false
+              ? "Configurado, mas a última leitura falhou: " + status.message
+              : agendaOk(status);
+        el("calendar-remove").disabled = !calendar.configured;
+      }
+
+      async function loadPermissions() {
+        const listEl = el("permission-list");
+        if (!listEl || !window.adrShell?.listPermissionGrants) return;
+        let grants = [];
+        try {
+          grants = (await window.adrShell.listPermissionGrants()) || [];
+        } catch {
+          grants = [];
+        }
+        listEl.innerHTML = "";
+        el("permission-revoke-all").disabled = grants.length === 0;
+        if (!grants.length) {
+          const empty = document.createElement("div");
+          empty.className = "meta";
+          empty.textContent = "Nenhuma permissão lembrada.";
+          listEl.appendChild(empty);
+          return;
+        }
+        for (const grant of grants) {
+          const row = document.createElement("div");
+          row.className = "row";
+          const name = document.createElement("div");
+          name.className = "name";
+          name.textContent = grant.label;
+          const meta = document.createElement("div");
+          meta.className = "meta";
+          meta.textContent = grant.origin;
+          name.appendChild(meta);
+          row.appendChild(name);
+          row.appendChild(
+            actionButton("Revogar", `permission:${grant.key}`, async () => {
+              await window.adrShell.revokePermissionGrant(grant.key);
+              msg("privacidade-msg", `Revogada: ${grant.label} em ${grant.origin}`, "var(--accent)");
+              void loadPermissions();
+            }, "btn secondary"),
+          );
+          listEl.appendChild(row);
+        }
+      }
+
+      async function loadBackups() {
+        if (!window.adrShell?.listBackups) return;
+        try {
+          const backups = (await window.adrShell.listBackups()) || [];
+          const last = backups[0];
+          if (last) {
+            el("backup-meta").textContent =
+              "Última cópia: " +
+              new Date(last.createdAt).toLocaleString("pt-BR") +
+              (last.kind === "auto" ? " (automática, na atualização)" : "") +
+              ". Uma cópia também é feita a cada atualização.";
+          }
+        } catch {
+          /* mantém o texto padrão */
+        }
+      }
+
+      function renderPrivacy() {
+        const lockInfo = state.whatsappLock || {};
+        const standardValues = ["0", "5", "15", "30", "60", "120"];
+
+        const listEl = el("wa-lock-list");
+        if (!listEl) return;
+        listEl.innerHTML = "";
+
+        const waServices = (state.services || []).filter((s) => s.kind === "whatsapp");
+        if (!waServices.length) {
+          listEl.innerHTML =
+            '<div class="row"><div class="meta">Nenhuma sessão do WhatsApp cadastrada neste workspace.</div></div>';
+          el("wa-lock-all").disabled = true;
+          return;
+        }
+        el("wa-lock-all").disabled = false;
+
+        const infoMap = new Map((lockInfo.services || []).map((s) => [s.id, s]));
+
+        for (const svc of waServices) {
+          const info = infoMap.get(svc.id) || {
+            enabled: lockInfo.enabled === true,
+            locked: lockInfo.locked === true,
+            lockOnLeave: false,
+          };
+          const isEnabled = info.enabled === true;
+          const isLocked = info.locked === true;
+          const onLeave = info.lockOnLeave === true;
+          const timeoutMinutes = info.timeoutMinutes ?? lockInfo.timeoutMinutes ?? 30;
+
+          const card = document.createElement("div");
+          card.className = "toggles";
+          card.style.marginBottom = "12px";
+
+          const row1 = document.createElement("div");
+          row1.innerHTML = `${tile(svc.kind)}<div class="name"></div>`;
+          row1.querySelector(".name").textContent = svc.name;
+          const meta1 = document.createElement("div");
+          meta1.className = "meta";
+          meta1.textContent = isEnabled
+            ? isLocked
+              ? "🔒 Bloqueado — requer PIN ao abrir"
+              : "🔓 Desbloqueado no momento"
+            : "Proteção por PIN desativada";
+          row1.querySelector(".name").appendChild(meta1);
+
+          const chkLock = focusKey(document.createElement("input"), `privacy:${svc.id}:lock`);
+          chkLock.type = "checkbox";
+          chkLock.setAttribute("aria-label", "Proteger " + svc.name + " com PIN");
+          chkLock.checked = isEnabled;
+          chkLock.addEventListener("change", async () => {
+            const res = chkLock.checked
+              ? await window.adrShell.enableWhatsAppLock(svc.id)
+              : await window.adrShell.disableWhatsAppLock(svc.id);
+            msg(
+              "privacidade-msg",
+              res.message || (res.ok ? "Atualizado" : "Cancelado"),
+              res.ok ? "var(--accent)" : "var(--danger)",
+            );
+            if (!res.ok) renderPrivacy();
+          });
+          row1.appendChild(chkLock);
+          card.appendChild(row1);
+
+          if (isEnabled) {
+            const row2 = document.createElement("div");
+            row2.innerHTML = `
+              <div class="name">
+                Sempre pedir o PIN ao abrir esta aba
+                <div class="meta">Bloqueia novamente assim que você sair desta conta</div>
+              </div>
+            `;
+            const chkLeave = focusKey(document.createElement("input"), `privacy:${svc.id}:leave`);
+            chkLeave.type = "checkbox";
+            chkLeave.setAttribute("aria-label", "Pedir PIN ao reabrir " + svc.name);
+            chkLeave.checked = onLeave;
+            chkLeave.addEventListener("change", async () => {
+              const res = await window.adrShell.setWhatsAppLockOnLeave(svc.id, chkLeave.checked);
+              msg(
+                "privacidade-msg",
+                res.message || "Preferência atualizada",
+                res.ok ? "var(--accent)" : "var(--danger)",
+              );
+              if (!res.ok) chkLeave.checked = !chkLeave.checked;
+            });
+            row2.appendChild(chkLeave);
+            card.appendChild(row2);
+
+            const rowTimeout = document.createElement("div");
+            const timeoutLabel = document.createElement("div");
+            timeoutLabel.className = "name";
+            timeoutLabel.innerHTML = `Pedir PIN novamente após inatividade<div class="meta">Tempo exclusivo desta conta; “Nunca” mantém desbloqueada até fechar o app ou bloquear manualmente</div>`;
+            const timeoutControls = document.createElement("div");
+            timeoutControls.style.cssText = "display:flex;align-items:center;gap:6px";
+            const timeoutSelect = focusKey(document.createElement("select"), `privacy:${svc.id}:timeout`);
+            timeoutSelect.setAttribute("aria-label", "Tempo para bloquear " + svc.name);
+            for (const [value, label] of [
+              ["5", "5 min"],
+              ["15", "15 min"],
+              ["30", "30 min"],
+              ["60", "1 hora"],
+              ["120", "2 horas"],
+              ["custom", "Personalizado…"],
+              ["0", "Nunca"],
+            ]) {
+              const option = document.createElement("option");
+              option.value = value;
+              option.textContent = label;
+              timeoutSelect.appendChild(option);
+            }
+            const timeoutCustom = focusKey(document.createElement("input"), `privacy:${svc.id}:custom`);
+            timeoutCustom.type = "number";
+            timeoutCustom.setAttribute(
+              "aria-label",
+              "Tempo personalizado em minutos para " + svc.name,
+            );
+            timeoutCustom.dataset.whatsappTimeoutInput = "1";
+            timeoutCustom.min = "1";
+            timeoutCustom.max = "1440";
+            timeoutCustom.placeholder = "Min";
+            // Borda e altura vêm de panel.css, como nas outras abas (a borda --line sumia no escuro).
+            timeoutCustom.style.cssText = "display:none;width:76px;text-align:right";
+            const timeoutUnit = document.createElement("span");
+            timeoutUnit.textContent = "min";
+            timeoutUnit.style.cssText = "display:none;font-size:12px;color:var(--muted)";
+            const customTimeout = !standardValues.includes(String(timeoutMinutes));
+            timeoutSelect.value = customTimeout ? "custom" : String(timeoutMinutes);
+            timeoutCustom.value = String(timeoutMinutes > 0 ? timeoutMinutes : 45);
+            timeoutCustom.style.display = customTimeout ? "block" : "none";
+            timeoutUnit.style.display = customTimeout ? "inline" : "none";
+
+            const saveTimeout = async (minutes) => {
+              const res = await window.adrShell.setWhatsAppLockTimeout(svc.id, minutes);
+              msg(
+                "privacidade-msg",
+                res.message || "Tempo atualizado",
+                res.ok ? "var(--accent)" : "var(--danger)",
+              );
+              if (!res.ok) renderPrivacy();
+            };
+            timeoutSelect.addEventListener("change", async () => {
+              if (timeoutSelect.value === "custom") {
+                timeoutCustom.style.display = "block";
+                timeoutUnit.style.display = "inline";
+                timeoutCustom.focus();
+                timeoutCustom.select();
+                return;
+              }
+              timeoutCustom.style.display = "none";
+              timeoutUnit.style.display = "none";
+              await saveTimeout(parseInt(timeoutSelect.value, 10));
+            });
+            timeoutCustom.addEventListener("change", async () => {
+              let minutes = parseInt(timeoutCustom.value, 10);
+              if (isNaN(minutes) || minutes < 1) minutes = 1;
+              if (minutes > 1440) minutes = 1440;
+              timeoutCustom.value = String(minutes);
+              await saveTimeout(minutes);
+            });
+            timeoutCustom.addEventListener("keydown", (event) => {
+              if (event.key === "Enter") timeoutCustom.blur();
+            });
+            timeoutControls.appendChild(timeoutSelect);
+            timeoutControls.appendChild(timeoutCustom);
+            timeoutControls.appendChild(timeoutUnit);
+            rowTimeout.appendChild(timeoutLabel);
+            rowTimeout.appendChild(timeoutControls);
+            card.appendChild(rowTimeout);
+
+            const row3 = document.createElement("div");
+            row3.innerHTML = `<div class="name" style="font-size:12px;color:var(--muted)">Ações</div>`;
+            const btnChange = focusKey(document.createElement("button"), `privacy:${svc.id}:change-pin`);
+            btnChange.type = "button";
+            btnChange.className = "btn secondary";
+            btnChange.textContent = "Alterar PIN";
+            btnChange.addEventListener("click", async () => {
+              const res = await window.adrShell.changeWhatsAppPin(svc.id);
+              msg(
+                "privacidade-msg",
+                res.message || (res.ok ? "PIN alterado" : "Falha"),
+                res.ok ? "var(--accent)" : "var(--danger)",
+              );
+            });
+
+            const btnLockNow = focusKey(document.createElement("button"), `privacy:${svc.id}:lock-now`);
+            btnLockNow.type = "button";
+            btnLockNow.className = "btn secondary";
+            btnLockNow.textContent = "Bloquear agora";
+            btnLockNow.disabled = isLocked;
+            btnLockNow.addEventListener("click", async () => {
+              const res = await window.adrShell.lockWhatsApp(svc.id);
+              msg(
+                "privacidade-msg",
+                res.message || "Sessão bloqueada",
+                res.ok ? "var(--accent)" : "var(--danger)",
+              );
+            });
+
+            row3.appendChild(btnChange);
+            row3.appendChild(btnLockNow);
+            card.appendChild(row3);
+          }
+
+          listEl.appendChild(card);
+        }
+      }
+
+      // Um badge do WhatsApp ou o progresso de um download re-emitem o estado
+      // inteiro várias vezes por segundo; escrever .value por cima apagava o que
+      // estava sendo digitado no campo em foco (era o caso do nome do workspace,
+      // e valia igual para escala e views).
+      function setFieldValue(node, value) {
+        if (document.activeElement !== node) node.value = value;
+      }
+
+      function renderGeral() {
+        const ws = (state.workspaces || []).find((w) => w.id === state.activeWorkspaceId);
+        setFieldValue(el("ws-name"), ws?.name || "");
+        el("autostart").checked = state.autostart === true;
+        setFieldValue(el("contacts-account"), state.contactsAccount || "");
+        setFieldValue(el("ui-scale"), String(Number(((state.uiScale || 1) * 100).toFixed(2))));
+        setFieldValue(el("max-views"), String(state.maxLoadedViews || 6));
+        el("adblock-enabled").checked = state.adBlockEnabled !== false;
+        el("browser-toolbar-position").value = state.browserToolbarPosition || "top";
+        el("external-browser").value = state.preferredExternalBrowser || "auto";
+        const update = state.update || {};
+        // currentVersion já vinha no estado desde sempre, só nunca era desenhado:
+        // não havia como ver a versão instalada em lugar nenhum da interface.
+        el("app-version").textContent = update.currentVersion || "—";
+        el("update-meta").textContent =
+          update.message || "Verifique se há uma nova versão disponível.";
+        const updateButton = el("btn-update");
+        updateButton.textContent =
+          update.phase === "downloaded" || update.phase === "install-error"
+            ? "Reiniciar e instalar"
+            : update.phase === "installing"
+              ? "Reiniciando…"
+              : update.phase === "checking" ||
+                  update.phase === "available" ||
+                  update.phase === "downloading"
+                ? "Aguarde…"
+                : "Verificar";
+        updateButton.disabled =
+          update.phase === "disabled" ||
+          update.phase === "installing" ||
+          update.phase === "checking" ||
+          update.phase === "available" ||
+          update.phase === "downloading";
+        el("perfil-ws").textContent = ws?.name || "Workspace";
+        el("avatar").textContent = (ws?.name || "?").trim().slice(0, 2).toUpperCase();
+      }
+
+      function renderTheme() {
+        const current = state.theme || "system";
+        for (const card of document.querySelectorAll(".theme-card")) {
+          if (card.dataset.theme) {
+            card.classList.toggle("active", card.dataset.theme === current);
+            card.setAttribute("aria-pressed", String(card.dataset.theme === current));
+          }
+        }
+        const sidebarPosition = state.sidebarPosition || "left";
+        for (const card of document.querySelectorAll("[data-sidebar-position]")) {
+          card.classList.toggle("active", card.dataset.sidebarPosition === sidebarPosition);
+          card.setAttribute(
+            "aria-pressed",
+            String(card.dataset.sidebarPosition === sidebarPosition),
+          );
+        }
+        window.__adrState = state;
+        applyTheme(state);
+        document.documentElement.style.zoom = String(Number(state.uiScale) || 1);
+        updateCompactLayout();
+      }
+
+      function updateCompactLayout() {
+        document.body.classList.toggle(
+          "compact",
+          window.innerWidth / (Number(state.uiScale) || 1) <= 760,
+        );
+      }
+      window.addEventListener("resize", updateCompactLayout);
+
+      for (const card of document.querySelectorAll(".theme-card")) {
+        if (card.dataset.theme) {
+          card.addEventListener("click", () =>
+            window.adrShell.updateSettings({ theme: card.dataset.theme }),
+          );
+        }
+      }
+      for (const card of document.querySelectorAll("[data-sidebar-position]")) {
+        card.addEventListener("click", () =>
+          window.adrShell.updateSettings({ sidebarPosition: card.dataset.sidebarPosition }),
+        );
+      }
+      el("ws-name").addEventListener("change", (e) =>
+        window.adrShell.renameWorkspace(e.target.value),
+      );
+      el("autostart").addEventListener("change", (e) =>
+        window.adrShell.setAutostart(e.target.checked),
+      );
+      el("ui-scale").addEventListener("change", (e) =>
+        window.adrShell.updateSettings({ uiScale: Number(e.target.value) / 100 || 1 }),
+      );
+      el("max-views").addEventListener("change", (e) =>
+        window.adrShell.updateSettings({ maxLoadedViews: Number(e.target.value) || 6 }),
+      );
+      el("adblock-enabled").addEventListener("change", (e) =>
+        window.adrShell.updateSettings({ adBlockEnabled: e.target.checked }),
+      );
+      el("browser-toolbar-position").addEventListener("change", (e) =>
+        window.adrShell.updateSettings({ browserToolbarPosition: e.target.value }),
+      );
+      el("external-browser").addEventListener("change", (e) =>
+        window.adrShell.updateSettings({ preferredExternalBrowser: e.target.value }),
+      );
+      el("notif-enabled").addEventListener("change", (e) =>
+        window.adrShell.updateNotifications({ enabled: e.target.checked }),
+      );
+      el("notif-mute").addEventListener("change", (e) =>
+        window.adrShell.updateNotifications({ respectWhatsAppMute: e.target.checked }),
+      );
+      el("notif-tray").addEventListener("change", (e) =>
+        window.adrShell.updateNotifications({ trayBadge: e.target.checked }),
+      );
+      el("notif-quiet").addEventListener("change", (e) =>
+        window.adrShell.updateNotifications({ quietHours: e.target.checked }),
+      );
+      el("notif-quiet-from").addEventListener("change", (e) =>
+        window.adrShell.updateNotifications({ quietFromHour: Number(e.target.value) }),
+      );
+      el("notif-quiet-to").addEventListener("change", (e) =>
+        window.adrShell.updateNotifications({ quietToHour: Number(e.target.value) }),
+      );
+      const settingToggle = (id, key) =>
+        el(id).addEventListener("change", (e) =>
+          window.adrShell.updateSettings({ [key]: e.target.checked }),
+        );
+      settingToggle("meet-quiet", "meetQuietNotifications");
+      settingToggle("meet-mini", "meetMiniWindow");
+      settingToggle("meet-shortcut", "meetMuteShortcut");
+      settingToggle("meet-crm", "meetLogToCrm");
+      el("calendar-minutes").addEventListener("change", (e) =>
+        window.adrShell.updateSettings({ calendarReminderMinutes: Number(e.target.value) }),
+      );
+      el("calendar-save").addEventListener("click", async () => {
+        const input = el("calendar-url");
+        const value = input.value.trim();
+        if (!value) {
+          msg("notif-msg", "Cole o endereço secreto iCal primeiro.", "var(--danger)");
+          return;
+        }
+        el("calendar-save").disabled = true;
+        try {
+          const result = await window.adrShell.setCalendarFeed(value);
+          if (result?.ok) {
+            input.value = "";
+            msg(
+              "notif-msg",
+              result.count
+                ? `Agenda conectada: ${result.count} ${result.count === 1 ? "reunião" : "reuniões"} com Meet nas próximas 24 h.`
+                : "Agenda conectada. Os lembretes aparecem antes das reuniões com Google Meet.",
+              "var(--accent)",
+            );
+          } else {
+            msg("notif-msg", result?.message || "Não foi possível ler a agenda.", "var(--danger)");
+          }
+        } finally {
+          el("calendar-save").disabled = false;
+        }
+      });
+      el("calendar-remove").addEventListener("click", async () => {
+        await window.adrShell.setCalendarFeed("");
+        msg("notif-msg", "Lembrete de reunião desligado.", "var(--accent)");
+      });
+      el("permission-revoke-all").addEventListener("click", async () => {
+        const answer = await window.adrShell.confirm(
+          "Revogar todas as permissões lembradas?",
+          "Revogar",
+          "Microfone, câmera, notificações e os demais acessos voltam a ser perguntados.",
+        );
+        if (!answer?.ok) return;
+        await window.adrShell.revokePermissionGrant("*");
+        msg("privacidade-msg", "Todas as permissões foram revogadas.", "var(--accent)");
+        void loadPermissions();
+      });
+      el("btn-backup").addEventListener("click", async () => {
+        const result = await window.adrShell.backupProfile();
+        if (result && !result.ok && result.message !== "Cancelado") {
+          msg("geral-msg", result.message || "Não foi possível fazer o backup.", "var(--danger)");
+        }
+      });
+      el("btn-backups-open").addEventListener("click", () => window.adrShell.openBackups());
+      void loadPermissions();
+      void loadBackups();
+
+      el("wa-lock-all").addEventListener("click", async () => {
+        const result = await window.adrShell.lockWhatsApp();
+        msg(
+          "privacidade-msg",
+          result.message || (result.ok ? "WhatsApp bloqueado" : "Falha"),
+          result.ok ? "var(--accent)" : "var(--danger)",
+        );
+      });
+
+      el("contacts-account").addEventListener("change", (e) =>
+        window.adrShell.setContactsAccount(e.target.value.trim()),
+      );
+      for (const provider of ["google", "microsoft"]) {
+        el(`${provider}-add`).addEventListener("click", async () => {
+          const kind = el(`${provider}-add-kind`).value;
+          try {
+            await window.adrShell.addService(kind, undefined, true);
+          } catch (e) {
+            msg("perfil-msg", String(e.message || e), "var(--danger)");
+          }
+        });
+      }
+      el("btn-crm-logout").addEventListener("click", async () => {
+        const answer = await window.adrShell.confirm(
+          "Sair da conta do ADR CRM neste workspace?",
+          "Sair",
+        );
+        if (!answer?.ok) return;
+        await window.adrShell.logoutCrm();
+      });
+      el("btn-diag").addEventListener("click", async () => {
+        try {
+          const res = await window.adrShell.exportDiagnostics();
+          msg("geral-msg", res.file ? `Salvo: ${res.file}` : "Exportado", "var(--accent)");
+        } catch (e) {
+          msg("geral-msg", String(e.message || e), "var(--danger)");
+        }
+      });
+      el("btn-update").addEventListener("click", async () => {
+        try {
+          if (["downloaded", "install-error"].includes(state.update?.phase)) {
+            const installed = await window.adrShell.installUpdate();
+            if (!installed.ok) msg("geral-msg", installed.message, "var(--danger)");
+            return;
+          }
+          const res = await window.adrShell.checkUpdates();
+          el("update-meta").textContent = res.message || "Verificação concluída";
+          msg(
+            "geral-msg",
+            res.message || "Sem novidades",
+            res.phase === "error" ? "var(--danger)" : "var(--muted)",
+          );
+        } catch (e) {
+          msg("geral-msg", String(e.message || e), "var(--danger)");
+        }
+      });
+      el("btn-update-candidates").addEventListener("click", async () => {
+        const result = await window.adrShell.openExternalBrowser(
+          "https://github.com/ADRAGENCIACRM/adrworkspace-releases/releases",
+        );
+        if (!result?.ok) {
+          msg("geral-msg", result?.message || "Não foi possível abrir as versões de avaliação.", "var(--danger)");
+        }
+      });
+
+      const lastRendered = {};
+      function renderWhenChanged(key, value, render) {
+        const signature = JSON.stringify(value);
+        if (lastRendered[key] === signature) return;
+        lastRendered[key] = signature;
+        render();
+      }
+
+      function apply(next) {
+        const activeFocusKey = document.activeElement?.dataset?.focusKey;
+        const editingWhatsAppTimeout =
+          document.activeElement?.dataset?.whatsappTimeoutInput === "1";
+        state = { ...state, ...next };
+        renderTheme();
+        renderGeral();
+        renderWhenChanged("installed", [state.services, state.rail, state.loadedServiceIds, state.failedServiceIds, state.loadingServiceIds, state.activeSurface, state.googleAccounts, state.microsoftAccounts, state.crmAudioMuted], renderInstalled);
+        renderWhenChanged("catalog", state.catalog, renderCatalog);
+        // Só estrutura na assinatura: os bytes mudam a cada 250 ms, e remontar a
+        // lista recriava o "Cancelar" debaixo do mouse. O percentual é só texto.
+        renderWhenChanged("downloads", (state.downloads || []).map((d) => [d.id, d.filename, d.state]), renderDownloads);
+        for (const dl of state.downloads || []) {
+          const meta = el("downloads").querySelector(`[data-download-id="${CSS.escape(String(dl.id))}"] .meta`);
+          if (meta) meta.textContent = downloadMeta(dl);
+        }
+        renderWhenChanged("googleAccounts", [state.googleAccounts, state.services], renderGoogleAccounts);
+        renderWhenChanged("microsoftAccounts", [state.microsoftAccounts, state.services], renderMicrosoftAccounts);
+        renderWhenChanged("notifications", [state.notifications, state.services], renderNotif);
+        if (document.activeElement?.id !== "calendar-url") {
+          renderWhenChanged("meet", [state.meet, state.calendar], renderMeet);
+        }
+        // Badges/notificações reenviam o estado com frequência. Não destrua o
+        // campo dinâmico enquanto o usuário digita um tempo personalizado.
+        if (!editingWhatsAppTimeout) {
+          renderWhenChanged("privacy", [state.whatsappLock, state.services], renderPrivacy);
+        }
+        if (next.panel) showPanel(next.panel);
+        if (activeFocusKey) {
+          const replacement = [...document.querySelectorAll("[data-focus-key]")].find(
+            (node) => node.dataset.focusKey === activeFocusKey && !node.disabled,
+          );
+          replacement?.focus({ preventScroll: true });
+        }
+      }
+
+      setTab(tab);
+      window.adrShell?.onState?.((next) => apply(next || {}));
+      window.adrShell?.onPanel?.((panel) => showPanel(panel));
+      window.adrShell?.onPanelTab?.((next) => setTab(next));
+      window.adrShell?.getState?.().then((next) => apply(next || {}));
+    </script>
+    <script src="./optimizer-panel.js"></script>
+  </body>
+</html>
