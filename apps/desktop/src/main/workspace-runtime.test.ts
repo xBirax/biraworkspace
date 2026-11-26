@@ -45,6 +45,7 @@ function runtimeFunction(name: string, globals: Record<string, unknown>, source 
       (ts.isFunctionDeclaration(n) || ts.isVariableDeclaration(n)) && n.name?.getText() === name,
   );
   const declaration = (ts.isVariableDeclaration(node) ? "const " : "") + node.getText();
+  globals["opts"] ??= { personal: false };
   return evaluate(`${declaration};\n${name}`, globals);
 }
 const no = () => undefined;

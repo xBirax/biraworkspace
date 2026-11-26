@@ -6,7 +6,7 @@ import {
   parseNetworkFilterDomains,
 } from "./ad-blocker.js";
 
-describe("ADR Browser ad blocker", () => {
+describe("Bira Browser ad blocker", () => {
   it("extracts supported EasyList network domains and ignores exceptions", () => {
     const filters = parseNetworkFilterDomains(`
       ! comment

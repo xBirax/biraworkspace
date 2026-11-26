@@ -234,6 +234,8 @@ export class PinAttemptThrottle {
  */
 export type WhatsAppPinState = "ok" | "missing" | "corrupt" | "unavailable";
 
+import {secureStorageAvailable} from "./secure-storage.js";
+
 export class WhatsAppLock {
   /**
    * `onSecretChanged` roda quando o PIN deste arquivo é criado, trocado ou
@@ -245,7 +247,7 @@ export class WhatsAppLock {
     private readonly storage: Pick<
       SafeStorage,
       "isEncryptionAvailable" | "encryptString" | "decryptString"
-    >,
+    > & Partial<Pick<SafeStorage, "getSelectedStorageBackend">>,
     private readonly onSecretChanged?: (throttleKey: string) => void,
   ) {}
 
@@ -264,7 +266,7 @@ export class WhatsAppLock {
   }
 
   isAvailable(): boolean {
-    return this.storage.isEncryptionAvailable();
+    return secureStorageAvailable(this.storage);
   }
 
   pinState(): WhatsAppPinState {

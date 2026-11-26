@@ -74,6 +74,30 @@ export function reorderWorkspaces(state: AppStateV1, orderedIds: string[]): AppS
 }
 
 /** Reorder services inside one workspace (rail drag-and-drop). */
+export function moveServiceToWorkspace(state: AppStateV1, serviceId: string, targetId: string): AppStateV1 {
+  const service = state.services.find(s => s.id === serviceId && !s.deletedAt);
+  if (!service) throw new Error("serviço inexistente");
+  const source = state.workspaces.find(w => w.id === service.workspaceId && !w.deletedAt);
+  const target = state.workspaces.find(w => w.id === targetId && !w.deletedAt);
+  if (!source || !target) throw new Error("workspace inexistente");
+  if (source.id === target.id) return state;
+  // Only membership moves; existing profiles, partitions and PINs keep their IDs.
+  return parseAppState({
+    ...state,
+    activeWorkspaceId: state.activeServiceId === serviceId ? targetId : state.activeWorkspaceId,
+    services: state.services.map(s => s.id === serviceId ? { ...s, workspaceId: targetId } : s),
+    workspaces: state.workspaces.map(w => {
+      if (w.id === source.id) {
+        const index = w.serviceInstanceIds.indexOf(serviceId);
+        const ids = w.serviceInstanceIds.filter(id => id !== serviceId);
+        return { ...w, serviceInstanceIds: ids, crmPosition: Math.max(0, Math.min(ids.length, w.crmPosition - (index >= 0 && index < w.crmPosition ? 1 : 0))), updatedAt: now() };
+      }
+      if (w.id === targetId) return { ...w, serviceInstanceIds: [...w.serviceInstanceIds.filter(id => id !== serviceId), serviceId], updatedAt: now() };
+      return w;
+    }),
+  });
+}
+
 export function reorderWorkspaceServices(
   state: AppStateV1,
   workspaceId: string,

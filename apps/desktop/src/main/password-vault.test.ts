@@ -10,6 +10,7 @@ function tempVault() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "adr-vault-test-"));
   created.push(dir);
   const storage = {
+    getSelectedStorageBackend: () => "gnome_libsecret" as const,
     isEncryptionAvailable: () => true,
     encryptString: (value: string) => Buffer.from(`encrypted:${value}`, "utf8"),
     decryptString: (value: Buffer) =>
@@ -34,6 +35,7 @@ describe("PasswordVault", () => {
     expect(raw).not.toContain("secret-value");
 
     const reloaded = new PasswordVault(file, {
+      getSelectedStorageBackend: () => "gnome_libsecret" as const,
       isEncryptionAvailable: () => true,
       encryptString: (value) => Buffer.from(`encrypted:${value}`, "utf8"),
       decryptString: (value) => value.toString("utf8").replace(/^encrypted:/, ""),
@@ -42,6 +44,24 @@ describe("PasswordVault", () => {
       total: 1,
       matchCount: 1,
     });
+  });
+
+  it("bloqueia o preenchimento em cache quando o chaveiro fica indisponível", () => {
+    const { file } = tempVault();
+    let available = true;
+    const vault = new PasswordVault(file, {
+      getSelectedStorageBackend: () => "gnome_libsecret",
+      isEncryptionAvailable: () => available,
+      encryptString: (value) => Buffer.from(value),
+      decryptString: (value) => value.toString(),
+    });
+    const entry = vault.saveCredential("https://example.com", "fixture", "sintético");
+    const before = fs.readFileSync(file);
+    available = false;
+    expect(() => vault.getForFill(entry.id, "https://example.com")).toThrow(/chaveiro/);
+    expect(fs.readFileSync(file)).toEqual(before);
+    available = true;
+    expect(vault.getForFill(entry.id, "https://example.com")?.username).toBe("fixture");
   });
 
   it("never returns a credential for a different origin", () => {
@@ -68,6 +88,7 @@ describe("PasswordVault", () => {
     vault.saveCredential("https://example.com", "user", "secret");
     fs.writeFileSync(file, Buffer.alloc(64));
     const reopened = new PasswordVault(file, {
+      getSelectedStorageBackend: () => "gnome_libsecret" as const,
       isEncryptionAvailable: () => true,
       encryptString: (value) => Buffer.from(`encrypted:${value}`, "utf8"),
       decryptString: (value) => value.toString("utf8").replace(/^encrypted:/, ""),
@@ -102,6 +123,7 @@ describe("PasswordVault com o Bitwarden", () => {
     const { file, vault } = tempVault();
     vault.mirrorBitwarden(bitwardenItemsToEntries(items));
     const reloaded = new PasswordVault(file, {
+      getSelectedStorageBackend: () => "gnome_libsecret" as const,
       isEncryptionAvailable: () => true,
       encryptString: (value) => Buffer.from(`encrypted:${value}`, "utf8"),
       decryptString: (value) => value.toString("utf8").replace(/^encrypted:/, ""),

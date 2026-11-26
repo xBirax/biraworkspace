@@ -2,7 +2,7 @@
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
-    <title>Histórico — ADR Browser</title>
+    <title>Histórico — Bira Browser</title>
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:" />
     <link rel="stylesheet" href="./fonts.css" />
     <link rel="stylesheet" href="./tokens.css" />
@@ -284,7 +284,7 @@
         clearButton.disabled = !entries.length && !term;
         if (!entries.length) {
           if (term) renderEmpty(`Nada encontrado para “${term}”`, "Tente outra palavra do título ou do endereço.");
-          else renderEmpty("O histórico está vazio", "As páginas que você abrir no ADR Browser aparecem aqui.");
+          else renderEmpty("O histórico está vazio", "As páginas que você abrir no Bira Browser aparecem aqui.");
           return;
         }
         results.textContent = "";

@@ -16,7 +16,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 describe("desktop bootstrap", () => {
   it("exposes product identity and production CRM URL", () => {
     const info = getDesktopBootstrapInfo();
-    expect(info.product).toBe("ADR Workspace");
+    expect(info.product).toBe("BiraWorkspace");
     expect(info.defaultCrmBaseUrl).toBe("https://app.adragencia.com.br");
   });
 });

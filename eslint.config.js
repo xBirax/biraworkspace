@@ -5,6 +5,8 @@ import tseslint from "typescript-eslint";
 export default tseslint.config(
   {
     ignores: [
+      ".tools/**",
+      ".test-results/**",
       "**/dist/**",
       // Saída de build: cópias do vendor/ (que já é ignorado). Sem isto,
       // `pnpm lint` falhava com 200+ erros em arquivo gerado.

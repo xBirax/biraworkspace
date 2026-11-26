@@ -51,6 +51,8 @@ function isVaultEntry(value: unknown): value is VaultEntry {
   );
 }
 
+import {secureStorageAvailable} from "./secure-storage.js";
+
 export class PasswordVault {
   private entries: VaultEntry[] | null = null;
 
@@ -59,18 +61,19 @@ export class PasswordVault {
     private readonly storage: Pick<
       SafeStorage,
       "isEncryptionAvailable" | "encryptString" | "decryptString"
-    >,
+    > & Partial<Pick<SafeStorage, "getSelectedStorageBackend">>,
   ) {}
 
   isAvailable(): boolean {
-    return this.storage.isEncryptionAvailable();
+    return secureStorageAvailable(this.storage);
   }
 
   private load(): VaultEntry[] {
-    if (this.entries) return this.entries;
     if (!this.isAvailable()) {
-      throw new Error("A criptografia segura do sistema operacional não está disponível");
+      this.entries = null;
+      throw new Error("Desbloqueie o chaveiro do sistema para acessar o cofre.");
     }
+    if (this.entries) return this.entries;
     if (!fs.existsSync(this.filePath)) {
       this.entries = [];
       return this.entries;

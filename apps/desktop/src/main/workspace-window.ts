@@ -1,3 +1,8 @@
+import { LocalTranslation } from "./local-translation.js";
+import { closeLocalTranscription, localWhisper, transcribePcm } from "./local-transcription.js";
+import { ADR_APP_URL, privacyMode, protectedNotifications, type PrivacyMode } from "./personal-policy.js";
+import {buildId} from "./build-id.js";
+import { identifyTaskbarWindow,launchTarget } from "./windows-taskbar.js";
 import {
   BaseWindow,
   BrowserWindow,
@@ -106,9 +111,10 @@ import {
   reorderWorkspaceRail,
   renameWorkspace,
   reorderWorkspaces,
+  moveServiceToWorkspace,
   setActiveWorkspace,
 } from "@adr/workspaces";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import {
   oauthStart,
   isGoogleAccountsUrl,
@@ -154,7 +160,7 @@ import { createOptimizerController } from "./optimizer/index.js";
 import { openInPreferredBrowser } from "./external-browser.js";
 import { permissionGrantKey } from "./permission-policy.js";
 import { safeLogLine } from "./redact.js";
-import { buildDiagnosticSnapshot, writeDiagnosticExport } from "./diagnostics.js";
+import { buildDiagnosticSnapshot, TabDiagnostics, writeDiagnosticExport } from "./diagnostics.js";
 import { isAllowedExternalUrl, isShellPageUrl } from "./url-allowlist.js";
 import { CRM_WORLD_ID, isCrmPagePath, SAVE_CONTACT_BUTTON } from "./whatsapp-inject.js";
 import {
@@ -189,7 +195,7 @@ import {
 } from "./bitwarden-cli.js";
 import { DesktopUpdater, type DesktopUpdateState } from "./desktop-updater.js";
 import { canInstallUpdateNow } from "./update-policy.js";
-import { newContactUrl, toE164 } from "./google-contacts.js";
+import { newContactUrl, toE164, READ_WHATSAPP_CONTACT } from "./google-contacts.js";
 import {
   PinAttemptThrottle,
   WhatsAppLock,
@@ -209,7 +215,7 @@ import {
 import { createTaskbarBadgePng, describeTaskbarBadge } from "./taskbar-badge.js";
 
 const WHATSAPP_URL = "https://web.whatsapp.com/";
-const CRM_URL = "https://app.adragencia.com.br/";
+const CRM_URL = ADR_APP_URL;
 /** O CRM não é ServiceInstance: esta é a chave dele em notifications.serviceEnabled. */
 const CRM_SURFACE_ID = "crm";
 
@@ -310,7 +316,7 @@ function showsAddressBar(kind: ServiceKind): boolean {
 }
 
 /**
- * Faixa de abas só no ADR Browser: as abas são os serviços "browser" do
+ * Faixa de abas só no Bira Browser: as abas são os serviços "browser" do
  * workspace. Instagram e Google fora do site têm barra, mas não são abas.
  */
 function hasTabStrip(kind: ServiceKind): boolean {
@@ -330,6 +336,7 @@ function defaultNotifications(): NotificationSettings {
 }
 
 export function createWorkspaceWindow(opts: {
+  personal?: boolean;
   dirname: string;
   viewMeta: WeakMap<WebContents, { kind: ViewKind; workspaceId: string; serviceId?: string }>;
   /** `path` opcional: caminho DENTRO do CRM para onde a aba deve ir ao aparecer. */
@@ -350,12 +357,15 @@ export function createWorkspaceWindow(opts: {
   /** Chamada autenticada ao CRM (cookies da sessão pessoal, invalida cache em 401/403). */
   callCrmJson: (workspaceId: string, apiPath: string, init?: RequestInit) => Promise<unknown>;
 }): void {
+  const voiceJobs = new Map<string, AbortController>();
+  const privacyReady = new Set<number>();
+  const privacyMuted = new Map<number, boolean>();
   const statePath = path.join(app.getPath("userData"), "state.v1.json");
   const passwordVault = new PasswordVault(
     path.join(app.getPath("userData"), "vault", "password-vault.v1.json"),
     safeStorage,
   );
-  /** Histórico e abas abertas do ADR Browser (ver browser-history.ts). */
+  /** Histórico e abas abertas do Bira Browser (ver browser-history.ts). */
   const browserHistory = new BrowserHistoryStore(
     path.join(app.getPath("userData"), "history", "browser-history.v1.json"),
     safeStorage,
@@ -400,12 +410,17 @@ export function createWorkspaceWindow(opts: {
   const isWhatsAppLocked = (serviceId: string): boolean =>
     resolveWhatsAppLocked(serviceId, appState.settings);
   const loaded = loadAppState(statePath);
+  if (!loaded.ok && loaded.futureVersion) {
+    dialog.showErrorBox("Perfil de uma versão mais recente", loaded.error);
+    app.exit(1);
+    return;
+  }
   if (!loaded.ok && loaded.locked) {
     // Arquivo bom, só preso por outro processo: recomeçar do zero aqui gravaria
     // um estado vazio por cima dele (= deslogado de tudo). Melhor não abrir.
     dialog.showErrorBox(
-      "ADR Workspace",
-      "O arquivo de configuração está em uso por outro programa (antivírus ou instalação em andamento) ou sem permissão de acesso. Aguarde alguns segundos e abra o ADR Workspace de novo; se continuar, verifique as permissões da pasta de dados do ADR Workspace (%APPDATA%).",
+      "BiraWorkspace",
+      "O arquivo de configuração está em uso por outro programa (antivírus ou instalação em andamento) ou sem permissão de acesso. Aguarde alguns segundos e abra o BiraWorkspace de novo; se continuar, verifique as permissões da pasta de dados do BiraWorkspace (%APPDATA%).",
     );
     app.exit(1);
     return;
@@ -425,14 +440,14 @@ export function createWorkspaceWindow(opts: {
       // Seguir em frente apagaria a configuração; mesmo critério do backup de boot.
       console.error("não foi possível preservar o estado ilegível", error);
       dialog.showErrorBox(
-        "ADR Workspace",
+        "BiraWorkspace",
         "O arquivo de configuração não pôde ser lido nem copiado. O aplicativo será fechado para não sobrescrevê-lo. Verifique o espaço livre e as permissões da pasta de dados.",
       );
       app.exit(1);
       return;
     }
   }
-  // Aba do ADR Browser fechada só volta pelo Ctrl+Shift+T, que é só em memória:
+  // Aba do Bira Browser fechada só volta pelo Ctrl+Shift+T, que é só em memória:
   // depois de reiniciar ela não volta mais, e sem esta limpeza cada aba já
   // aberta e fechada ficava para sempre no state (ver purgeClosedBrowserTabs).
   let appState: AppStateV1 = purgeClosedBrowserTabs(
@@ -530,8 +545,8 @@ export function createWorkspaceWindow(opts: {
   let extensionScript = "";
   let vendorDir = vendorRoot;
   try {
-    vendorDir = resolveVendorExtensionDir(vendorRoot);
-    extensionScript = buildExtensionInjection(vendorDir, CRM_URL);
+    if (!opts.personal) vendorDir = resolveVendorExtensionDir(vendorRoot);
+    if (!opts.personal) extensionScript = buildExtensionInjection(vendorDir, CRM_URL);
   } catch (error) {
     opts.setCrmPanelKillSwitch(
       applyCrmPanelKillSwitch(opts.getCrmPanelKillSwitch(), false, "vendor-missing"),
@@ -558,7 +573,7 @@ export function createWorkspaceWindow(opts: {
     y: work.y + Math.round((work.height - restoredHeight) / 2),
     width: restoredWidth,
     height: restoredHeight,
-    title: "ADR Workspace",
+    title: opts.personal ? "BiraWorkspace" : "BiraWorkspace",
     // Cor de antes da primeira pintura: fixa no escuro, o tema claro piscava.
     backgroundColor: nativeTheme.shouldUseDarkColors ? "#0D1526" : "#F4F6F8",
     show: false,
@@ -570,6 +585,7 @@ export function createWorkspaceWindow(opts: {
   if (!appIcon.isEmpty()) windowOptions.icon = appIcon;
 
   const win = new BaseWindow(windowOptions);
+  if (opts.personal) identifyTaskbarWindow(win);
   // Fechar a janela destrói todas as views antes do before-quit: quem trata
   // "view destruída" precisa saber que é o fechamento, não a aba morrendo.
   let windowClosing = false;
@@ -590,7 +606,20 @@ export function createWorkspaceWindow(opts: {
    */
   const place = (view: WebContentsView, bounds: Electron.Rectangle): void => {
     view.setBounds(bounds);
-    view.setVisible(bounds.width > 0 && bounds.height > 0);
+    const meta = opts.viewMeta.get(view.webContents);
+    const mode = meta?.serviceId ? modeFor(meta.serviceId) : "normal";
+    if (meta?.serviceId && (!bounds.width || !bounds.height || mode==="presentation" || (isWhatsAppLocked(meta.serviceId) && !whatsappUnlocked.has(meta.serviceId)))) voiceJobs.get(meta.serviceId)?.abort();
+    const covered = opts.personal && meta?.kind === "whatsapp" && (mode === "presentation" || (mode === "discreet" && !privacyReady.has(view.webContents.id)));
+    if (opts.personal && meta?.kind === "whatsapp") {
+      const contents = view.webContents;
+      if (mode === "presentation") {
+        if (!privacyMuted.has(contents.id)) privacyMuted.set(contents.id, contents.isAudioMuted());
+        contents.setAudioMuted(true);
+      } else if (privacyMuted.has(contents.id)) {
+        contents.setAudioMuted(privacyMuted.get(contents.id)!); privacyMuted.delete(contents.id);
+      }
+    }
+    view.setVisible(!covered && bounds.width > 0 && bounds.height > 0);
   };
 
   /** Views que o próprio app fechou: o "destroyed" delas é esperado. */
@@ -931,6 +960,7 @@ export function createWorkspaceWindow(opts: {
   };
   hidePrompt();
 
+  const tabDiagnostics = new TabDiagnostics();
   const crmViews = new Map<string, WebContentsView>();
   const crmRetryTimers = new Map<string, NodeJS.Timeout>();
   const crmCrashAt = new Map<string, number>();
@@ -1042,6 +1072,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
   };
 
   const ensureCrmView = (wsId: string): WebContentsView => {
+    if (opts.personal) throw new Error("Superfície CRM desativada no BiraWorkspace");
     const existing = crmViews.get(wsId);
     if (existing && existing.webContents && !existing.webContents.isDestroyed()) return existing;
     if (existing) crmViews.delete(wsId);
@@ -1058,6 +1089,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     });
     attachZoom(view.webContents);
     const crmSession = session.fromPartition(partitionName);
+    tabDiagnostics.watch(view.webContents, "crm");
     attachPermissionHandler(crmSession, partitionName, "crm", CRM_SURFACE_ID, () => CRM_URL);
     /**
      * Recuperação da aba morta — o "o CRM para de funcionar depois de algum tempo".
@@ -1295,7 +1327,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
   // ensureCrmView, que recria sob demanda, então fechar é seguro.
   /**
    * Fecha as conexões da sessão só quando nada mais a usa. Gmail, Agenda, Drive,
-   * YouTube, Spotify e o ADR Browser dividem UMA sessão Google por workspace:
+   * YouTube, Spotify e o Bira Browser dividem UMA sessão Google por workspace:
    * hibernar a Agenda derrubava o stream do Spotify tocando, um envio do Gmail
    * ou um download em andamento. Hasteada: closeCrmView é declarada antes dos
    * mapas de views serem usados.
@@ -1346,8 +1378,9 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
   // Ícone do site por aba (já filtrado por pickFavicon), para a barra mostrar
   // na troca de aba sem esperar a página anunciar de novo.
   const browserFavicons = new Map<string, string | null>();
+  const failedAdrPages = new WeakSet<WebContents>();
   // Título da página por aba, para a faixa de abas: a aba hibernada continua
-  // com o nome do site em vez de virar "ADR Browser".
+  // com o nome do site em vez de virar "Bira Browser".
   const browserTitles = new Map<string, string>();
   // Reabrir o app onde as abas estavam: cada aba volta no último endereço (a
   // primeira carga usa suspendedBrowserUrls, ver ensureServiceLoaded). Aba que
@@ -1414,7 +1447,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
       meetQuietNotifications: appState.settings.meetQuietNotifications,
       meetMiniWindow: appState.settings.meetMiniWindow,
       meetMuteShortcut: appState.settings.meetMuteShortcut,
-      meetLogToCrm: appState.settings.meetLogToCrm,
+      meetLogToCrm: !opts.personal && appState.settings.meetLogToCrm,
       calendarReminderMinutes: appState.settings.calendarReminderMinutes,
       notificationsEnabled: notifSettings().enabled !== false,
     }),
@@ -1531,6 +1564,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
   let crmGateTimer: NodeJS.Timeout | undefined;
   let paletteOpen = false;
   let notifPanelOpen = false;
+  let privacyPanelOpen = false;
   let toastVisible = false;
   let toastSize = { width: 420, height: 88 };
   let toastTimer: NodeJS.Timeout | undefined;
@@ -1579,7 +1613,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
   }
 
   /**
-   * Zoom de página do ADR Browser (Ctrl+= / Ctrl+- / Ctrl+roda) por SITE, por
+   * Zoom de página do Bira Browser (Ctrl+= / Ctrl+- / Ctrl+roda) por SITE, por
    * cima do zoom da interface. Só em memória, como o resto do que o Browser
    * guarda da navegação: o attachZoom acima zera o nível gravado pelo Chromium
    * a cada navegação, e é este fator que vem depois e põe o do site de volta.
@@ -1599,7 +1633,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
   }
 
   const notifSettings = (): NotificationSettings =>
-    appState.settings.notifications || defaultNotifications();
+    opts.personal ? protectedNotifications(appState.settings.notifications || defaultNotifications(), appState.settings.whatsappPrivacyModes || {}) : appState.settings.notifications || defaultNotifications();
 
   const preferredBrowser = (): ExternalBrowserPreference =>
     appState.settings.preferredExternalBrowser;
@@ -1611,7 +1645,8 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
 
   // Lido uma vez: getLoginItemSettings() bate no registro do Windows e
   // shellStatePayload() roda a cada broadcast (download, badge, troca de aba).
-  let autostartEnabled = app.getLoginItemSettings().openAtLogin;
+  const loginOptions=opts.personal && app.isPackaged && process.platform==="win32" ? {path:launchTarget()} : {};
+  let autostartEnabled = app.getLoginItemSettings(loginOptions).openAtLogin;
 
   /**
    * "Limpar" zera o contador do ícone até o usuário IR OLHAR o serviço.
@@ -1679,7 +1714,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
   };
 
   /**
-   * A aba do ADR Browser que representa todas na barra lateral (um ícone só;
+   * A aba do Bira Browser que representa todas na barra lateral (um ícone só;
    * as abas estão na faixa): a ativa, se for deste workspace; senão a última
    * usada. Declaração de função: o payload da lateral nasce antes desta linha.
    */
@@ -1703,15 +1738,16 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
   }
   function railOrder(wsId: string): string[] {
     return collapseRailBrowserTabs(
-      railOrderForWorkspace(appState, wsId),
+      railOrderForWorkspace(appState, wsId).filter((id) => !opts.personal || id !== "crm"),
       orderedServicesForWorkspace(appState, wsId)
         .filter((s) => hasTabStrip(s.kind))
         .map((s) => s.id),
       railBrowserTab(wsId),
     );
   }
-  /** "ADR Browser · 3 abas" no ícone que representa todas. */
+  /** "Bira Browser · 3 abas" no ícone que representa todas. */
   function railServiceName(service: ServiceInstance): string {
+    if (opts.personal && service.kind === "whatsapp" && modeFor(service.id) === "presentation") return "WhatsApp protegido";
     if (!hasTabStrip(service.kind)) return service.name;
     const count = orderedServicesForWorkspace(appState, service.workspaceId).filter((s) =>
       hasTabStrip(s.kind),
@@ -1719,7 +1755,28 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     return count > 1 ? `${service.name} · ${count} abas` : service.name;
   }
 
+  function modeFor(id: string): PrivacyMode { return privacyMode(appState.settings.whatsappPrivacyModes?.[id]); }
+  function privacyOptionsFor(id: string) { return { ...(appState.settings.whatsappPrivacyOptions?.[id] || { names:false, avatars:false, previews:true, messages:false, media:true, reveal:"hover" as const }) }; }
+  function privacyCovered(): boolean {
+    const svc = activeService();
+    if (!opts.personal || svc?.kind !== "whatsapp") return false;
+    const mode = modeFor(svc.id), view = serviceViews.get(svc.id);
+    return mode === "presentation" || (mode === "discreet" && (!view || !privacyReady.has(view.webContents.id)));
+  }
   const shellStatePayload = () => ({
+    privacyPanelOpen,
+    privacyGroup:appState.settings.whatsappPrivacyGroup||[],
+    privacyCovered: privacyCovered(),
+    whatsappTranslation: Object.fromEntries(Object.entries(appState.settings.whatsappTranslation || {}).map(([id, prefs]) => [id, {incoming:prefs.incoming}])),
+    whatsappTranscription: appState.settings.whatsappTranscription || {},
+    englishGlossary: appState.settings.englishGlossary || [],
+    whatsappAudioLanguages: appState.settings.whatsappAudioLanguages || {},
+    backupAvailable: ["win32", "linux"].includes(process.platform),
+    restoreAvailable: process.platform === "linux",
+    buildId:buildId(),
+    whatsappPrivacyOptions: appState.settings.whatsappPrivacyOptions || {},
+    whatsappPrivacyModes: appState.settings.whatsappPrivacyModes || {},
+    personal: Boolean(opts.personal),
     platform: process.platform,
     services: railServices(workspaceId).map((s) => ({
       id: s.id,
@@ -1746,7 +1803,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     contactsAccount: contactsAccount() || "",
     // Ordem da barra lateral: ids dos serviços mais o marcador "crm", na ordem
     // em que foram arrastados. É a lista de ícones arrastáveis da tela.
-    // Abas do ADR Browser num ícone só (railOrder/railServices).
+    // Abas do Bira Browser num ícone só (railOrder/railServices).
     rail: railOrder(workspaceId),
     // A barra de TODOS os workspaces, para a lateral mostrar os ícones de todos
     // de uma vez. `services`/`rail` acima continuam só do workspace ativo — as
@@ -1785,7 +1842,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
       quietNotifications: appState.settings.meetQuietNotifications,
       miniWindow: appState.settings.meetMiniWindow,
       muteShortcut: appState.settings.meetMuteShortcut,
-      logToCrm: appState.settings.meetLogToCrm,
+      logToCrm: !opts.personal && appState.settings.meetLogToCrm,
       inCall: meet.anyCall(),
     },
     calendar: {
@@ -1859,6 +1916,8 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     const { width, height } = win.getContentBounds();
     if (paletteOpen || notifPanelOpen) {
       place(overlay, { x: 0, y: titlebarHeight(), width, height: Math.max(height - titlebarHeight(), 0) });
+    } else if (privacyPanelOpen || privacyCovered()) {
+      place(overlay, lastMain);
     } else if (toastVisible) {
       // Recortado no tamanho real do toast: a caixa fixa de 420×88 era uma view
       // transparente por cima do serviço, e todo clique naquele canto sumia.
@@ -1874,7 +1933,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     } else {
       place(overlay, HIDDEN);
     }
-    if (paletteOpen || notifPanelOpen || toastVisible) win.contentView.addChildView(overlay);
+    if (paletteOpen || notifPanelOpen || toastVisible || privacyPanelOpen || privacyCovered()) win.contentView.addChildView(overlay);
   };
 
   const showToast = (message: string): void => {
@@ -1932,7 +1991,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
       throw new Error(opened.message || "Não foi possível abrir o navegador");
     }
     pushLog("info", "contato aberto no google", { comNome: Boolean(name) });
-    showToast(`Abrindo no Google Contacts: ${name || phone}`);
+    showToast("Formulário do Google Contatos aberto.");
     return { opened: true, name };
   };
   opts.setSaveGoogleContact(saveGoogleContact);
@@ -2013,7 +2072,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
         type: "warning",
         title: "Configuração recuperada",
         message: "A configuração salva não pôde ser lida",
-        detail: `${restoredFromBackup ? "O ADR Workspace abriu a cópia de segurança anterior." : "O ADR Workspace recomeçou com uma configuração nova."} Nada foi apagado: a versão anterior está em\n${quarantinedStateCopies.join("\n")}\n\nEnvie este caminho ao suporte se precisar recuperá-la.`,
+        detail: `${restoredFromBackup ? "O BiraWorkspace abriu a cópia de segurança anterior." : "O BiraWorkspace recomeçou com uma configuração nova."} Nada foi apagado: a versão anterior está em\n${quarantinedStateCopies.join("\n")}\n\nEnvie este caminho ao suporte se precisar recuperá-la.`,
         buttons: ["Abrir pasta", "Fechar"],
         defaultId: 1,
         cancelId: 1,
@@ -2058,6 +2117,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     browserToolbar?.webContents.send("browser:nav", {
       canGoBack: view.webContents.navigationHistory.canGoBack(),
       canGoForward: view.webContents.navigationHistory.canGoForward(),
+      adrLoadFailed: failedAdrPages.has(view.webContents),
     });
     browserToolbar?.webContents.send("browser:adblock", {
       ...adBlocker.stateFor(view.webContents.id, url),
@@ -2076,7 +2136,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     if (findTargetId !== null && findTargetId !== view.webContents.id) stopFind(true);
   };
 
-  /** Abas do ADR Browser deste workspace, na ordem da barra lateral. */
+  /** Abas do Bira Browser deste workspace, na ordem da barra lateral. */
   function browserTabServices(): ServiceInstance[] {
     return orderedServicesForWorkspace(appState, workspaceId).filter((s) => hasTabStrip(s.kind));
   }
@@ -2151,7 +2211,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     () => appState.settings.adBlockAllowlist,
     (contentsId) => {
       const contents = webContents.fromId(contentsId);
-      if (!contents || opts.viewMeta.get(contents)?.kind !== "browser") return "";
+      if (!contents || opts.viewMeta.get(contents)?.kind !== "browser") return undefined;
       return contents.getURL();
     },
     (contentsId) => {
@@ -2159,6 +2219,11 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
       if (!active || active.webContents.id !== contentsId) return;
       clearTimeout(adBlockToolbarTimer);
       adBlockToolbarTimer = setTimeout(pushBrowserToolbarState, 250);
+    },
+    (contentsId, url) => {
+      const contents = webContents.fromId(contentsId);
+      const kind = contents && opts.viewMeta.get(contents)?.kind;
+      tabDiagnostics.record(contentsId, kind ?? "unknown", url, { event: "policy-block", policy: "adr-domain" });
     },
   );
   void adBlocker.initialize().then(pushBrowserToolbarState);
@@ -2485,8 +2550,8 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
    * layout acabou de posicionar. Devolve os dois ao topo, na mesma ordem.
    */
   function raiseOverlays(): void {
+    if (paletteOpen || notifPanelOpen || toastVisible || privacyPanelOpen || privacyCovered()) win.contentView.addChildView(overlay);
     if (promptResolve) win.contentView.addChildView(promptOverlay);
-    if (paletteOpen || notifPanelOpen || toastVisible) win.contentView.addChildView(overlay);
   }
 
   let stateSaveTimer: NodeJS.Timeout | undefined;
@@ -2517,6 +2582,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
   }
   const pendingNotificationChats = new Map<string, string>();
   const showSurface = (surface: Surface, userInitiated = false): void => {
+    if (opts.personal && surface === "crm") surface = "empty";
     const serviceId = surface.startsWith("service:") ? surface.slice("service:".length) : "";
     const service = serviceId
       ? appState.services.find((item) => item.id === serviceId && !item.deletedAt)
@@ -2528,7 +2594,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     }
     // Clique em notificação e recuperação em segundo plano também vão para o workspace do serviço.
     if (service && !activateWorkspace(service.workspaceId)) return;
-    if (!crmSurfaceAllowedWithoutLogin(surface) && !crmAuthenticatedWorkspaces.has(workspaceId)) {
+    if (!opts.personal && !crmSurfaceAllowedWithoutLogin(surface) && !crmAuthenticatedWorkspaces.has(workspaceId)) {
       // A conversa do clique na notificação não abre agora; sem apagar, ela
       // abria muito depois, quando o usuário entrasse no WhatsApp por conta própria.
       if (service) pendingNotificationChats.delete(service.id);
@@ -2605,6 +2671,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
       whatsappLastActive.set(service.id, now);
     }
     const previousService = activeService();
+    if (opts.personal && previousService?.kind === "whatsapp") serviceViews.get(previousService.id)?.webContents.send("bira:privacy-conceal");
     if (
       previousService?.kind === "whatsapp" &&
       previousService.id !== serviceId &&
@@ -2677,6 +2744,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
   };
 
   function armCrmGate(wsId: string): void {
+    if (opts.personal) return;
     if (crmGateTimer) clearInterval(crmGateTimer);
     const check = async (): Promise<void> => {
       if (win.isDestroyed()) return;
@@ -2754,6 +2822,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
    * página do WhatsApp, que é conteúdo de terceiro.
    */
   const openCrmPath = (path: string): void => {
+    if (opts.personal) return;
     let destino: URL;
     try {
       destino = new URL(path, CRM_URL);
@@ -2809,6 +2878,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
       // página porque troca o window.Notification dela; estes não.
       const inCrmWorld = (code: string): Promise<unknown> =>
         view.webContents.executeJavaScriptInIsolatedWorld(CRM_WORLD_ID, [{ code }], true);
+      if (opts.personal) return;
       await inCrmWorld(SAVE_CONTACT_BUTTON);
       if (shouldMountCrmPanel(opts.getCrmPanelKillSwitch(), false)) {
         const result = await inCrmWorld(extensionScript);
@@ -2894,7 +2964,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     // Workspace ainda sem login do CRM conferido (Meet/Teams de outro workspace):
     // o portão de showSurface o leria como deslogado e o link se perdia.
     const targetWorkspace = appState.services.find((s) => s.id === serviceId)?.workspaceId;
-    if (targetWorkspace && !crmLoginKnown.has(targetWorkspace)) {
+    if (!opts.personal && targetWorkspace && !crmLoginKnown.has(targetWorkspace)) {
       void crmSessionHasLogin(targetWorkspace)
         .catch(() => false)
         .then((loggedIn) => {
@@ -3011,7 +3081,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
       if (!result.ok) showToast(result.message || "Não foi possível abrir o link");
       else if (isChromeWebStoreUrl(url)) {
         // Sem o aviso, o clique na loja "não fazia nada" no app (ver isChromeWebStoreUrl).
-        showToast(`A Chrome Web Store abriu no ${externalBrowserLabel()}: o ADR Browser não instala extensões.`);
+        showToast(`A Chrome Web Store abriu no ${externalBrowserLabel()}: o Bira Browser não instala extensões.`);
       }
     });
   };
@@ -3124,7 +3194,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
       // Cartão e atalhos do painel do CRM (pessoa, negócio, criar empresa): na
       // aba do CRM do app, que tem a sessão — no navegador externo o usuário
       // caía na tela de login.
-      if (isCrmUrl(url)) {
+      if (isCrmUrl(url) && !(opts.personal && kind === "browser")) {
         // Qualquer página aberta no app podia levar a aba do CRM, com a sessão do
         // usuário, a qualquer rota dele. Só as telas que o painel linka passam.
         if (isCrmPagePath(url) && pageMayOpen(contents, url)) {
@@ -3150,7 +3220,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
         return { action: "deny" };
       }
       const disposition = servicePopupDisposition(kind, url, windowDisposition, contents.getURL());
-      // ADR Browser: link "em nova aba" (target=_blank, clique do meio,
+      // Bira Browser: link "em nova aba" (target=_blank, clique do meio,
       // Ctrl+clique) abre aba nova ao lado, como no Chrome — antes trocava a
       // página da aba atual. Clique do meio/Ctrl+clique deixa a aba no fundo.
       if (
@@ -3186,7 +3256,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
         void contents.loadURL(url).catch(() => undefined);
       } else if (disposition === "popup") {
         // Só a aba da frente, com a janela em foco, abre janela — e uma por vez
-        // a cada 1,5 s. Sem isto qualquer página (ADR Browser, link aberto na
+        // a cada 1,5 s. Sem isto qualquer página (Bira Browser, link aberto na
         // aba) abria quantas janelas sem barra de endereço quisesse.
         if (!pageMayOpen(contents, url)) return { action: "deny" };
         // Janela de verdade, filha da janela do app e na mesma sessão da aba:
@@ -3558,7 +3628,9 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     const view = new WebContentsView({
       webPreferences: {
         partition: partitionName,
-        ...(svc.kind === "gmail"
+        ...(opts.personal
+          ? { preload: path.join(opts.dirname, svc.kind === "whatsapp" ? "../preload/personal-privacy.cjs" : "../preload/form-activity-preload.cjs"), additionalArguments: [`--bira-privacy=${modeFor(svc.id)}`, `--bira-options=${JSON.stringify(privacyOptionsFor(svc.id))}`] }
+          : svc.kind === "gmail"
           ? { preload: path.join(opts.dirname, "../preload/gmail-preload.cjs") }
           : svc.kind === "whatsapp" && viewKindAllowsCrmPreload("whatsapp")
           ? { preload: path.join(opts.dirname, "../preload/crm-preload.cjs") }
@@ -3571,6 +3643,12 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
         webSecurity: true,
       },
     });
+    tabDiagnostics.watch(view.webContents, svc.kind);
+    if (opts.personal && svc.kind === "whatsapp") {
+      view.webContents.on("did-start-navigation", (_e, _url, inPlace, main) => {
+        if (main && !inPlace) { privacyReady.delete(view.webContents.id); view.setVisible(modeFor(svc.id) === "normal"); }
+      });
+    }
     if (sessionUa) view.webContents.setUserAgent(sessionUa);
     // Com "Electron" no User-Agent o Spotify entrega o player de celular
     // (mobile-web-player, `fallback=getapp`), que não toca faixas: medido em
@@ -3601,7 +3679,8 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     view.webContents.on("zoom-changed", (_e, direction) => {
       if (hasTabStrip(svc.kind)) stepPageZoom(view, direction === "in" ? 1 : -1);
     });
-    view.webContents.on("did-navigate", (_e, url) => {
+    view.webContents.on("did-navigate", (_e, url, httpStatus) => {
+      if (httpStatus > 0 || !isCrmUrl(url)) failedAdrPages.delete(view.webContents);
       // Depois do attachZoom (que volta ao zoom da interface): o do site por cima.
       applyPageZoom(view.webContents);
       // Página nova: o ícone e a busca eram da anterior.
@@ -3654,8 +3733,11 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
       }
     });
     view.webContents.on("did-finish-load", () => {
-      serviceLoadRetries.delete(svc.id);
-      failedServiceIds.delete(svc.id);
+      // O Chromium também pode terminar de carregar o documento interno de erro.
+      if (!failedAdrPages.has(view.webContents)) {
+        serviceLoadRetries.delete(svc.id);
+        failedServiceIds.delete(svc.id);
+      }
       if (svc.kind === "whatsapp") void injectWhatsAppGuards(view, svc.id);
       if (svc.kind === "gmail") {
         // O Gmail só emite notificação nativa se o usuário ligar nas opções
@@ -3685,6 +3767,11 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
       if (!isMain || code === -3) return;
       if (serviceViews.get(svc.id) !== view) return;
       console.error("service did-fail-load", svc.id, code, desc, url);
+      if (svc.kind === "browser") {
+        if (isCrmUrl(url)) failedAdrPages.add(view.webContents);
+        else failedAdrPages.delete(view.webContents);
+        syncBrowserChrome(svc);
+      }
       loadingServiceIds.delete(svc.id);
       failedServiceIds.add(svc.id);
       broadcastState();
@@ -3865,7 +3952,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
         });
       }
       // Só o guard de notificação (WhatsApp/Gmail) emite isto, e só para o próprio
-      // id: qualquer página aberta no ADR Browser poderia dar console.log e roubar
+      // id: qualquer página aberta no Bira Browser poderia dar console.log e roubar
       // o foco.
       if (
         svc.kind === "whatsapp" &&
@@ -3975,7 +4062,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
       dropDeadServiceView(svc.id, view);
       // A página que se fechou (fim de login, "pode fechar esta aba") voltaria na
       // recriação e chamaria window.close() de novo: laço criar/carregar/fechar.
-      // O ADR Browser volta à página inicial dele; os outros já voltam à home.
+      // O Bira Browser volta à página inicial dele; os outros já voltam à home.
       if (svc.kind === "browser") suspendedBrowserUrls.set(svc.id, svc.startUrl);
       const now = Date.now();
       const closedRecently = now - (selfClosedAt.get(svc.id) ?? 0) < 15_000;
@@ -4315,6 +4402,14 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
   /** Ctrl+K devolvido à página (campo de texto): a próxima passada deixa passar. */
   let passCtrlKOnce = false;
   function onKey(event: { preventDefault: () => void }, input: Input): void {
+    if (opts.personal && input.type === "keyDown" && input.control && input.shift && input.key.toLowerCase() === "p") {
+      event.preventDefault(); privacyPanelOpen = !privacyPanelOpen; layout(); broadcastState(); return;
+    }
+    if (opts.personal && input.type === "keyDown" && input.control && input.shift && input.key.toLowerCase() === "h") {
+      event.preventDefault(); privacyPanelOpen = false;
+      hideAllWhatsApp();
+      return;
+    }
     if (input.type !== "keyDown") return;
     if (input.key === "F12") {
       event.preventDefault();
@@ -4382,7 +4477,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
       return;
     }
     // Atalhos de aba, como no Chrome. Ctrl+T vale em qualquer superfície (abre
-    // uma aba do ADR Browser); Ctrl+W e Ctrl+Tab só com uma aba dele na frente
+    // uma aba do Bira Browser); Ctrl+W e Ctrl+Tab só com uma aba dele na frente
     // — fechar o WhatsApp com Ctrl+W seria um acidente.
     // Sem Alt: Ctrl+Alt é o AltGr do teclado ABNT2.
     if (input.key === "Tab" && !input.alt) {
@@ -4410,7 +4505,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
         return;
       }
     }
-    // Ctrl+H: histórico do ADR Browser.
+    // Ctrl+H: histórico do Bira Browser.
     if (!input.shift && !input.alt && (input.key === "h" || input.key === "H")) {
       // No Google Docs, Ctrl+H é "localizar e substituir" (como o Ctrl+F lá).
       const view = chromeView();
@@ -4577,7 +4672,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
       appState.services.some((s) => s.id === id && s.deletedAt),
     );
     if (!tab) {
-      showToast("Nenhuma aba do ADR Browser fechada para reabrir.");
+      showToast("Nenhuma aba do Bira Browser fechada para reabrir.");
       return;
     }
     try {
@@ -4678,7 +4773,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     const answer = await dialog.showMessageBox(parent, {
       type: "warning",
       title: "Limpar histórico",
-      message: "Apagar todo o histórico do ADR Browser?",
+      message: "Apagar todo o histórico do Bira Browser?",
       detail: "As abas abertas continuam onde estão. Esta ação não pode ser desfeita.",
       buttons: ["Limpar histórico", "Cancelar"],
       defaultId: 1,
@@ -4689,7 +4784,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     browserHistory.clear();
     return { ok: true };
   });
-  // Abrir um item: aba nova do ADR Browser ao lado da aba ativa, com a janela
+  // Abrir um item: aba nova do Bira Browser ao lado da aba ativa, com a janela
   // do app na frente. Só endereço que o próprio histórico aceitaria.
   handleHistory("history:open", (_event, url: unknown) => {
     if (typeof url !== "string" || !isRecordableUrl(url)) return { ok: false };
@@ -4923,8 +5018,8 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
   });
 
   handleShell("shell:set-autostart", (_event, enabled: boolean) => {
-    app.setLoginItemSettings({ openAtLogin: Boolean(enabled) });
-    autostartEnabled = app.getLoginItemSettings().openAtLogin;
+    app.setLoginItemSettings({ ...loginOptions,openAtLogin: Boolean(enabled) });
+    autostartEnabled = app.getLoginItemSettings(loginOptions).openAtLogin;
     broadcastState();
     return { ok: true, openAtLogin: autostartEnabled };
   });
@@ -4950,7 +5045,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     if (
       parsed === "settings" &&
       panelTab &&
-      ["geral", "servicos", "tema", "perfil", "notif", "privacidade", "desempenho"].includes(panelTab)
+      ["geral", "servicos", "tema", "perfil", "notif", "privacidade", "desempenho", "traducao"].includes(panelTab)
     ) {
       if (panel.webContents.isLoadingMainFrame()) pendingPanelTab = panelTab;
       else panel.webContents.send("shell:panel-tab", panelTab);
@@ -5024,6 +5119,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
    */
   const removeServiceById = (serviceId: string, next?: string): void => {
     requireCurrentService(serviceId);
+    voiceJobs.get(serviceId)?.abort();
     const removed = appState.services.find((s) => s.id === serviceId && !s.deletedAt);
     if (removed?.kind === "browser") {
       const liveUrl = serviceViews.get(serviceId)?.webContents.getURL();
@@ -5109,20 +5205,20 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     },
   );
 
-  /** Nova aba do ADR Browser, já com o cursor na barra de endereço. */
+  /** Nova aba do Bira Browser, já com o cursor na barra de endereço. */
   const openNewBrowserTab = (): void => {
     // Mesmo caminho da aba aberta por link/duplicada (erros e toast inclusos).
     if (openUrlInBrowserTab("", undefined, true)) focusAddressBar();
   };
 
-  /** Fecha a aba e ativa a vizinha, como no Chrome. Só abas do ADR Browser. */
+  /** Fecha a aba e ativa a vizinha, como no Chrome. Só abas do Bira Browser. */
   const closeBrowserTab = (serviceId: string): void => {
     const ids = browserTabServices().map((s) => s.id);
     if (!ids.includes(serviceId)) return;
     removeServiceById(serviceId, tabAfterClose(ids, serviceId));
   };
 
-  /** Ctrl+Tab/Ctrl+Shift+Tab entre as abas do ADR Browser. */
+  /** Ctrl+Tab/Ctrl+Shift+Tab entre as abas do Bira Browser. */
   const cycleBrowserTab = (step: 1 | -1): void => {
     const active = activeService();
     if (!active || !hasTabStrip(active.kind)) return;
@@ -5135,7 +5231,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
   };
 
   /**
-   * Aba nova do ADR Browser já na `url` (vazia = página inicial), logo depois
+   * Aba nova do Bira Browser já na `url` (vazia = página inicial), logo depois
    * de `afterId` — onde o Chrome põe link aberto em nova aba e aba duplicada.
    * Sem `activate` fica no fundo e só carrega quando for aberta, como as
    * hibernadas. Declaração de função: as views (criadas antes desta linha)
@@ -5323,7 +5419,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
       height: 720,
       minWidth: 520,
       minHeight: 420,
-      title: "Histórico — ADR Browser",
+      title: "Histórico — Bira Browser",
       show: false,
       autoHideMenuBar: true,
       backgroundColor: nativeTheme.shouldUseDarkColors ? "#0d1526" : "#f4f6f8",
@@ -5337,6 +5433,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
       },
     });
     historyWindow = created;
+    if (opts.personal) identifyTaskbarWindow(created);
     if (!appIcon.isEmpty()) created.setIcon(appIcon);
     created.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
     created.webContents.on("will-navigate", (event) => event.preventDefault());
@@ -5380,6 +5477,305 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     return { ok: true, state: shellStatePayload() };
   });
 
+  function moveService(serviceId: string, targetId: string): { ok: boolean; message?: string } {
+    let committed = false;
+    try {
+      const next = moveServiceToWorkspace(appState, serviceId, targetId);
+      saveAppStateAtomic(statePath, next);
+      appState = next;
+      committed = true;
+      const view = serviceViews.get(serviceId);
+      if (view) {
+        const meta = opts.viewMeta.get(view.webContents);
+        if (meta) opts.viewMeta.set(view.webContents, { ...meta, workspaceId: targetId });
+        view.webContents.send("bira:privacy-conceal");
+      }
+      // Keep the live renderer and partition so drafts and sessions survive.
+      activateWorkspace(targetId);
+      showSurface(`service:${serviceId}`, true);
+      broadcastState();
+      showToast("Serviço movido. Sua sessão foi preservada.");
+      return { ok: true };
+    } catch (error) {
+      if (committed) {
+        const message = "Serviço movido. Abra o workspace de destino para continuar.";
+        showToast(message); return {ok:true,message};
+      }
+      const message = error instanceof Error ? error.message : "Não foi possível mover o serviço";
+      showToast(message); return { ok: false, message };
+    }
+  }
+  handleShell("shell:move-service", (_event, id: string, targetId: string) => moveService(String(id), String(targetId)));
+
+  function updatePrivacy(changes: Record<string, PrivacyMode>, group: string[], coverFirst = false) {
+    const modes = {...appState.settings.whatsappPrivacyModes};
+    const resume = {...appState.settings.whatsappPrivacyResumeModes};
+    for (const [id,mode] of Object.entries(changes)) {
+      const previous = modeFor(id);
+      if (mode === "presentation" && previous !== mode) resume[id] = previous as "normal"|"discreet";
+      modes[id] = mode;
+      if (coverFirst) {
+        serviceViews.get(id)?.setVisible(false);
+        voiceJobs.get(id)?.abort();
+      }
+    }
+    const next = parseAppState({...appState,settings:{...appState.settings,
+      whatsappPrivacyModes:modes,whatsappPrivacyResumeModes:resume,whatsappPrivacyGroup:group}});
+    let saved=true;
+    try { saveAppStateAtomic(statePath,next); }
+    catch (error) {
+      if (!coverFirst) throw error;
+      saved=false;
+    }
+    appState=next;
+    for (const [id,mode] of Object.entries(changes)) {
+      const view=serviceViews.get(id);
+      if (!view) continue;
+      privacyReady.delete(view.webContents.id);
+      if (mode!=="normal") view.setVisible(false);
+      view.webContents.send("bira:privacy-options",privacyOptionsFor(id));
+      view.webContents.send("bira:privacy-mode",mode);
+    }
+    void patchAllNotificationSettings(); layout(); broadcastState();
+    if (!saved) showToast("Sessões cobertas. Libere espaço no disco e use Ocultar todas para tentar salvar novamente.");
+    return {ok:saved};
+  }
+  function setPrivacy(id: string, mode: PrivacyMode) {
+    if (!opts.personal || !appState.services.some(s=>s.id===id && s.kind==="whatsapp" && !s.deletedAt)) return {ok:false};
+    return updatePrivacy({[id]:mode},(appState.settings.whatsappPrivacyGroup||[]).filter(v=>v!==id),mode==="presentation");
+  }
+  function hideAllWhatsApp() {
+    privacyPanelOpen=false;
+    const ids=appState.services.filter(s=>s.kind==="whatsapp" && !s.deletedAt && modeFor(s.id)!=="presentation").map(s=>s.id);
+    const group=Array.from(new Set([...(appState.settings.whatsappPrivacyGroup||[]),...ids]));
+    return updatePrivacy(Object.fromEntries(ids.map(id=>[id,"presentation"])),group,true);
+  }
+  handleShell("shell:set-privacy", (_event, id: string, mode: string) => {
+    if (!["normal", "discreet", "presentation"].includes(mode)) return { ok: false };
+    return setPrivacy(id, mode as PrivacyMode);
+  });
+  handleShell("shell:privacy-panel", (_event, open: boolean) => {
+    privacyPanelOpen = open === true; layout(); broadcastState();
+    if (privacyPanelOpen) overlay.webContents.focus();
+    else focusActiveSurface();
+    return { ok:true };
+  });
+  const voiceService = (event: Electron.IpcMainInvokeEvent) => {
+    const meta = opts.viewMeta.get(event.sender);
+    if (!opts.personal || meta?.kind !== "whatsapp" || !meta.serviceId ||
+        event.senderFrame !== event.sender.mainFrame || !event.senderFrame.url.startsWith("https://web.whatsapp.com/") ||
+        serviceViews.get(meta.serviceId)?.webContents !== event.sender) return;
+    return meta.serviceId;
+  };
+  handleShell("shell:set-transcription", (_event, id: string, enabled: boolean) => {
+    if (!opts.personal || requireCurrentService(id).kind !== "whatsapp" || typeof enabled !== "boolean") return { ok:false };
+    const next = parseAppState({ ...appState, settings: { ...appState.settings,
+      whatsappTranscription: { ...appState.settings.whatsappTranscription, [id]:enabled } } });
+    saveAppStateAtomic(statePath, next); appState=next;
+    if (!enabled) voiceJobs.get(id)?.abort();
+    serviceViews.get(id)?.webContents.send("bira:transcription-enabled", enabled);
+    broadcastState();
+    return { ok:true };
+  });
+  handleShell("shell:audio-language", (_event,id:string,language:unknown)=>{
+    if (!opts.personal || requireCurrentService(id).kind!=="whatsapp" || !(language==="auto" || language==="pt" || language==="en" || language==="es")) return {ok:false};
+    const next=parseAppState({...appState,settings:{...appState.settings,whatsappAudioLanguages:{...appState.settings.whatsappAudioLanguages,[id]:language}}});
+    saveAppStateAtomic(statePath,next); appState=next; voiceJobs.get(id)?.abort();
+    serviceViews.get(id)?.webContents.send("bira:transcription-enabled",!!next.settings.whatsappTranscription?.[id]);
+    broadcastState(); return {ok:true};
+  });
+  ipcMain.handle("bira:transcription-status", event => {
+    const id = voiceService(event);
+    return !!id && appState.settings.whatsappTranscription?.[id] === true;
+  });
+  let library: string | undefined, reader: string | undefined;
+  const translator = new LocalTranslation(path.join(opts.dirname, "../preload/translate-worker.py"));
+  const translationFor = (id: string) => appState.settings.whatsappTranslation?.[id] || {incoming:false};
+  function translationSummary(id: string) {
+    const options = translationFor(id);
+    return {incoming:options.incoming, hasTranslatedChats:Object.keys(options.byChat || {}).length > 0};
+  }
+  handleShell("shell:edit-english-term", (_event, source:unknown, target:unknown) => {
+    if (!opts.personal) return {ok:false};
+    // eslint-disable-next-line no-control-regex -- Glossary entries must be printable, single-line text.
+    const valid=(value:unknown):value is string=>typeof value==="string" && !!value.trim() && value.length<=240 && !/[\u0000-\u001f\u007f]/.test(value);
+    if (!valid(source) || (target !== null && !valid(target))) return {ok:false};
+    const name=source.normalize("NFC").trim();
+    const key=name.toLocaleLowerCase("pt-BR");
+    const terms=(appState.settings.englishGlossary || []).filter(t=>t.source.toLocaleLowerCase("pt-BR")!==key);
+    if (target!==null) terms.push({source:name,target:target.normalize("NFC").trim()});
+    if (terms.length>300) return {ok:false,message:"O glossário comporta até 300 correções."};
+    const next=parseAppState({...appState,settings:{...appState.settings,englishGlossary:terms}});
+    saveAppStateAtomic(statePath,next);appState=next;
+    broadcastState();
+    return {ok:true};
+  });
+  function saveTranslation(id:string, value:NonNullable<typeof appState.settings.whatsappTranslation>[string]) {
+    const next = parseAppState({...appState, settings:{...appState.settings,
+      whatsappTranslation:{...appState.settings.whatsappTranslation, [id]:value}}});
+    saveAppStateAtomic(statePath, next);
+    appState = next;
+  }
+  handleShell("shell:set-translation", (_event, id:string, incoming:boolean) => {
+    if (!opts.personal || requireCurrentService(id).kind !== "whatsapp" || typeof incoming !== "boolean") return {ok:false};
+    saveTranslation(id, {...translationFor(id), incoming});
+    serviceViews.get(id)?.webContents.send("bira:translation-settings", translationSummary(id));
+    broadcastState();
+    return {ok:true};
+  });
+  ipcMain.handle("bira:translation-settings", event => {
+    const id = voiceService(event);
+    return id ? translationSummary(id) : {incoming:false,hasTranslatedChats:false};
+  });
+  async function loadWhatsApp(frame: Electron.WebFrameMain) {
+    if (await frame.executeJavaScript("!!window.WPP?.chat?.downloadMedia")) return;
+    library ??= fs.readFileSync(path.join(opts.dirname, "../preload/wppconnect-wa.js"), "utf8");
+    await frame.executeJavaScript("window.WPPConfig={disableGoogleAnalytics:true,deviceName:false,sendStatusToDevice:false};\n" + library + "\n;void 0");
+  }
+  async function activeChatLanguage(event: Electron.IpcMainInvokeEvent) {
+    const id = voiceService(event), frame = event.senderFrame;
+    const accessible = () => !event.sender.isDestroyed() && !!id && voiceService(event) === id &&
+      activeSurface === "service:"+id && !(isWhatsAppLocked(id) && !whatsappUnlocked.has(id)) && modeFor(id) !== "presentation";
+    if (!id || !frame || !accessible()) return null;
+    try {
+      await loadWhatsApp(frame);
+      const jid = await frame.executeJavaScript("(async()=>{for(let i=0;i<60&&!window.WPP?.isReady;i++)await new Promise(r=>setTimeout(r,100));return (await WPP.chat.getActiveChat())?.id?._serialized || null})()");
+      if (!accessible() || typeof jid !== "string" || !jid.includes("@") || jid.length>256) return null;
+      const key = createHash("sha256").update(id+"\0"+jid).digest("hex");
+      const options = translationFor(id);
+      return {key, individual:/^\d+@(?:c\.us|lid|s\.whatsapp\.net)$/.test(jid), language:options.byChat?.[key] || "off" as const, review:options.reviewByChat?.[key] === true};
+    } catch {return null;}
+  }
+  ipcMain.handle("bira:open-glossary",event=>{
+    const id=voiceService(event);
+    if (!id || activeSurface!=="service:"+id || modeFor(id)==="presentation" || (isWhatsAppLocked(id) && !whatsappUnlocked.has(id))) return;
+    showSurface("settings",true);
+    if (panel.webContents.isLoadingMainFrame()) pendingPanelTab="traducao";
+    else panel.webContents.send("shell:panel-tab","traducao");
+  });
+  ipcMain.handle("bira:translation-chat", activeChatLanguage);
+  ipcMain.handle("bira:open-google-contact", async (event, expected:unknown) => {
+    const id=voiceService(event), frame=event.senderFrame;
+    if (!id || !frame || typeof expected!=="string") return false;
+    const chat=await activeChatLanguage(event);
+    if (!chat?.individual || chat.key!==expected) return false;
+    const contact=await frame.executeJavaScript(READ_WHATSAPP_CONTACT) as {jid?:unknown;phone?:unknown;name?:unknown}|null;
+    if (!contact || typeof contact.jid!=="string" || typeof contact.phone!=="string" || !/^[1-9]\d{5,14}$/.test(contact.phone)) return false;
+    const key=createHash("sha256").update(id+"\0"+contact.jid).digest("hex");
+    if (key!==expected || (await activeChatLanguage(event))?.key!==expected) return false;
+    await saveGoogleContact({name:typeof contact.name==="string" ? contact.name.slice(0,200) : undefined,phone:contact.phone});
+    return true;
+  });
+  ipcMain.handle("bira:set-chat-language", async (event, expected:unknown, language:unknown, review?:unknown) => {
+    const id = voiceService(event);
+    if (!id || (language !== "off" && language !== "en" && language !== "es") ||
+      (review !== undefined && typeof review !== "boolean")) return null;
+    const chat = await activeChatLanguage(event);
+    if (!chat || chat.key !== expected) return null;
+    const options = translationFor(id), byChat = {...options.byChat};
+    if (language === "off") delete byChat[chat.key];
+    else byChat[chat.key] = language;
+    const reviewByChat = {...options.reviewByChat};
+    if (review === true) reviewByChat[chat.key] = true;
+    if (review === false) delete reviewByChat[chat.key];
+    saveTranslation(id, {...options, byChat, reviewByChat});
+    return {...translationSummary(id), key:chat.key, language, review:reviewByChat[chat.key] === true};
+  });
+  ipcMain.handle("bira:translate-text", async (event, text:unknown, target:unknown, expected:unknown) => {
+    const id = voiceService(event);
+    if (!id || typeof text !== "string" || !text.trim() || text.length>6000 ||
+        (target !== "pt" && target !== "en" && target !== "es")) return {error:"Texto inválido"};
+    if (target === "pt") {
+      if (!translationFor(id).incoming) return {error:"Tradução desativada"};
+    } else {
+      const chat = await activeChatLanguage(event);
+      if (!chat || chat.key !== expected || chat.language !== target) return {error:"A conversa ou o idioma mudou"};
+    }
+    return translator.translate(text, target, () => target!=="pt" || (!event.sender.isDestroyed() && activeSurface==="service:"+id && translationFor(id).incoming && modeFor(id)!=="presentation"), target==="en" ? appState.settings.englishGlossary : undefined);
+  });
+  ipcMain.handle("bira:transcribe-voice", async (event, key: unknown) => {
+    const service = voiceService(event), frame = event.senderFrame;
+    const available=()=>!!service && voiceService(event)===service && activeSurface==="service:"+service &&
+      !(isWhatsAppLocked(service) && !whatsappUnlocked.has(service)) && modeFor(service)!=="presentation" && !!appState.settings.whatsappTranscription?.[service];
+    if (!service || !frame || !available() ||
+        typeof key !== "string" || key.length > 400 || !(/^(true|false)_[^\s]+$/.test(key) || /^[a-zA-Z0-9-]{8,128}$/.test(key))) return {error:"skip"};
+    if (!localWhisper()) return {error:"engine"};
+    if (voiceJobs.has(service)) return {error:"busy"};
+    const job = new AbortController();
+    voiceJobs.set(service, job);
+    const timeout = setTimeout(() => job.abort(), 650000);
+    const cancelEvent = JSON.stringify("bira-cancel-voice-" + randomUUID());
+    const cancelled = new Promise<never>((_, reject) => job.signal.addEventListener("abort", () => {
+      if (!event.sender.isDestroyed()) void frame.executeJavaScript("window.dispatchEvent(new Event(" + cancelEvent + "))").catch(()=>undefined);
+      reject(Error("Cancelado"));
+    }, {once:true}));
+    try {
+      const extract = async () => {
+        await loadWhatsApp(frame);
+        reader ??= fs.readFileSync(path.join(opts.dirname, "../preload/read-voice.js"), "utf8");
+        job.signal.throwIfAborted();
+        return frame.executeJavaScript(`(async()=>{
+          const controller=new AbortController();
+          const cancel=()=>controller.abort();
+          window.addEventListener(${cancelEvent},cancel,{once:true});
+          try {return await (${reader})(${JSON.stringify(key)},controller.signal);}
+          finally {window.removeEventListener(${cancelEvent},cancel);}
+        })()`);
+      };
+      const result = await Promise.race([extract(), cancelled]) as {pcm?:unknown; error?:string;chatId?:string} | null;
+      if (result?.error) return {error:result.error};
+      if (!(result?.pcm instanceof ArrayBuffer) || result.pcm.byteLength > 19200000) return {error:"unavailable"};
+      if (!available()) return {error:"gone"};
+      const text = await transcribePcm(Buffer.from(result.pcm), job.signal,appState.settings.whatsappAudioLanguages?.[service]||"pt");
+      if (!available() || job.signal.aborted || !result.chatId) return {error:"gone"};
+      const sameMessage=await frame.executeJavaScript(`(async()=>!!document.querySelector('#main [data-id="'+CSS.escape(${JSON.stringify(key)})+'"]') && (await window.WPP.chat.getActiveChat())?.id?._serialized===${JSON.stringify(result.chatId)})()`);
+      return sameMessage && available() && !job.signal.aborted ? {text} : {error:"gone"};
+    } catch { return {error:job.signal.aborted ? "gone" : "unavailable"}; }
+    finally { clearTimeout(timeout); voiceJobs.delete(service); }
+  });
+  win.once("closed", () => {
+    for (const job of voiceJobs.values()) job.abort();
+    translator.close();
+    closeLocalTranscription();
+    for (const channel of ["bira:open-glossary", "bira:translation-settings", "bira:translation-chat", "bira:open-google-contact", "bira:set-chat-language", "bira:translate-text"]) ipcMain.removeHandler(channel);
+    ipcMain.removeHandler("bira:transcribe-voice");
+    ipcMain.removeHandler("bira:transcription-status");
+  });
+  handleShell("shell:privacy-options", (_event, id: string, value: unknown) => {
+    requireCurrentService(id);
+    if (!value || typeof value !== "object") return { ok:false };
+    const v = value as Record<string,unknown>, options = privacyOptionsFor(id);
+    for (const key of ["names","avatars","previews","messages","media"] as const) if (typeof v[key] === "boolean") options[key] = v[key];
+    if (v["reveal"] === "hover" || v["reveal"] === "hold") options.reveal = v["reveal"];
+    const next = parseAppState({ ...appState, settings: { ...appState.settings, whatsappPrivacyOptions: { ...appState.settings.whatsappPrivacyOptions, [id]: options } } });
+    saveAppStateAtomic(statePath,next); appState=next;
+    serviceViews.get(id)?.webContents.send("bira:privacy-options",options);
+    broadcastState(); return { ok:true };
+  });
+  handleShell("shell:restore-privacy", (_event, individual?:string) => {
+    const group=appState.settings.whatsappPrivacyGroup||[];
+    const active=activeService();
+    if (individual && (individual!==active?.id || active.kind!=="whatsapp")) return {ok:false};
+    const ids=individual ? [individual] : group.length ? group : active ? [active.id] : [];
+    const changes=Object.fromEntries(ids.filter(id=>modeFor(id)==="presentation").map(id=>[id,appState.settings.whatsappPrivacyResumeModes?.[id]||"normal"]));
+    return updatePrivacy(changes,group.filter(id=>!ids.includes(id)));
+  });
+  handleShell("shell:hide-all", hideAllWhatsApp);
+  const onPrivacyReady = (event: Electron.IpcMainEvent, value: { mode?: unknown; ready?: unknown }): void => {
+    const meta = opts.viewMeta.get(event.sender);
+    if (!opts.personal || meta?.kind !== "whatsapp" || !meta.serviceId || event.senderFrame !== event.sender.mainFrame) return;
+    if (value?.mode !== modeFor(meta.serviceId)) { event.sender.send("bira:privacy-mode", modeFor(meta.serviceId)); return; }
+    if (value?.ready === true) privacyReady.add(event.sender.id); else privacyReady.delete(event.sender.id);
+    layout(); broadcastState();
+  };
+  ipcMain.on("bira:privacy-ready", onPrivacyReady);
+  win.on("closed", () => ipcMain.removeListener("bira:privacy-ready", onPrivacyReady));
+  const concealAll = (): void => { for (const view of serviceViews.values()) view.webContents.send("bira:privacy-conceal"); };
+  win.on("blur", concealAll);
+  powerMonitor.on("lock-screen", concealAll);
+  powerMonitor.on("suspend", concealAll);
+  win.on("closed", () => { powerMonitor.removeListener("lock-screen", concealAll); powerMonitor.removeListener("suspend", concealAll); });
+
   handleShell("shell:service-context-menu", (_event, serviceId: string) => {
     const id = String(serviceId || "");
     const service = appState.services.find(
@@ -5388,9 +5784,12 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     if (!service) return { ok: false };
     const view = serviceViews.get(id);
     const hibernated = !view;
-    // Abas do ADR Browser que o ícone da lateral representa (0 fora do Browser).
+    // Abas do Bira Browser que o ícone da lateral representa (0 fora do Browser).
     const browserTabCount = hasTabStrip(service.kind) ? browserTabServices().length : 0;
     const menu = Menu.buildFromTemplate([
+      { label: "Mover para workspace", submenu: listActiveWorkspaces(appState).filter(w => w.id !== service.workspaceId).map(w => ({ label: w.name, click: () => { moveService(id,w.id); } })), enabled: listActiveWorkspaces(appState).length > 1 },
+      { type: "separator" },
+      ...(opts.personal && service.kind === "whatsapp" ? [{ label: "Privacidade visual", submenu: ([ ["normal", "Privacidade desligada"], ["discreet", "Desfoque ativado"], ["presentation", "Ocultar esta sessão"] ] as const).map(([mode, label]) => ({ label, type: "radio" as const, checked: modeFor(id) === mode, click: () => setPrivacy(id, mode) })) }] : []),
       {
         label: "Abrir",
         click: () => showSurface(`service:${id}`, true),
@@ -5401,7 +5800,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
               ? [{ label: "Ocultar mini-janela desta reunião", click: () => meet.hideMiniForCurrentCall(id) }]
               : []),
             // Caminho que não depende do toast do Windows (desligado, perdido).
-            ...(meet.hasLoggableCall()
+            ...(!opts.personal && meet.hasLoggableCall()
               ? [{ label: "Registrar a última reunião no CRM…", click: () => meet.registerLastCall() }]
               : []),
             {
@@ -5539,15 +5938,15 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
       { type: "separator" },
       browserTabCount > 1
         ? {
-            // O ícone do ADR Browser é todas as abas: "Excluir" apagaria só a
+            // O ícone do Bira Browser é todas as abas: "Excluir" apagaria só a
             // que ele representa no momento.
             label: `Fechar todas as abas (${browserTabCount})…`,
             click: () => {
               void dialog
                 .showMessageBox(win, {
                   type: "warning",
-                  title: "Fechar abas do ADR Browser",
-                  message: `Fechar as ${browserTabCount} abas do ADR Browser?`,
+                  title: "Fechar abas do Bira Browser",
+                  message: `Fechar as ${browserTabCount} abas do Bira Browser?`,
                   detail: "Ctrl+Shift+T reabre as últimas fechadas enquanto o app estiver aberto.",
                   buttons: ["Cancelar", "Fechar todas"],
                   defaultId: 0,
@@ -5908,7 +6307,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
       : googlePartitionForWorkspace(appState, workspaceId);
     if (!partitionName) return { ok: false, message: "Sem perfil Google neste workspace" };
     // clearStorageData() sem filtro limpava a partição INTEIRA — e ela é dividida
-    // com Spotify e ADR Browser. Sair do Google derrubava o login do Spotify.
+    // com Spotify e Bira Browser. Sair do Google derrubava o login do Spotify.
     const googleSession = session.fromPartition(partitionName);
     const cookies = await googleSession.cookies.get({});
     try {
@@ -5956,7 +6355,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
 
   /**
    * Sair de uma conta Microsoft: a partição é só do Outlook/Teams daquela
-   * conta (diferente da Google, dividida com Spotify e ADR Browser), então
+   * conta (diferente da Google, dividida com Spotify e Bira Browser), então
    * limpa inteira e recarrega os serviços que a usam.
    */
   handleShell("shell:microsoft-logout", async (_event, profileId: string) => {
@@ -6050,7 +6449,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     // orderedIds é a barra inteira (ids dos serviços + o marcador "crm") vinda
     // da lista arrastável; reorderWorkspaceRail reordena os serviços e tira a
     // crmPosition do workspace de onde o "crm" caiu. A lateral mostra as abas do
-    // ADR Browser num ícone só: ele volta a ser todas as abas, juntas.
+    // Bira Browser num ícone só: ele volta a ser todas as abas, juntas.
     const tabIds = browserTabServices().map((s) => s.id);
     const full = expandRailBrowserTabs(
       Array.isArray(orderedIds) ? orderedIds.filter((id) => typeof id === "string") : [],
@@ -6081,7 +6480,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
       whatsappUnlocked.delete(previous.id);
       whatsappLastActive.delete(previous.id);
     }
-    activeSurface = "crm";
+    activeSurface = opts.personal ? "empty" : "crm";
     appState = setActiveWorkspace(appState, id);
     workspaceId = appState.activeWorkspaceId || id;
     saveAppStateAtomic(statePath, appState);
@@ -6098,7 +6497,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     // Sem esperar a primeira conferência do login, o portão de showSurface via
     // "desconhecido" como deslogado.
     const target = workspaceId;
-    if (!crmLoginKnown.has(target)) {
+    if (!opts.personal && !crmLoginKnown.has(target)) {
       const loggedIn = await crmSessionHasLogin(target).catch(() => false);
       if (loggedIn) crmAuthenticatedWorkspaces.add(target);
       crmLoginKnown.add(target);
@@ -6265,14 +6664,14 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     log: (message, extra) => pushLog("info", message, extra),
     userData: app.getPath("userData"),
     backupScriptPath: app.isPackaged
-      ? path.join(process.resourcesPath, "backup-profile.ps1")
-      : path.join(opts.dirname, "../../build/backup-profile.ps1"),
-    relaunchPath: app.isPackaged ? process.execPath : "",
+      ? path.join(process.resourcesPath, process.platform === "linux" ? "backup-profile-linux.py" : "backup-profile.ps1")
+      : path.join(opts.dirname, "../../build", process.platform === "linux" ? "backup-profile-linux.py" : "backup-profile.ps1"),
+    relaunchPath: app.isPackaged ? (process.platform === "linux" && process.env["APPIMAGE"] || process.execPath) : "",
     quitForBackup: () => {
       // Atualização adiada liga a instalação na saída; aqui a saída é para o
       // backup, que reabre o app — instalador e cópia ao mesmo tempo disputavam o
       // perfil. A atualização volta a ser oferecida depois.
-      desktopUpdater.cancelInstallOnQuit();
+      desktopUpdater?.cancelInstallOnQuit();
       app.quit();
     },
   });
@@ -6396,7 +6795,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
         return;
       }
       const selected = await dialog.showOpenDialog(win, {
-        title: "Importar senhas para o Cofre ADR",
+        title: "Importar senhas para o Cofre Bira",
         properties: ["openFile"],
         filters: [{ name: "Senhas em CSV", extensions: ["csv"] }],
       });
@@ -6432,7 +6831,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
         "info",
         "Importação concluída",
         `${result.imported} nova(s), ${result.updated} atualizada(s).`,
-        `${result.total} credencial(is) no Cofre ADR. Por segurança, exclua o CSV original depois de confirmar que os logins funcionam.`,
+        `${result.total} credencial(is) no Cofre Bira. Por segurança, exclua o CSV original depois de confirmar que os logins funcionam.`,
       );
     } catch (error) {
       await showVaultMessage(
@@ -6499,7 +6898,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     try {
       passwordVault.saveCredential(currentUrl, username, password);
       pushBrowserToolbarState();
-      showToast("Credencial salva no Cofre ADR.");
+      showToast("Credencial salva no Cofre Bira.");
     } catch (error) {
       await showVaultMessage(
         "error",
@@ -6510,7 +6909,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
   };
 
   /**
-   * Bitwarden → Cofre ADR pela CLI oficial (ver bitwarden-cli.ts): pede a senha
+   * Bitwarden → Cofre Bira pela CLI oficial (ver bitwarden-cli.ts): pede a senha
    * mestra, desbloqueia, copia os logins e tranca. Uma sincronização por vez.
    */
   let bitwardenSyncRunning = false;
@@ -6575,7 +6974,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
         "Bitwarden sincronizado",
         `${result.imported} nova(s), ${result.updated} atualizada(s), ${result.removed} removida(s).`,
         [
-          `${result.total} credencial(is) no Cofre ADR.`,
+          `${result.total} credencial(is) no Cofre Bira.`,
           parsed.skipped
             ? `${parsed.skipped} item(ns) do Bitwarden ficaram de fora (notas, cartões, logins sem usuário/senha ou sem endereço web).`
             : "",
@@ -6678,7 +7077,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
               void dialog
                 .showMessageBox(win, {
                   type: "warning",
-                  title: "Apagar todo o Cofre ADR",
+                  title: "Apagar todo o Cofre Bira",
                   message: `Excluir permanentemente ${status.total} credencial(is)?`,
                   detail: "Esta ação não apaga o CSV original e não pode ser desfeita.",
                   buttons: ["Apagar tudo", "Cancelar"],
@@ -6700,7 +7099,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
       await showVaultMessage(
         "error",
         "Cofre indisponível",
-        error instanceof Error ? error.message : "Não foi possível abrir o Cofre ADR.",
+        error instanceof Error ? error.message : "Não foi possível abrir o Cofre Bira.",
       );
     }
   };
@@ -6804,7 +7203,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     return { ok: true };
   });
 
-  // Faixa de abas. Os ids vêm da página da barra: só valem abas do ADR Browser
+  // Faixa de abas. Os ids vêm da página da barra: só valem abas do Bira Browser
   // deste workspace, e criar/fechar/mover usa o mesmo caminho da lateral.
   const isBrowserTab = (id: unknown): id is string =>
     typeof id === "string" && browserTabServices().some((s) => s.id === id);
@@ -6901,11 +7300,12 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
   });
 
   handleToolbar("browser:lusha-search", async () => {
+    if (opts.personal) return { ok: false, message: "Integração empresarial desativada" };
     const view = withActiveBrowserView();
     const currentUrl = view?.webContents.getURL() || "";
     const linkedinUrl = normalizeLinkedInProfileUrl(currentUrl);
     if (!linkedinUrl) {
-      showToast("Abra um perfil /in/ do LinkedIn no ADR Browser.");
+      showToast("Abra um perfil /in/ do LinkedIn no Bira Browser.");
       return { ok: false, code: "LINKEDIN_PROFILE_REQUIRED" };
     }
     if (!view) return { ok: false, code: "NO_ACTIVE_VIEW" };
@@ -7029,6 +7429,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
 
   handleShell("shell:export-diagnostics", () => {
     const snapshot = buildDiagnosticSnapshot({
+      minimal: Boolean(opts.personal),
       settings: {
         theme: appState.settings.theme,
         uiScale: appState.settings.uiScale,
@@ -7038,6 +7439,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
         .filter((s) => !s.deletedAt)
         .map((s) => ({ id: s.id, kind: s.kind, name: s.name, keepAwake: s.keepAwake })),
       recentLogs,
+      tabIncidents: tabDiagnostics.incidents,
     });
     const file = writeDiagnosticExport(snapshot);
     pushLog("info", "diagnostics exported", file);
@@ -7064,11 +7466,10 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     ]);
     await Promise.all(
       [...sessions].map((current) =>
-        Promise.resolve()
-          // flushStorageData é só DOMStorage; o login vem em cookie.
-          .then(() => current.cookies.flushStore())
-          .then(() => current.flushStorageData())
-          .catch(() => undefined),
+        Promise.all([
+          Promise.resolve().then(() => current.cookies.flushStore()).catch(() => console.warn("Falha ao gravar cookies da sessão")),
+          Promise.resolve().then(() => current.flushStorageData()).catch(() => console.warn("Falha ao gravar armazenamento da sessão")),
+        ]),
       ),
     );
   };
@@ -7109,7 +7510,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     }
   };
 
-  const desktopUpdater = new DesktopUpdater((next) => {
+  const desktopUpdater = opts.personal ? undefined : new DesktopUpdater((next) => {
     const previousPhase = updateState.phase;
     updateState = next;
     broadcastState();
@@ -7135,7 +7536,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
   let updateIdleTimer: NodeJS.Timeout | undefined;
   function installUpdateWhenIdle(): void {
     // Sair antes de ficar ocioso também instala (ver DesktopUpdater.installOnQuit).
-    desktopUpdater.installOnQuit();
+    desktopUpdater?.installOnQuit();
     clearInterval(updateIdleTimer);
     updateIdleTimer = setInterval(() => {
       if (updateState.phase !== "downloaded" || win.isDestroyed()) {
@@ -7166,9 +7567,10 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     }, 60_000);
   }
   win.on("closed", () => clearInterval(updateIdleTimer));
-  updateState = desktopUpdater.snapshot();
+  updateState = !desktopUpdater ? { phase: "disabled", currentVersion: app.getVersion(), message: "Versão local de testes · atualizações automáticas desativadas" } : desktopUpdater.snapshot();
 
   const installDownloadedUpdate = async (): Promise<{ ok: boolean; message: string }> => {
+    if (!desktopUpdater) return { ok: false, message: "Atualizações automáticas desativadas." };
     const result = await desktopUpdater.install(
       async () => {
         saveAppStateAtomic(statePath, appState);
@@ -7199,6 +7601,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     ) {
       return { ...updateState, phase: "error", message: "Origem não autorizada" };
     }
+    if (!desktopUpdater) return { ...updateState, phase: "disabled", message: "Atualizações automáticas desativadas nesta versão local do BiraWorkspace." };
     const result = await desktopUpdater.check(true);
     pushLog("info", "update check", { phase: result.phase, version: result.latestVersion });
     return result;
@@ -7208,6 +7611,7 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     if (event.sender !== panel.webContents) {
       return { ok: false, message: "Origem não autorizada" };
     }
+    if (opts.personal) return { ok: false, message: "Atualizações automáticas desativadas." };
     return installDownloadedUpdate();
   });
 
@@ -7218,8 +7622,10 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
     if (revealed || win.isDestroyed()) return;
     revealed = true;
     layout();
-    win.maximize();
-    win.show();
+    if (process.env["BIRA_TEST_HIDDEN"] === "1") {
+      win.setBounds({ x: -20000, y: -20000, width: 1280, height: 800 });
+      win.showInactive();
+    } else { win.maximize(); win.show(); }
     broadcastState();
     showQuarantineNotice();
   };
@@ -7227,7 +7633,11 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
   // O resultado é do workspace do boot: se o usuário trocou antes de a consulta
   // voltar, ele não vale para o workspace atual.
   const bootWorkspaceId = workspaceId;
-  void crmSessionHasLogin(bootWorkspaceId)
+  if (opts.personal) {
+    const saved = appState.services.find((s) => s.id === appState.activeServiceId && s.workspaceId === workspaceId && !s.deletedAt);
+    showSurface(saved ? `service:${saved.id}` : "empty");
+    reveal();
+  } else void crmSessionHasLogin(bootWorkspaceId)
     .then((loggedIn) => {
       if (win.isDestroyed()) return;
       if (loggedIn) crmAuthenticatedWorkspaces.add(bootWorkspaceId);
@@ -7252,9 +7662,9 @@ button{margin-top:22px;padding:10px 16px;border-radius:9px;border:0;background:#
       armCrmGate(workspaceId);
       reveal();
     });
-  desktopUpdater.start();
+  desktopUpdater?.start();
   win.on("closed", () => {
-    desktopUpdater.dispose();
+    desktopUpdater?.dispose();
     if (crmGateTimer) clearInterval(crmGateTimer);
     clearInterval(hibernationTimer);
     clearInterval(privacyTimer);

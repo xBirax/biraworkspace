@@ -45,7 +45,7 @@ export function isCrmHandoffPath(path: string): boolean {
 }
 
 /**
- * Destinos que uma página de serviço (WhatsApp, Gmail, site no ADR Browser) pode
+ * Destinos que uma página de serviço (WhatsApp, Gmail, site no Bira Browser) pode
  * abrir na aba do CRM por `window.open`: as telas de pessoa, empresa e negócio que
  * o painel da extensão linka. `/api`, `/admin`, sair etc. não vêm de fora.
  */

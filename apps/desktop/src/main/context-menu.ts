@@ -39,7 +39,7 @@ type Params = Pick<
   Partial<Pick<ContextMenuParams, "misspelledWord" | "dictionarySuggestions">>;
 
 /**
- * Página do ADR Browser: o menu ganha o que se espera de um navegador (abrir
+ * Página do Bira Browser: o menu ganha o que se espera de um navegador (abrir
  * link em nova aba, pesquisar a seleção, voltar/avançar, imprimir). Nos outros
  * serviços fica de fora — "nova aba" lá seria uma aba do Browser surgindo do nada.
  */

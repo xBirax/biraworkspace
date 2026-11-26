@@ -86,7 +86,7 @@ export const SERVICE_CATALOG: CatalogItem[] = [
   },
   {
     kind: "browser",
-    name: "ADR Browser",
+    name: "Bira Browser",
     available: true,
     note: "Mesma sessão Google do workspace",
   },

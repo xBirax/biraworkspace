@@ -6,7 +6,7 @@ describe("Linux packaging CI regression", () => {
     "accepts release tags and prepares a clean checkout with %j line endings",
     (lineEnding) => {
       const workflow = fs
-        .readFileSync(new URL("../../../../.github/workflows/ci.yml", import.meta.url), "utf8")
+        .readFileSync(new URL("../../../../.github/workflows/ci.yml.disabled", import.meta.url), "utf8")
         .replace(/\r?\n/g, lineEnding);
       const triggers = workflow.split("concurrency:")[0]!;
       expect(triggers).toMatch(/push:\s*\n\s+branches:.*\r?\n\s+tags:\s*\["v\*"\]/);
@@ -28,7 +28,7 @@ describe("Linux packaging CI regression", () => {
 describe("Windows release candidates", () => {
   it("checks the core package version and keeps rc tags out of the stable channel", () => {
     const workflow = fs.readFileSync(
-      new URL("../../../../.github/workflows/release-windows.yml", import.meta.url),
+      new URL("../../../../.github/workflows/release-windows.yml.disabled", import.meta.url),
       "utf8",
     );
     expect(workflow).toContain("$coreVersion = $tagVersion -replace '-rc\\.\\d+$', ''");
@@ -39,6 +39,7 @@ describe("Windows release candidates", () => {
     const desktopPackage = JSON.parse(
       fs.readFileSync(new URL("../../package.json", import.meta.url), "utf8"),
     ) as { build?: { publish?: Array<{ releaseType?: string }> } };
-    expect(desktopPackage.build?.publish?.[0]?.releaseType).toBe("release");
+    expect(desktopPackage.build?.publish).toEqual([]);
+    expect(fs.readdirSync(new URL("../../../../.github/workflows/", import.meta.url)).filter(name => /\.ya?ml$/.test(name))).toEqual([]);
   });
 });

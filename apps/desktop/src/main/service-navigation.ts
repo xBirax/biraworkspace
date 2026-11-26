@@ -23,7 +23,7 @@ export function isWhatsAppAppUrl(url: string): boolean {
  * trocar o próprio endereço — reproduzido em 16/10 com BaseWindow +
  * WebContentsView puros, sem código do app; desligar FedCm, Prerender2 ou
  * WebAppInstallation não evita. O Chromium trata a loja como origem especial
- * do sistema de extensões, que o Electron não tem. O ADR Browser não instala
+ * do sistema de extensões, que o Electron não tem. O Bira Browser não instala
  * extensões, então a loja vai para o navegador externo e nunca é carregada.
  * Também pega o endereço escondido num redirecionador (google.com/url?q=).
  */
@@ -130,12 +130,12 @@ export function servicePopupDisposition(
     // "new-window", link com target=_blank é "foreground-tab"). É assim que todo
     // login social, pagamento e consentimento funciona em qualquer site: a página
     // espera window.opener e se fecha no fim. Carregada na aba, ficava em branco —
-    // LinkedIn → "Continuar com o Google" no ADR Browser, 06/10. Regra geral, sem
+    // LinkedIn → "Continuar com o Google" no Bira Browser, 06/10. Regra geral, sem
     // lista de sites. WhatsApp fica de fora: link dele vai ao navegador externo.
     if (windowDisposition === "new-window" && kind !== "whatsapp") return "popup";
     // Link "em nova aba" para outro site vai ao navegador padrão: carregado na
     // aba, o usuário perdia o serviço (conversa do ChatGPT, e-mail aberto). Links
-    // do próprio site e páginas de login seguem na aba. O ADR Browser é o
+    // do próprio site e páginas de login seguem na aba. O Bira Browser é o
     // navegador do app: os links dele ficam nele.
     if (kind !== "browser" && kind !== "whatsapp" && currentUrl) {
       const target = new URL(unwrapRedirectUrl(url));
@@ -235,7 +235,7 @@ export function isTeamsMeetingUrl(url: string): boolean {
 }
 
 /**
- * Barra de endereço do ADR Browser. Endereço local (localhost, IPv4, [IPv6],
+ * Barra de endereço do Bira Browser. Endereço local (localhost, IPv4, [IPv6],
  * com ou sem porta) vai em http, como no Chrome: roteador e servidor de dev
  * raramente têm TLS. Sem isso "192.168.0.1" virava busca no Google.
  */

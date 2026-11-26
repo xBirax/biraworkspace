@@ -1,4 +1,4 @@
-# ADR Workspace - copia do perfil (logins, cookies, estado, cofre) com o app FECHADO.
+# BiraWorkspace - copia do perfil (logins, cookies, estado, cofre) com o app FECHADO.
 #
 # Usado em dois lugares:
 #  - pelo instalador (build/installer.nsh), a cada instalacao/atualizacao,
@@ -17,13 +17,14 @@
 #
 # Texto so em ASCII: o PowerShell 5.1 le .ps1 sem BOM como ANSI.
 param(
-  [string]$ProfileDir = (Join-Path $env:APPDATA "ADR Workspace"),
+  [string]$ProfileDir = (Join-Path $env:APPDATA "BiraWorkspace"),
   [string]$Label = "auto",
   [int]$Keep = 3,
   [int]$WaitPid = 0,
   [string]$Relaunch = "",
-  [string]$ProcessName = "adr-workspace",
-  [string]$BackupsRoot = (Join-Path $env:LOCALAPPDATA "ADR Workspace Backups")
+  [string]$ProcessName = "biraworkspace",
+  [string]$ReadyFile = "",
+  [string]$BackupsRoot = (Join-Path $env:LOCALAPPDATA "BiraWorkspace Backups")
 )
 $ErrorActionPreference = "Continue"
 $backupsRoot = $BackupsRoot
@@ -38,7 +39,7 @@ function Set-Status([hashtable]$fields) {
 }
 
 # So o app DESTA sessao do Windows: numa maquina compartilhada (outro usuario
-# logado, RDP) o ADR Workspace de outra pessoa nao pode travar esta copia.
+# logado, RDP) o BiraWorkspace de outra pessoa nao pode travar esta copia.
 $mySession = (Get-Process -Id $PID).SessionId
 function Get-App { Get-Process $ProcessName -ErrorAction SilentlyContinue | Where-Object { $_.SessionId -eq $mySession } }
 
@@ -52,7 +53,13 @@ function Log([string]$message) {
 # rmdir /s /q apaga a juncao, nunca o destino dela. Remove-Item -Recurse do
 # PowerShell 5.1 pode entrar numa juncao e apagar o que esta do outro lado.
 function Remove-Folder([string]$path) {
-  if (Test-Path -LiteralPath $path) { & cmd.exe /d /c rmdir /s /q "$path" 2>$null }
+  $target = [IO.Path]::GetFullPath($path)
+  $allowed = [IO.Path]::GetFullPath($backupsRoot).TrimEnd('\') + '\'
+  if (-not $target.StartsWith($allowed, [StringComparison]::OrdinalIgnoreCase)) { throw 'Pasta fora do destino de backups' }
+  if (-not (Test-Path -LiteralPath $target)) { return }
+  $items = @((Get-Item -LiteralPath $target)) + @(Get-ChildItem -LiteralPath $target -Force -Recurse)
+  if ($items | Where-Object { $_.Attributes -band [IO.FileAttributes]::ReparsePoint }) { throw 'Backup com link de sistema: limpeza recusada' }
+  Remove-Item -LiteralPath $target -Recurse -Force -ErrorAction Stop
 }
 
 function Start-App {
@@ -60,7 +67,7 @@ function Start-App {
   # Ainda aberto (nao fechou a tempo): reabrir so bateria na trava de instancia
   # unica e o processo novo sairia - o que ja esta aberto continua servindo.
   if (Get-App) { return }
-  Start-Process -FilePath $Relaunch
+  Start-Process -FilePath $Relaunch -WindowStyle Hidden
 }
 
 if (-not (Test-Path -LiteralPath (Join-Path $ProfileDir "state.v1.json"))) {
@@ -69,6 +76,12 @@ if (-not (Test-Path -LiteralPath (Join-Path $ProfileDir "state.v1.json"))) {
 }
 
 # --- esperar o app fechar ---------------------------------------------------
+if ($ReadyFile) {
+  try {
+    New-Item -ItemType Directory -Force -Path $backupsRoot -ErrorAction Stop | Out-Null
+    [IO.File]::WriteAllText($ReadyFile, '{"ready":true}')
+  } catch { exit 1 }
+}
 if ($WaitPid -gt 0) {
   try { Wait-Process -Id $WaitPid -Timeout 60 -ErrorAction SilentlyContinue } catch {}
 }
@@ -83,6 +96,16 @@ if (Get-App) {
   exit 1
 }
 
+$gatePath = [IO.Path]::GetFullPath($ProfileDir).TrimEnd('\') + '.backup.lock'
+try {
+  $gate = [IO.File]::Open($gatePath, 'OpenOrCreate', 'ReadWrite', 'None')
+} catch {
+  Set-Status @{state='failed';finishedAt=(Get-Date).ToString('o');message='O perfil esta em uso.'}
+  Start-App
+  exit 1
+}
+$result = 0
+try {
 # --- copias interrompidas (desligou no meio, instalador morto) -----------------
 # Sem backup-info.json e com mais de 6 h: nunca vai terminar, so ocupa disco.
 Get-ChildItem -LiteralPath $backupsRoot -Directory -ErrorAction SilentlyContinue |
@@ -97,7 +120,7 @@ Get-ChildItem -LiteralPath $backupsRoot -Directory -ErrorAction SilentlyContinue
   }
 
 # --- copiar -------------------------------------------------------------------
-$stamp = Get-Date -Format "yyyyMMdd-HHmmss"
+$stamp = (Get-Date -Format "yyyyMMdd-HHmmss") + "-" + [guid]::NewGuid().ToString("N").Substring(0,8)
 $target = Join-Path $backupsRoot "$Label-$stamp"
 Set-Status @{ state = "running"; label = $Label; startedAt = (Get-Date).ToString("o") }
 $skip = @("Cache", "Code Cache", "GPUCache", "DawnCache", "DawnGraphiteCache", "DawnWebGPUCache",
@@ -106,14 +129,21 @@ $skip = @("Cache", "Code Cache", "GPUCache", "DawnCache", "DawnGraphiteCache", "
 & robocopy $ProfileDir (Join-Path $target "profile") /E /XJ /COPY:DAT /R:1 /W:1 /NFL /NDL /NP /NJH /NJS `
   /XD @skip /XF SingletonLock SingletonCookie SingletonSocket "*.tmp" | Out-Null
 $code = $LASTEXITCODE
-if ($code -ge 8) {
+if ($null -eq $code -or $code -ge 8) {
+  $result = 1
   Log "robocopy falhou ($code); copia incompleta removida"
   Remove-Folder $target
   Set-Status @{ state = "failed"; label = $Label; finishedAt = (Get-Date).ToString("o");
     message = "A copia do perfil falhou (robocopy $code). Feche o app e use Fazer backup agora." }
 } else {
+  $manifest = Join-Path $target 'backup-info.json'
+  $pending = "$manifest.tmp"
   @{ profile = $ProfileDir; label = $Label; createdAt = (Get-Date).ToString("o") } |
-    ConvertTo-Json | Set-Content -Encoding utf8 (Join-Path $target "backup-info.json")
+    ConvertTo-Json | Set-Content -LiteralPath $pending -Encoding utf8 -ErrorAction Stop
+  $check = Get-Content -LiteralPath $pending -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+  if ($check.profile -ne $ProfileDir -or $check.label -ne $Label -or
+      !(Test-Path -LiteralPath (Join-Path $target 'profile\state.v1.json'))) { throw 'Manifesto ou copia incompleta' }
+  [IO.File]::Move($pending,$manifest)
   Log "copia pronta em $target"
   $size = (Get-ChildItem -LiteralPath $target -Recurse -File -Force -ErrorAction SilentlyContinue |
     Measure-Object Length -Sum).Sum
@@ -133,5 +163,9 @@ if ($code -ge 8) {
     }
 }
 
+} catch {
+  $result = 1
+  Set-Status @{state="failed";finishedAt=(Get-Date).ToString("o");message="A copia nao foi confirmada."}
+} finally { $gate.Dispose() }
 Start-App
-exit 0
+exit $result

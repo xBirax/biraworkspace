@@ -9,6 +9,7 @@ const electron = vi.hoisted(() => ({
 }));
 vi.mock("electron", () => ({
   safeStorage: {
+    getSelectedStorageBackend: () => "gnome_libsecret" as const,
     isEncryptionAvailable: () => electron.encryptionAvailable,
     encryptString: (text: string) => Buffer.from(`sealed:${text}`),
   },

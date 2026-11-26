@@ -20,6 +20,11 @@ describe("WhatsApp compatibility identity", () => {
     expect(whatsappUserAgent(ua)).toBe(ua);
   });
 
+  it("removes the packaged Bira identity while preserving the real Chromium version", () => {
+    const ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) BiraWorkspace/0.2.0-local.1 Chrome/152.0.7977.65 Electron/44.1.0 Safari/537.36";
+    expect(whatsappUserAgent(ua)).toBe("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.65 Safari/537.36");
+  });
+
   it("sets the WhatsApp session and returns the same identity for its view", () => {
     const ses = {
       getUserAgent: vi.fn(() => "Chrome/152.0.7977.65 Electron/44.1.0"),

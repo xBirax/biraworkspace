@@ -25,7 +25,7 @@ describe("isServiceOwnSite", () => {
     expect(isServiceOwnSite("whatsapp", "https://web.whatsapp.com/", "https://web.whatsapp.com/")).toBe(true);
   });
 
-  it("recusa outro site aberto dentro da aba, e CRM/shell/ADR Browser", () => {
+  it("recusa outro site aberto dentro da aba, e CRM/shell/Bira Browser", () => {
     // No google.com cada app é um site: Calendar não é Gmail.
     expect(isServiceOwnSite("gmail", "https://calendar.google.com/", "https://mail.google.com/")).toBe(false);
     expect(isServiceOwnSite("chatgpt", "https://evil.example/", "https://chatgpt.com/")).toBe(false);
@@ -102,11 +102,11 @@ describe("planReminders", () => {
 
 describe("backup do perfil", () => {
   const request = {
-    userData: "C:\\Users\\a\\AppData\\Roaming\\ADR Workspace",
+    userData: "C:\\Users\\a\\AppData\\Roaming\\BiraWorkspace",
     scriptPath: "C:\\Programs\\adr\\resources\\backup-profile.ps1",
     relaunch: "",
     label: "manual" as const,
-    backupsRoot: "C:\\Users\\a\\AppData\\Local\\ADR Workspace Backups",
+    backupsRoot: "C:\\Users\\a\\AppData\\Local\\BiraWorkspace Backups",
   };
 
   it("monta os argumentos sem -Relaunch quando não há o que reabrir", () => {
@@ -121,21 +121,22 @@ describe("backup do perfil", () => {
     ]);
   });
 
-  it("recusa fora do Windows e sem o script; agenda destacado no Windows", () => {
-    expect(startBackupAndRestart(request, { platform: "linux" }).ok).toBe(false);
-    expect(startBackupAndRestart(request, { platform: "win32", exists: () => false }).ok).toBe(false);
+  it("recusa fora do Windows e sem o script; agenda destacado no Windows", async () => {
+    expect((await startBackupAndRestart(request, { platform: "linux" })).ok).toBe(false);
+    expect((await startBackupAndRestart(request, { platform: "win32", exists: () => false })).ok).toBe(false);
     const child = { on: vi.fn(), unref: vi.fn() };
     const spawn = vi.fn(() => child);
-    const result = startBackupAndRestart(request, {
+    const result = await startBackupAndRestart(request, {
       platform: "win32",
       exists: () => true,
       spawn: spawn as never,
       pid: 7,
+      ready: () => true,
     });
     expect(result.ok).toBe(true);
     expect(spawn).toHaveBeenCalledWith(
       "powershell.exe",
-      backupScriptArgs(request, 7),
+      expect.arrayContaining(backupScriptArgs(request, 7)),
       expect.objectContaining({ detached: true, shell: false }),
     );
     expect(child.unref).toHaveBeenCalled();

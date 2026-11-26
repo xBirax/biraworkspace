@@ -2,7 +2,7 @@
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
-    <title>ADR Browser Toolbar</title>
+    <title>Bira Browser Toolbar</title>
     <link rel="stylesheet" href="./fonts.css" />
     <link rel="stylesheet" href="./tokens.css" />
     <style>
@@ -234,7 +234,7 @@
         background: var(--adr-border);
       }
 
-      /* Faixa de abas. O main só dá altura para ela no ADR Browser; com 48 px
+      /* Faixa de abas. O main só dá altura para ela no Bira Browser; com 48 px
          (Instagram, Google fora do site) a faixa some sozinha. */
       .tabs {
         display: none;
@@ -360,6 +360,8 @@
       body.edge-bottom .tabs .tab-new {
         margin: 1px 0 0;
       }
+      #adr-retry { width: auto; padding: 0 10px; white-space: nowrap; }
+      #adr-retry[hidden], #adr-retry:not([hidden]) + #bookmarks { display: none; }
     </style>
     <link rel="stylesheet" href="./internal-surfaces.css" />
     <!-- Layout refinado da barra e da faixa. Depois do internal-surfaces de
@@ -662,7 +664,7 @@
   </head>
   <body data-adr-surface="browser-toolbar">
     <div class="tabs" id="tabs">
-      <div class="tab-list" id="tab-list" role="tablist" aria-label="Abas do ADR Browser"></div>
+      <div class="tab-list" id="tab-list" role="tablist" aria-label="Abas do Bira Browser"></div>
       <button id="tab-new" class="tab-new" title="Nova aba (Ctrl+T)" aria-label="Nova aba" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
     </div>
     <div class="bar">
@@ -689,18 +691,19 @@
         <button id="find-close" title="Fechar (Esc)" aria-label="Fechar busca" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
       </div>
       <div class="tools" role="group" aria-label="Ferramentas ADR">
-      <button id="lusha" title="Consultar o perfil atual na Lusha" aria-label="Consultar na Lusha" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"></circle><path d="M2 21c0-3.9 3.1-7 7-7 1.3 0 2.5.3 3.5.9"></path><circle cx="17" cy="17" r="3"></circle><path d="m22 22-2.8-2.8"></path></svg></button>
+      <button hidden style="display:none" id="lusha" title="Consultar o perfil atual na Lusha" aria-label="Consultar na Lusha" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"></circle><path d="M2 21c0-3.9 3.1-7 7-7 1.3 0 2.5.3 3.5.9"></path><circle cx="17" cy="17" r="3"></circle><path d="m22 22-2.8-2.8"></path></svg></button>
       <button id="shield" title="Ativar ou desativar bloqueio" aria-label="Bloqueio de anúncios" type="button">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 8 4v6c0 5-3.4 8.2-8 10-4.6-1.8-8-5-8-10V6z"></path><path d="m9 12 2 2 4-4"></path></svg>
         <span id="blocked">0</span>
       </button>
       <button id="site-shield" title="Permitir anúncios neste site" aria-label="Permitir anúncios neste site" type="button"><span class="full-label">Liberar anúncios</span><span class="short-label">Liberar</span></button>
-      <button id="vault" class="empty" title="Cofre ADR" type="button">
+      <button id="vault" class="empty" title="Cofre Bira" type="button">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="m11 12 9-9 2 2-2 2 1 1-2 2-1-1-2 2"></path></svg>
         <span id="vault-count">0</span>
       </button>
       </div>
       <button id="star" title="Adicionar aos favoritos (Ctrl+D)" aria-label="Adicionar aos favoritos" aria-pressed="false" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 17.4l-5.6 2.9 1.1-6.2L3 9.7l6.2-.9z"></path></svg></button>
+      <button id="adr-retry" type="button" hidden>ADR indisponível · Tentar novamente</button>
       <div class="bookmarks" id="bookmarks"></div>
       <button id="chrome" title="Abrir no navegador padrão" aria-label="Abrir no navegador padrão" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M10 14 20 4"></path><path d="M20 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5"></path></svg></button>
     </div>
@@ -721,11 +724,13 @@
       /** Endereço da página da aba ativa (o que o main mandou, não o digitado). */
       let currentUrl = "";
 
+      const ADR_HOME = "https://app.adragencia.com.br/";
+      document.getElementById("adr-retry").addEventListener("click", () => window.adrBrowser?.navigate(ADR_HOME));
       const DEFAULT_BOOKMARKS = [
         { title: "Google", url: "https://www.google.com/" },
         { title: "YouTube", url: "https://www.youtube.com/" },
         { title: "Gmail", url: "https://mail.google.com/" },
-        { title: "ADR", url: "https://app.adragencia.com.br/" },
+        { title: "ADR", url: ADR_HOME },
       ];
 
       function loadBookmarks() {
@@ -825,11 +830,11 @@
         button.classList.toggle("unavailable", !vaultState.available);
         count.textContent = String(vaultState.matchCount || 0);
         if (!vaultState.available) {
-          button.title = vaultState.error || "Cofre ADR indisponível";
+          button.title = vaultState.error || "Cofre Bira indisponível";
         } else if (vaultState.matchCount) {
           button.title = `${vaultState.matchCount} ${vaultState.matchCount === 1 ? "credencial" : "credenciais"} para este site`;
         } else {
-          button.title = `Cofre ADR · ${vaultState.total || 0} ${vaultState.total === 1 ? "credencial" : "credenciais"}`;
+          button.title = `Cofre Bira · ${vaultState.total || 0} ${vaultState.total === 1 ? "credencial" : "credenciais"}`;
         }
         button.setAttribute("aria-label", button.title);
       }
@@ -1220,6 +1225,7 @@
       window.adrBrowser?.onAppearance?.(renderAppearance);
       window.adrBrowser?.getAppearance?.().then(renderAppearance).catch(() => undefined);
       window.adrBrowser?.onNavState?.((state) => {
+        document.getElementById("adr-retry").hidden = !state.adrLoadFailed;
         document.getElementById("back").disabled = !state.canGoBack;
         document.getElementById("forward").disabled = !state.canGoForward;
       });

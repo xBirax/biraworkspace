@@ -43,7 +43,7 @@ import { runGmailCommand } from "./gmail-commands.js";
 const mainDir = path.join(app.getAppPath(), "dist", "main");
 const CRM_URL = "https://app.adragencia.com.br/";
 
-app.setName("ADR Workspace");
+app.setName("BiraWorkspace");
 // Keep `pnpm dev` off the installed app's profile. Both resolve userData from
 // the app name, so without this they share state.v1.json, the vault and every
 // session partition — two running instances then race on the same state file.
@@ -72,7 +72,7 @@ if (isPrimaryInstance && app.isPackaged) {
     backupBeforeElectron44(app.getPath("userData"));
   } catch {
     dialog.showErrorBox(
-      "Atualização do ADR Workspace",
+      "Atualização do BiraWorkspace",
       "Não foi possível criar a cópia local das sessões. O aplicativo será fechado para preservar seus dados. Verifique o espaço livre e as permissões da pasta de dados e tente novamente.",
     );
     app.exit(1);
@@ -84,7 +84,7 @@ if (process.platform === "linux") {
 if (process.platform === "win32") {
   // Without this, Windows has no registered identity for the app and toast
   // notifications fall back to a synthetic "electron.app.<productName>" label
-  // instead of "ADR Workspace". Must match the NSIS installer's appId
+  // instead of "BiraWorkspace". Must match the NSIS installer's appId
   // (package.json build.appId) so the Start Menu shortcut's AUMID lines up.
   app.setAppUserModelId("br.com.adragencia.workspace");
 }
@@ -606,7 +606,7 @@ app.whenReady().then(async () => {
       buttons: ["Fechar e aguardar", "Abrir mesmo assim"],
       defaultId: 0,
       cancelId: 0,
-      title: "ADR Workspace",
+      title: "BiraWorkspace",
       message: "Um backup do perfil está em andamento.",
       detail:
         "O backup manual reabre o app sozinho quando termina; o da atualização leva alguns minutos. Abrir agora pode deixar a cópia incompleta.",
@@ -698,8 +698,8 @@ app.whenReady().then(async () => {
   // instância única: cada clique no ícone caía no second-instance e nada abria.
   console.error("falha ao abrir a janela", error);
   dialog.showErrorBox(
-    "ADR Workspace",
-    `Não foi possível abrir o ADR Workspace.
+    "BiraWorkspace",
+    `Não foi possível abrir o BiraWorkspace.
 
 ${error instanceof Error ? error.message : String(error)}`,
   );

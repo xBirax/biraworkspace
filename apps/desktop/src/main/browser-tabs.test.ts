@@ -14,18 +14,18 @@ import {
 
 describe("tabTitle", () => {
   it("usa o título da página", () => {
-    expect(tabTitle("Google", "https://www.google.com/", "ADR Browser")).toBe("Google");
+    expect(tabTitle("Google", "https://www.google.com/", "Bira Browser")).toBe("Google");
   });
 
   it("cai no domínio quando o título é a própria URL ou vazio", () => {
     const url = "https://www.example.com/a?b=1";
-    expect(tabTitle(url, url, "ADR Browser")).toBe("example.com");
-    expect(tabTitle("  ", url, "ADR Browser")).toBe("example.com");
+    expect(tabTitle(url, url, "Bira Browser")).toBe("example.com");
+    expect(tabTitle("  ", url, "Bira Browser")).toBe("example.com");
   });
 
   it("cai no nome do serviço sem página web", () => {
-    expect(tabTitle("", "", "ADR Browser 2")).toBe("ADR Browser 2");
-    expect(tabTitle("", "data:text/html,oi", "ADR Browser")).toBe("ADR Browser");
+    expect(tabTitle("", "", "Bira Browser 2")).toBe("Bira Browser 2");
+    expect(tabTitle("", "data:text/html,oi", "Bira Browser")).toBe("Bira Browser");
   });
 
   it("corta título enorme", () => {
@@ -153,7 +153,7 @@ describe("purgeClosedBrowserTabs", () => {
   });
 });
 
-describe("ADR Browser agrupado na barra lateral", () => {
+describe("Bira Browser agrupado na barra lateral", () => {
   const rail = ["wa", "t1", "crm", "t2", "yt", "t3"];
   const tabs = ["t1", "t2", "t3"];
 

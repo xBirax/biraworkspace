@@ -8,7 +8,7 @@ import type { Session } from "electron";
 export function whatsappUserAgent(nativeUserAgent: string): string {
   // Keep the actual Chromium version, OS and architecture. Google keeps its
   // native identity in its separate session; no global override or page script.
-  return nativeUserAgent.replace(/\s(?:ADRWorkspace|Electron)\/\S+/g, "");
+  return nativeUserAgent.replace(/\s(?:ADRWorkspace|BiraWorkspace|Electron)\/\S+/g, "");
 }
 
 /**

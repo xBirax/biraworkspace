@@ -131,7 +131,7 @@ export type LoadStateResult =
   | { ok: true; state: AppStateV1; source: "primary" | "backup" }
   /** `locked`: o arquivo existe mas outro processo o segura (antivírus,
    *  indexador, instalador). Não é corrupção: não cair no backup nem recomeçar. */
-  | { ok: false; error: string; locked?: true };
+  | { ok: false; error: string; locked?: true; futureVersion?: number };
 
 /** Erros de E/S que no Windows passam sozinhos (arquivo aberto por outro processo). */
 const TRANSIENT_IO = new Set(["EBUSY", "EPERM", "EACCES", "EAGAIN"]);
@@ -199,6 +199,8 @@ export function loadAppState(filePath: string): LoadStateResult {
     }
     try {
       const raw = JSON.parse(text);
+      if (Number.isInteger(raw?.schemaVersion) && raw.schemaVersion > 1)
+        return { ok:false, futureVersion:raw.schemaVersion, error:"Abra o perfil com a versão mais recente do BiraWorkspace." };
       const state = parseAppState(raw);
       return { ok: true, state, source };
     } catch {

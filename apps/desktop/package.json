@@ -1,10 +1,10 @@
 {
   "name": "@adr/desktop",
-  "version": "0.1.53",
+  "version": "0.2.0-local.3",
   "private": true,
-  "description": "ADR Workspace desktop client (Electron; Linux package + Windows/macOS dev)",
-  "author": "ADR Agencia <dev@adragencia.com.br>",
-  "homepage": "https://app.adragencia.com.br",
+  "description": "BiraWorkspace — ambiente pessoal para Windows e Linux",
+  "author": "BiraWorkspace <biraworkspace@users.noreply.github.com>",
+  "homepage": "https://github.com/xBirax/biraworkspace",
   "type": "module",
   "main": "dist/main/index.bundle.cjs",
   "scripts": {
@@ -30,7 +30,8 @@
     "@adr/view-lifecycle": "workspace:*",
     "@adr/workspaces": "workspace:*",
     "@types/node": "22.13.10",
-    "@vitest/coverage-v8": "3.0.8",
+    "@vitest/coverage-v8": "3.2.7",
+    "@wppconnect/wa-js": "4.8.1",
     "concurrently": "9.1.2",
     "electron": "github:castlabs/electron-releases#v44.1.0+wvcus",
     "electron-builder": "25.1.8",
@@ -39,15 +40,16 @@
     "ical.js": "2.2.1",
     "typescript": "^5.8.2",
     "vite": "6.2.2",
-    "vitest": "3.0.8",
+    "vitest": "3.2.7",
     "zod": "3.24.2"
   },
   "build": {
-    "appId": "br.com.adragencia.workspace",
+    "appId": "com.bira.workspace",
     "electronDist": "node_modules/electron/dist",
     "afterSign": "scripts/vmp-sign.cjs",
-    "productName": "ADR Workspace",
-    "executableName": "adr-workspace",
+    "afterPack": "scripts/local-icon.cjs",
+    "productName": "BiraWorkspace",
+    "executableName": "biraworkspace",
     "icon": "build/icon.png",
     "directories": {
       "output": "release",
@@ -61,17 +63,13 @@
       "package.json",
       "!**/*.map"
     ],
-    "extraResources": [
-      {
-        "from": "../../vendor",
-        "to": "vendor"
-      }
-    ],
+    "extraResources": [],
     "win": {
+      "signAndEditExecutable": false,
       "extraResources": [
         {
-          "from": "optimizer-native/target/release/adr-workspace-optimizer.exe",
-          "to": "optimizer-native/adr-workspace-optimizer.exe"
+          "from": "build/icon.ico",
+          "to": "biraworkspace.ico"
         },
         {
           "from": "build/backup-profile.ps1",
@@ -87,38 +85,39 @@
         }
       ],
       "icon": "build/icon.ico",
-      "artifactName": "ADR-Workspace-Setup-${version}.${ext}"
+      "artifactName": "BiraWorkspace-Setup-${version}.${ext}"
     },
     "nsis": {
       "oneClick": true,
       "perMachine": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "ADR Workspace",
+      "shortcutName": "BiraWorkspace",
       "include": "build/installer.nsh"
     },
+    "deb": { "packageName": "biraworkspace", "recommends": ["libsecret-tools"], "afterInstall": "build/bira-after-install.sh", "afterRemove": "build/bira-after-remove.sh" },
     "linux": {
+      "extraResources": [
+        {"from":"build/biraworkspace.apparmor","to":"biraworkspace.apparmor"},
+        {"from":"build/backup-profile-linux.py","to":"backup-profile-linux.py"},
+        {"from":"scripts/setup-voice-linux.sh","to":"models/setup-voice-linux.sh"},
+        {"from":"scripts/setup-translation.py","to":"models/setup-translation.py"},
+        {"from":"src/main/translate-worker.py","to":"models/translate-worker.py"}
+      ],
       "target": [
         "deb",
         "AppImage"
       ],
       "category": "Network",
-      "maintainer": "ADR Agencia <dev@adragencia.com.br>",
-      "artifactName": "adr-workspace_${version}_${arch}.${ext}",
+      "maintainer": "BiraWorkspace <biraworkspace@users.noreply.github.com>",
+      "artifactName": "BiraWorkspace-${version}-${arch}.${ext}",
       "icon": "build/icons",
       "desktop": {
-        "Name": "ADR Workspace",
-        "StartupWMClass": "ADRWorkspace"
+        "Name": "BiraWorkspace",
+        "StartupWMClass": "biraworkspace"
       }
     },
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "ADRAGENCIACRM",
-        "repo": "adrworkspace-releases",
-        "releaseType": "release"
-      }
-    ],
+    "publish": [],
     "asarUnpack": [
       "dist/main/calendar-worker.bundle.cjs"
     ]

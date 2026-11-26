@@ -210,7 +210,7 @@
         ramPercent === null ? "Não foi possível medir a memória do computador." :
           `${bytes(overview.memoryUsedBytes)} de ${bytes(overview.memoryTotalBytes)} · ${bytes(Math.max(0, overview.memoryTotalBytes - overview.memoryUsedBytes))} livres na coleta`,
         ramPercent, ramPercent !== null && ramPercent >= 85 ? "high" : "normal"),
-      metric("ADR Workspace", bytes(overview.appMemoryBytes) || "Indisponível",
+      metric("BiraWorkspace", bytes(overview.appMemoryBytes) || "Indisponível",
         appRamPercent === null ? "Uso do aplicativo não medido." :
           `${appRamPercent}% da RAM física · processos compartilhados contados uma vez`,
         appRamPercent),

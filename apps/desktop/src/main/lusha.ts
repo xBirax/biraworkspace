@@ -370,7 +370,7 @@ export function buildLushaCardScript(
     header.className = "header";
     const brand = document.createElement("div");
     brand.className = "brand";
-    brand.textContent = "Lusha · ADR Browser";
+    brand.textContent = "Lusha · Bira Browser";
     const closeBtn = document.createElement("button");
     closeBtn.type = "button";
     closeBtn.className = "close-btn";

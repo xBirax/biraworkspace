@@ -2,6 +2,10 @@
 const { app, net } = require("electron");
 const assert = require("node:assert/strict");
 const http = require("node:http");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
+app.setPath("userData",fs.mkdtempSync(path.join(os.tmpdir(),"bira-network-fixture-")));
 
 const server = http.createServer((_request, response) => {
   response.writeHead(503, {

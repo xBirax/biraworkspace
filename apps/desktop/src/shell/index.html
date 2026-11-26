@@ -559,7 +559,7 @@ body { overflow: hidden; background: var(--bg); }
   <body data-adr-surface="shell">
 <header id="titlebar" data-adr-surface="titlebar">
     <div class="mark"><img src="./adr-logo.png" alt="" /></div>
-    <div class="name">ADR Workspace</div>
+    <div class="name">BiraWorkspace</div>
     <button type="button" id="search" title="Buscar (Ctrl+K)">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
         <circle cx="11" cy="11" r="7"></circle>
@@ -602,6 +602,8 @@ body { overflow: hidden; background: var(--bg); }
       <span class="nav-label">Adicionar serviço</span>
     </button>
 
+    <button class="util" id="bira-privacy" type="button" title="Privacidade (Ctrl+Shift+P)" aria-label="Configurar privacidade do WhatsApp"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg><span class="nav-label" id="bira-privacy-label">Privacidade</span></button>
+    <button class="util" id="bira-hide-all" type="button" title="Ocultar todos os WhatsApps (Ctrl+Shift+H)" aria-label="Ocultar todos os WhatsApps">◉<span class="nav-label">Ocultar agora</span></button>
     <div class="spacer"></div>
 
     <button class="util" id="tab-reload" type="button" title="Recarregar (Ctrl+R) · sem cache: Ctrl+Shift+R" aria-label="Recarregar serviço">
@@ -645,6 +647,8 @@ body { overflow: hidden; background: var(--bg); }
     </nav>
     <script src="./theme.js"></script>
     <script>
+      document.getElementById("bira-hide-all").onclick = () => window.adrShell?.hideAll();
+      document.getElementById("bira-privacy").onclick = () => window.adrShell?.privacyPanel(true);
       let state = { services: [], workspaces: [], activeSurface: "crm", badges: {} };
 
       document.getElementById("search").addEventListener("click", () => window.adrShell?.openPalette());
@@ -733,6 +737,11 @@ body { overflow: hidden; background: var(--bg); }
           btn.addEventListener("dragover", (e) => e.preventDefault());
           btn.addEventListener("drop", async (e) => {
             e.preventDefault();
+            const serviceId = e.dataTransfer.getData("text/service-id");
+            if (serviceId && serviceId !== "crm") {
+              await window.adrShell?.moveService(serviceId, ws.id);
+              return;
+            }
             // Só o próprio arrasto: o id "do último arrasto" como reserva reordenava o
             // workspace errado quando o que caía aqui era link, arquivo ou um serviço.
             const from = e.dataTransfer.getData("text/workspace-id");
@@ -810,6 +819,14 @@ body { overflow: hidden; background: var(--bg); }
         groupHeading.className = "workspace-heading";
         groupHeading.textContent = group.name || "Workspace";
         groupHeading.title = group.name || "Workspace";
+        groupHeading.title += " — arraste um serviço para mover para este workspace";
+        groupHeading.addEventListener("dragover", e => { e.preventDefault(); groupHeading.style.outline = "2px solid var(--accent)"; });
+        groupHeading.addEventListener("dragleave", () => { groupHeading.style.outline = ""; });
+        groupHeading.addEventListener("drop", async e => {
+          e.preventDefault(); groupHeading.style.outline = "";
+          const id = e.dataTransfer.getData("text/service-id");
+          if (id && id !== "crm") await window.adrShell?.moveService(id, group.workspaceId);
+        });
         root.appendChild(groupHeading);
         const servicesById = new Map((group.services || []).map((s) => [s.id, s]));
         const rail = group.rail || [];
@@ -888,7 +905,7 @@ body { overflow: hidden; background: var(--bg); }
           };
           // Reordering is per-workspace (crmPosition + serviceInstanceIds live
           // on one workspace), so only the active group's tiles are draggable.
-          btn.draggable = isActiveGroup;
+          btn.draggable = isActiveGroup || !isCrm;
           btn.addEventListener("click", openSurface);
           btn.addEventListener("keydown", (event) => {
             if (!isActiveGroup) return;
@@ -898,14 +915,15 @@ body { overflow: hidden; background: var(--bg); }
               // achado podia ser o de outro workspace.
               root, ".slot:not(.other-workspace) .tab[data-nav-id]");
           });
-          if (isActiveGroup) {
-            btn.addEventListener("contextmenu", (event) => {
+          if (isActiveGroup || !isCrm) {
+            btn.addEventListener("contextmenu", async (event) => {
               event.preventDefault();
+              if (!isActiveGroup) await openSurface();
               if (isCrm) window.adrShell?.crmContextMenu();
               else window.adrShell?.serviceContextMenu(svc.id);
             });
           }
-          if (isActiveGroup) {
+          if (isActiveGroup || !isCrm) {
             btn.addEventListener("dragstart", (e) => {
               e.dataTransfer.setData("text/service-id", railId);
               e.dataTransfer.effectAllowed = "move";
@@ -921,6 +939,12 @@ body { overflow: hidden; background: var(--bg); }
               e.preventDefault();
               btn.classList.remove("drag-over");
               const from = e.dataTransfer.getData("text/service-id");
+              const sourceGroup = (state.railGroups || []).find(g => (g.services || []).some(s => s.id === from));
+              if (sourceGroup && sourceGroup.workspaceId !== group.workspaceId) {
+                await window.adrShell?.moveService(from, group.workspaceId);
+                return;
+              }
+              if (!isActiveGroup) await window.adrShell?.setWorkspace(group.workspaceId, surface);
               const ids = reorder([...rail], from, railId);
               if (ids) await window.adrShell?.reorderServices(ids);
             });
@@ -971,6 +995,11 @@ body { overflow: hidden; background: var(--bg); }
       }
 
       function render() {
+        const privacyMode=state.whatsappPrivacyModes?.[state.activeSurface?.replace('service:','')]||'normal';
+        const privacyLabel=privacyMode==='presentation'?'WhatsApp oculto':privacyMode==='discreet'?'Desfoque ligado':'Privacidade';
+        document.getElementById('bira-privacy-label').textContent=privacyLabel;
+        document.getElementById('bira-privacy').title=privacyLabel+' · Configurar (Ctrl+Shift+P)';
+        document.getElementById('bira-privacy').setAttribute('aria-pressed',String(privacyMode!=='normal'));
         window.__adrState = state;
         applyTheme(state);
         document.getElementById("rail").dataset.position = state.sidebarPosition || "left";

@@ -185,5 +185,10 @@ describe("BrowserHistoryStore", () => {
     fs.writeFileSync(file, "lixo");
     const store = new BrowserHistoryStore(file, storage(), () => 1000);
     expect(store.search("")).toEqual([]);
+    store.visit("https://example.com/", "Nova visita");
+    store.flush();
+    const preserved = fs.readdirSync(path.dirname(file)).find(name => name.includes(".unreadable-"));
+    expect(preserved).toBeTruthy();
+    expect(fs.readFileSync(path.join(path.dirname(file), preserved!), "utf8")).toBe("lixo");
   });
 });

@@ -11,7 +11,7 @@ import {
 function fakeCli(responses: Record<string, { code?: number; stdout?: string }>) {
   const calls: Array<{ args: string[]; env: Record<string, string> }> = [];
   const run: BwRunner = async (args, env) => {
-    calls.push({ args, env });
+    calls.push({ args, env: { ...env } });
     const reply = responses[args[0]!] ?? {};
     return { code: reply.code ?? 0, stdout: reply.stdout ?? "", stderr: "" };
   };
@@ -86,6 +86,10 @@ describe("pullBitwardenItems", () => {
     const { run } = fakeCli({ ...unlocked, sync: { code: 1 } });
     const result = await pullBitwardenItems(run, "x");
     expect(result.synced).toBe(false);
+  });
+  it("não anuncia sucesso se o bloqueio final falhar", async () => {
+    const { run } = fakeCli({ ...unlocked, lock: { code: 1 } });
+    await expect(pullBitwardenItems(run, "x")).rejects.toThrow("confirmar o bloqueio");
   });
 });
 

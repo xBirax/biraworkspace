@@ -71,7 +71,7 @@ export function createPermissionHandler(deps: PermissionHandlerDeps) {
         }
         // Serviço que o usuário escolheu (WhatsApp, Gmail, CRM…) segue só a chave
         // do app — no site DELE. Página de outro site aberta na aba (link,
-        // redirecionamento) cai na regra geral abaixo, como o ADR Browser: antes
+        // redirecionamento) cai na regra geral abaixo, como o Bira Browser: antes
         // ela ganhava toast do Windows com a marca do app sem pergunta nenhuma.
         if (askingKind !== "browser" && deps.isServiceOwnSite(askingKind, url)) {
           callback(true);

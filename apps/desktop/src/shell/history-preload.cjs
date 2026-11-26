@@ -1,6 +1,6 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
-// Janela do histórico do ADR Browser (Ctrl+H). Só estes canais; o main só os
+// Janela do histórico do Bira Browser (Ctrl+H). Só estes canais; o main só os
 // atende para esta janela (handleHistory em workspace-window.ts).
 contextBridge.exposeInMainWorld("adrHistory", {
   search: (query) => ipcRenderer.invoke("history:search", String(query || "")),

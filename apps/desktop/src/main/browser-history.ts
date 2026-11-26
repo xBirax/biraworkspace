@@ -4,7 +4,7 @@ import type { SafeStorage } from "electron";
 import { writeDurableFile } from "@adr/app-state";
 
 /**
- * Histórico do ADR Browser e as abas abertas (para reabrir o app onde estava).
+ * Histórico do Bira Browser e as abas abertas (para reabrir o app onde estava).
  *
  * Gravado no disco, CRIPTOGRAFADO pelo sistema (DPAPI no Windows, como o Cofre
  * ADR); sem criptografia disponível fica só em memória — histórico em texto
@@ -197,6 +197,7 @@ export class BrowserHistoryStore {
   private entries: HistoryEntry[] = [];
   private tabsById: Record<string, SessionTab> = {};
   private loaded = false;
+  private unreadableRaw: string | undefined;
   private saveTimer: NodeJS.Timeout | undefined;
 
   constructor(
@@ -232,7 +233,7 @@ export class BrowserHistoryStore {
       const wrapper = JSON.parse(raw) as {
         ciphertext?: unknown;
       };
-      if (typeof wrapper.ciphertext !== "string") return;
+      if (typeof wrapper.ciphertext !== "string") throw new Error("Histórico sem conteúdo cifrado");
       const payload = JSON.parse(
         this.storage.decryptString(Buffer.from(wrapper.ciphertext, "base64")),
       ) as Partial<HistoryPayload>;
@@ -247,6 +248,7 @@ export class BrowserHistoryStore {
       // Arquivo ilegível (outra conta do Windows, corrompido): começa vazio.
       this.entries = [];
       this.tabsById = {};
+      this.unreadableRaw = raw;
     }
   }
 
@@ -266,6 +268,10 @@ export class BrowserHistoryStore {
       const payload: HistoryPayload = { version: 1, entries: this.entries, tabs: this.tabsById };
       const ciphertext = this.storage.encryptString(JSON.stringify(payload)).toString("base64");
       fs.mkdirSync(path.dirname(this.filePath), { recursive: true });
+      if (this.unreadableRaw !== undefined) {
+        fs.writeFileSync(`${this.filePath}.unreadable-${Date.now()}-${process.pid}`, this.unreadableRaw, { flag: "wx" });
+        this.unreadableRaw = undefined;
+      }
       const temporary = `${this.filePath}.${process.pid}.tmp`;
       writeDurableFile(temporary, JSON.stringify({ version: 1, ciphertext }));
       fs.renameSync(temporary, this.filePath);

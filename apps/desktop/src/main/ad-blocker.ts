@@ -1,3 +1,4 @@
+import { allowAdrBrowserRequest, isAdrEndpoint } from "./personal-policy.js";
 import fs from "node:fs";
 import path from "node:path";
 import { net, type Session } from "electron";
@@ -100,8 +101,9 @@ export class AdBlockManager {
     private readonly cachePath: string,
     private readonly enabled: () => boolean,
     private readonly allowlist: () => string[],
-    private readonly pageUrlForWebContents: (webContentsId: number) => string,
+    private readonly pageUrlForWebContents: (webContentsId: number) => string | undefined,
     private readonly onBlocked?: (webContentsId: number) => void,
+    private readonly onAdrNavigationBlocked?: (webContentsId: number, url: string) => void,
   ) {}
 
   async initialize(): Promise<void> {
@@ -115,6 +117,17 @@ export class AdBlockManager {
     if (this.attached.has(session)) return;
     this.attached.add(session);
     session.webRequest.onBeforeRequest((details, callback) => {
+      if (isAdrEndpoint(details.url)) {
+        if (allowAdrBrowserRequest(details, this.pageUrlForWebContents(details.webContentsId ?? -1))) {
+          callback({});
+          return;
+        }
+        callback({ cancel: true });
+        if (details.resourceType === "mainFrame" && details.webContentsId !== undefined) {
+          this.onAdrNavigationBlocked?.(details.webContentsId, details.url);
+        }
+        return;
+      }
       if (!this.enabled() || details.resourceType === "mainFrame") {
         callback({});
         return;

@@ -290,6 +290,17 @@ export const appSettingsSchema = z.object({
   /** Áudio da aba do CRM silenciado (o CRM não é ServiceInstance, mora aqui). */
   crmAudioMuted: z.boolean().default(false),
   /** PIN fica cifrado fora deste estado; aqui só fica a preferência de ativação. */
+  englishGlossary: z.array(z.object({source:z.string().min(1).max(240), target:z.string().min(1).max(240)})).max(300).optional(),
+  whatsappTranslation: z.record(z.object({
+    incoming:z.boolean(), byChat:z.record(z.enum(["en", "es"])).optional(),
+    reviewByChat:z.record(z.literal(true)).optional(),
+  })).optional(),
+  whatsappTranscription: z.record(z.boolean()).optional(),
+  whatsappPrivacyModes: z.record(z.enum(["normal", "discreet", "presentation"])).optional(),
+  whatsappPrivacyOptions: z.record(z.object({ names:z.boolean(), avatars:z.boolean(), previews:z.boolean(), messages:z.boolean(), media:z.boolean(), reveal:z.enum(["hover","hold"]) })).optional(),
+  whatsappPrivacyGroup: z.array(z.string()).optional(),
+  whatsappAudioLanguages: z.record(z.enum(["auto","pt","en","es"])).optional(),
+  whatsappPrivacyResumeModes: z.record(z.enum(["normal", "discreet"])).optional(),
   whatsappLockEnabled: z.boolean().default(false),
   /** Bloqueio e relock por id de sessão WhatsApp; PINs ficam em cofres separados. */
   whatsappLockServiceIds: z.record(z.boolean()).default({}),

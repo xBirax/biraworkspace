@@ -1,5 +1,5 @@
 /**
- * Faixa de abas do ADR Browser. Cada aba é um serviço de kind "browser" do
+ * Faixa de abas do Bira Browser. Cada aba é um serviço de kind "browser" do
  * workspace — a mesma lista da barra lateral, na mesma ordem. A faixa não tem
  * estado próprio: criar, fechar e reordenar passam pelas mesmas funções do
  * catálogo que a lateral usa, e a faixa só redesenha o que o main manda.
@@ -10,7 +10,7 @@
 import type { AppStateV1 } from "@adr/contracts";
 
 /**
- * Apaga de vez as abas do ADR Browser fechadas (soft-delete) — no início do
+ * Apaga de vez as abas do Bira Browser fechadas (soft-delete) — no início do
  * app, quando o Ctrl+Shift+T (só em memória) já não as alcança. Cada aba é um
  * serviço gravado no state; sem isto toda aba aberta e fechada ficava lá para
  * sempre. Aba de workspace excluído fica: restaurar o workspace a traz de volta.
@@ -122,7 +122,7 @@ export function mergeTabOrderIntoRail(
 }
 
 /**
- * Barra lateral com UM ícone do ADR Browser, não um por aba: as abas ficam na
+ * Barra lateral com UM ícone do Bira Browser, não um por aba: as abas ficam na
  * faixa de abas. O ícone é `representativeId` (a aba ativa ou a última usada)
  * e fica onde estava a primeira aba. Os outros serviços não se mexem.
  */
@@ -168,7 +168,7 @@ export function collapseBrowserServices<T extends { id: string }>(
 
 /**
  * Ordem arrastada na lateral (agrupada) de volta para a ordem completa: o
- * ícone do ADR Browser vira todas as abas, na ordem em que estão na faixa.
+ * ícone do Bira Browser vira todas as abas, na ordem em que estão na faixa.
  * Sem o ícone na ordem recebida, as abas vão para o fim.
  */
 export function expandRailBrowserTabs(

@@ -8,7 +8,7 @@ const roots: string[] = [];
 function fixture(): string {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "adr-backup-test-"));
   roots.push(root);
-  return path.join(root, "ADR Workspace");
+  return path.join(root, "BiraWorkspace");
 }
 afterEach(() => {
   vi.restoreAllMocks();

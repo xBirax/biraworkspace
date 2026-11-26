@@ -538,6 +538,11 @@ label.field {
   font-size: 15px;
   font-weight: 500;
 }
+.glossary-form { display:flex; flex-wrap:wrap; align-items:end; gap:12px; }
+.glossary-form label { display:grid; flex:1 1 180px; gap:5px; }
+.glossary-form input { width:100%; box-sizing:border-box; }
+#glossary-list .name { overflow-wrap:anywhere; }
+
 .list {
   display: flex;
   flex-direction: column;

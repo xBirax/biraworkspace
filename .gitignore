@@ -5,6 +5,9 @@ coverage
 *.log
 .DS_Store
 .turbo
+.tools/
+.test-results/
+__pycache__/
 release
 # release-new/, release-wv/, release-backup/: saídas de empacotamento com
 # win-unpacked de ~190 MB dentro. O padrão sem * deixava as três rastreáveis.

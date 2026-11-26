@@ -65,7 +65,9 @@ export function createScreenShare(deps: ScreenShareDeps): (ses: Electron.Session
           }
           const choose = (choice?: ScreenShareChoice): void => {
             const source = choice && sources.find((item) => item.id === choice.sourceId);
-            if (!choice || !source) {
+            if (!choice || !source || contents.isDestroyed() || !deps.isFrontView(contents) ||
+                !deps.parentWindow.isFocused() || contents.mainFrame !== request.frame ||
+                new URL(contents.getURL()).origin !== new URL(request.securityOrigin).origin) {
               answer(null);
               return;
             }
@@ -80,7 +82,7 @@ export function createScreenShare(deps: ScreenShareDeps): (ses: Electron.Session
           }
           // Fechar o menu sem escolher (ou "Cancelar") recusa.
           return popupChoice<ScreenShareChoice>(deps.parentWindow, [
-            // O site que pede vai no topo: no ADR Browser pode ser qualquer um.
+            // O site que pede vai no topo: no Bira Browser pode ser qualquer um.
             { header: `${site} quer ver a sua tela. Compartilhar:` },
             { separator: true },
             ...choices.map((choice) => ({ label: choice.label, value: choice })),

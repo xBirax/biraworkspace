@@ -18,7 +18,7 @@ describe("isAllowedExternalUrl", () => {
 
 describe("isShellPageUrl", () => {
   // Pasta com espaço e dentro do asar, como no app instalado.
-  const shellDir = path.join(os.tmpdir(), "ADR Workspace", "resources", "app.asar", "dist", "shell");
+  const shellDir = path.join(os.tmpdir(), "BiraWorkspace", "resources", "app.asar", "dist", "shell");
   const page = (file: string) => pathToFileURL(path.join(shellDir, file)).href;
 
   it("aceita as páginas do shell, com ou sem query", () => {

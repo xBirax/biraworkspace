@@ -55,13 +55,17 @@
           <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg
         ><span>Notificações</span>
       </button>
+      <button type="button" data-tab="traducao" hidden>
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h12M9 3v2m3 0c-1 5-4 9-9 12m2-9c1 3 3 5 7 7m1 5 4-11 4 11m-7-3h6"/></svg>
+        <span>Tradução</span>
+      </button>
       <button type="button" data-tab="privacidade">
         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
           <path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6z" />
           <path d="m8 12 3 3 5-6" /></svg
         ><span>Privacidade</span>
       </button>
-      <div class="nav-footer"><strong>ADR Workspace</strong>Seu trabalho, em um só lugar.</div>
+      <div class="nav-footer"><strong>BiraWorkspace</strong>Seu trabalho, em um só lugar.</div>
     </nav>
 
     <main id="main">
@@ -144,7 +148,7 @@
           <div class="row">
             <div class="name">
               Bloquear anúncios e rastreadores
-              <div class="meta">Você pode liberar sites individualmente no ADR Browser.</div>
+              <div class="meta">Você pode liberar sites individualmente no Bira Browser.</div>
             </div>
             <input
               type="checkbox"
@@ -183,7 +187,7 @@
           </div>
           <div class="row">
             <div class="name">
-              ADR Workspace
+              BiraWorkspace
               <div class="meta">Versão instalada: <span id="app-version">—</span></div>
             </div>
             <span class="pill">Desktop</span>
@@ -208,11 +212,13 @@
             <div class="name">
               Backup do perfil
               <div class="meta" id="backup-meta">
-                Logins, conversas e configurações. Uma cópia também é feita a cada atualização.
+                Logins, conversas e configurações deste perfil.
               </div>
             </div>
             <span style="display: flex; gap: 6px">
               <button class="btn" id="btn-backup" type="button">Fazer backup agora</button>
+              <select id="backup-choice" aria-label="Cópia a restaurar" hidden></select>
+              <button class="btn secondary" id="btn-restore" type="button" hidden>Restaurar cópia</button>
               <button class="btn secondary" id="btn-backups-open" type="button">Abrir pasta</button>
             </span>
           </div>
@@ -342,7 +348,7 @@
           <div>
             <div class="profile-name" id="perfil-ws"></div>
             <div class="meta">
-              Nome, e-mail e cargo vêm da sessão do ADR CRM
+              Suas contas ficam neste computador; cada serviço mantém seu próprio login.
             </div>
           </div>
         </div>
@@ -378,7 +384,7 @@
             <option value="calendar">Calendar</option>
             <option value="youtube">YouTube</option>
             <option value="spotify">Spotify</option>
-            <option value="browser">ADR Browser</option>
+            <option value="browser">Bira Browser</option>
           </select>
           <button class="btn primary" id="google-add" type="button">Adicionar conta</button>
         </div>
@@ -553,6 +559,19 @@
         <div class="list" id="notif-services"></div>
       </section>
 
+      <section data-pane="traducao" class="hidden">
+        <header class="page-header"><h2>Glossário de inglês</h2>
+          <p class="page-description">Salve como traduzir um termo ou uma frase. As correções valem para os próximos envios em inglês de todas as contas deste PC.</p>
+        </header>
+        <form id="glossary-form" class="glossary-form">
+          <label>Português<input id="glossary-source" type="text" maxlength="240" placeholder="Ex.: valores" required></label>
+          <label>Usar em inglês<input id="glossary-target" type="text" maxlength="240" placeholder="Ex.: rates" required></label>
+          <button type="submit" class="btn primary">Salvar correção</button>
+          <button type="button" id="glossary-cancel" class="btn" hidden>Cancelar edição</button>
+        </form>
+        <p id="glossary-msg" class="msg" role="status"></p>
+        <h3>Correções salvas</h3><div class="list" id="glossary-list"></div>
+      </section>
       <section data-pane="privacidade" class="hidden">
         <header class="page-header">
           <div class="eyebrow">Preferências</div>
@@ -787,13 +806,13 @@
         const loaded = state.loadedServiceIds;
         const filter = el("service-filter").value.trim().toLocaleLowerCase("pt-BR");
         {
-          const total = (state.services || []).length + 1;
+          const total = (state.services || []).length + (state.personal ? 0 : 1);
           el("installed-count").textContent = `${total} ${total === 1 ? "item" : "itens"}`;
         }
         // Walk the sidebar rail, not state.services, so this list mirrors the
         // real icon order and can show the CRM tile alongside the services.
         const byId = new Map((state.services || []).map((s) => [s.id, s]));
-        const rail = [...new Set([...(state.rail || []), ...byId.keys(), "crm"])].filter((id) => id === "crm" || byId.has(id));
+        const rail = [...new Set([...(state.rail || []), ...byId.keys(), ...(state.personal ? [] : ["crm"])])].filter((id) => id === "crm" || byId.has(id));
         let visible = 0;
         for (const railId of rail) {
           if (railId === "crm") {
@@ -1074,7 +1093,7 @@
           '<span class="tile" style="display:grid;place-items:center">' +
           '<img src="./adr-logo.png" alt="ADR" style="width:100%;height:100%;object-fit:contain" /></span>';
         const rows = [
-          { id: "crm", name: "Now! — CRM ADR", kind: "crm" },
+          ...(state.personal ? [] : [{ id: "crm", name: "Now! — CRM ADR", kind: "crm" }]),
           ...(state.services || []),
         ];
         for (const svc of rows) {
@@ -1175,13 +1194,18 @@
         if (!window.adrShell?.listBackups) return;
         try {
           const backups = (await window.adrShell.listBackups()) || [];
+          const choice = el("backup-choice");
+          choice.replaceChildren(...backups.filter(b => /^manual-[0-9]{8}-[0-9]{6}-[0-9a-f]{8}$/.test(b.name)).map(b =>
+            new Option(new Date(b.createdAt).toLocaleString("pt-BR"), b.name)));
+          choice.hidden = !state.restoreAvailable || !choice.length;
+          el("btn-restore").hidden = choice.hidden;
           const last = backups[0];
           if (last) {
             el("backup-meta").textContent =
               "Última cópia: " +
               new Date(last.createdAt).toLocaleString("pt-BR") +
               (last.kind === "auto" ? " (automática, na atualização)" : "") +
-              ". Uma cópia também é feita a cada atualização.";
+              ".";
           }
         } catch {
           /* mantém o texto padrão */
@@ -1403,6 +1427,50 @@
         if (document.activeElement !== node) node.value = value;
       }
 
+      function resetTerm() {
+        el("glossary-form").reset();
+        el("glossary-source").readOnly=false;
+        el("glossary-cancel").hidden=true;
+      }
+      function renderGlossary() {
+        const list=el("glossary-list");
+        list.replaceChildren();
+        const terms=[...(state.englishGlossary || [])].sort((a,b)=>a.source.localeCompare(b.source,"pt-BR"));
+        if (!terms.length) list.textContent="Nenhuma correção salva.";
+        for (const term of terms) {
+          const row=document.createElement("div");row.className="row";
+          const label=document.createElement("div");label.className="name";
+          label.textContent=term.source+" → "+term.target;
+          const edit=document.createElement("button");edit.type="button";edit.className="btn";edit.textContent="Editar";
+          edit.onclick=()=>{
+            el("glossary-source").value=term.source;el("glossary-source").readOnly=true;
+            el("glossary-target").value=term.target;el("glossary-cancel").hidden=false;
+            el("glossary-target").focus();el("glossary-target").select();
+          };
+          const remove=document.createElement("button");remove.type="button";remove.className="btn";remove.textContent="Remover";
+          remove.onclick=()=>saveTerm(term.source,null);
+          row.append(label,edit,remove);list.append(row);
+        }
+      }
+      let savingTerm=false;
+      async function saveTerm(source,target) {
+        if(savingTerm)return;
+        savingTerm=true;
+        const form=el("glossary-form"), list=el("glossary-list");
+        form.inert=true;list.inert=true;
+        try {
+          const res=await window.adrShell.editEnglishTerm(source,target);
+          if(!res.ok)throw Error(res.message || "Confira os campos.");
+          if(target!==null || source===el("glossary-source").value)resetTerm();
+          el("glossary-msg").textContent=target===null?"Correção removida.":"Correção salva para todas as contas.";
+        } catch {el("glossary-msg").textContent="Não foi possível salvar. Confira os campos, o espaço em disco e o limite de 300 correções.";}
+        finally {savingTerm=false;form.inert=false;list.inert=false;}
+      }
+      el("glossary-cancel").onclick=resetTerm;
+      el("glossary-form").onsubmit=event=>{
+        event.preventDefault();void saveTerm(el("glossary-source").value,el("glossary-target").value);
+      };
+
       function renderGeral() {
         const ws = (state.workspaces || []).find((w) => w.id === state.activeWorkspaceId);
         setFieldValue(el("ws-name"), ws?.name || "");
@@ -1416,7 +1484,9 @@
         const update = state.update || {};
         // currentVersion já vinha no estado desde sempre, só nunca era desenhado:
         // não havia como ver a versão instalada em lugar nenhum da interface.
-        el("app-version").textContent = update.currentVersion || "—";
+        el("app-version").textContent = [update.currentVersion,state.buildId].filter(Boolean).join(" · ");
+        el("btn-backup").disabled=state.backupAvailable===false;
+        if (state.backupAvailable===false) el("btn-backup").textContent="Backup disponível no Windows";
         el("update-meta").textContent =
           update.message || "Verifique se há uma nova versão disponível.";
         const updateButton = el("btn-update");
@@ -1579,6 +1649,10 @@
           msg("geral-msg", result.message || "Não foi possível fazer o backup.", "var(--danger)");
         }
       });
+      el("btn-restore").addEventListener("click", async () => {
+        const result = await window.adrShell.restoreProfile(el("backup-choice").value);
+        if (result?.message) el("backup-meta").textContent = result.message;
+      });
       el("btn-backups-open").addEventListener("click", () => window.adrShell.openBackups());
       void loadPermissions();
       void loadBackups();
@@ -1640,6 +1714,7 @@
         }
       });
       el("btn-update-candidates").addEventListener("click", async () => {
+        if (state.personal) return;
         const result = await window.adrShell.openExternalBrowser(
           "https://github.com/ADRAGENCIACRM/adrworkspace-releases/releases",
         );
@@ -1661,6 +1736,15 @@
         const editingWhatsAppTimeout =
           document.activeElement?.dataset?.whatsappTimeoutInput === "1";
         state = { ...state, ...next };
+        document.querySelector('nav [data-tab="traducao"]').hidden=!state.personal;
+        if (state.personal) {
+          renderWhenChanged("glossary",state.englishGlossary || [],renderGlossary);
+          el("btn-update-candidates").hidden = true;
+          el("open-performance").closest(".row")?.setAttribute("hidden", "");
+          el("btn-crm-logout").hidden = true;
+          el("meet-crm").closest(".row")?.setAttribute("hidden", "");
+          document.querySelector('nav [data-tab="desempenho"]')?.setAttribute("hidden", "");
+        }
         renderTheme();
         renderGeral();
         renderWhenChanged("installed", [state.services, state.rail, state.loadedServiceIds, state.failedServiceIds, state.loadingServiceIds, state.activeSurface, state.googleAccounts, state.microsoftAccounts, state.crmAudioMuted], renderInstalled);

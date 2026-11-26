@@ -73,10 +73,14 @@ describe("AppStateV1 persistence", () => {
     saveAppStateAtomic(file, createEmptyAppState());
     const backup = fs.readFileSync(`${file}.bak`, "utf8");
     fs.writeFileSync(file, '{"schemaVersion":99}', "utf8");
+    expect(loadAppState(file)).toMatchObject({ok:false, futureVersion:99});
+    expect(fs.readFileSync(file, "utf8")).toBe('{"schemaVersion":99}');
+    expect(fs.readFileSync(`${file}.bak`, "utf8")).toBe(backup);
+    fs.writeFileSync(file, '{"schemaVersion":0}', "utf8");
     expect(loadAppState(file)).toMatchObject({ ok: true, source: "backup" });
 
     expect(quarantineAppStateFiles(file, 7)).toEqual([`${file}.corrupt-7`, `${file}.bak.corrupt-7`]);
-    expect(fs.readFileSync(`${file}.corrupt-7`, "utf8")).toBe('{"schemaVersion":99}');
+    expect(fs.readFileSync(`${file}.corrupt-7`, "utf8")).toBe('{"schemaVersion":0}');
     expect(fs.readFileSync(`${file}.bak.corrupt-7`, "utf8")).toBe(backup);
     // Os originais ficam onde estavam, e o mesmo carimbo não sobrescreve cópia anterior.
     expect(loadAppState(file)).toMatchObject({ ok: true, source: "backup" });

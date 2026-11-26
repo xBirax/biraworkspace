@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {createHash} from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -9,25 +10,21 @@ const destShell = path.join(root, "dist/shell");
 
 fs.mkdirSync(destPreload, { recursive: true });
 fs.mkdirSync(destShell, { recursive: true });
+for (const file of ["crm-preload.cjs", "composer-preload.cjs", "gmail-preload.cjs"]) fs.rmSync(path.join(destPreload, file), { force: true });
 fs.rmSync(path.join(destShell, "titlebar.html"), { force: true });
 
 const formActivity = fs.readFileSync(path.join(root, "src/preload/form-activity-preload.cjs"), "utf8");
 fs.writeFileSync(path.join(destPreload, "form-activity-preload.cjs"), formActivity);
-for (const file of ["crm-preload.cjs", "composer-preload.cjs", "microsoft-badge-preload.cjs"]) {
-  fs.writeFileSync(path.join(destPreload, file), `${formActivity}\n${fs.readFileSync(path.join(root, "src/preload", file), "utf8")}`);
-}
-// The Gmail panel runs in Electron's isolated preload world. Never expose its
-// CRM commands through contextBridge or execute the panel in the page world.
-const vendorRoot = path.resolve(root, "../../vendor");
-const vendorNames = fs.readdirSync(vendorRoot, { withFileTypes: true })
-  .filter((entry) => entry.isDirectory() && /^adr-crm-extension-\d/.test(entry.name))
-  .map((entry) => entry.name)
-  .sort((a, b) => a.localeCompare(b, "en", { numeric: true, sensitivity: "base" }));
-const gmailSource = fs.readFileSync(path.join(vendorRoot, vendorNames.at(-1) || "", "gmail-content.js"), "utf8");
-// Gmail already has its own compose assistant. Keeping the generic composer
-// preload here can cover its button and an exception there prevents mounting.
-const gmailPreload = `if (location.origin === "https://mail.google.com" && location.pathname.startsWith("/mail/")) {\n  try {\n    const { ipcRenderer } = require("electron");\n    globalThis.adrGmailInvoke = (command, payload) => ipcRenderer.invoke("gmail:invoke", command, payload);\n    const mountAdrGmail = () => {\n      try {\n${gmailSource}\n        console.info("ADR_GMAIL_PANEL:" + (document.getElementById("adr-gmail-assistant") ? "mounted" : "missing"));\n      } catch (error) {\n        console.error("ADR_GMAIL_PANEL:error:" + String(error?.name || "unknown"));\n      }\n    };\n    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mountAdrGmail, { once: true });\n    else mountAdrGmail();\n  } catch (error) {\n    console.error("ADR_GMAIL_PANEL:bridge-error:" + String(error?.name || "unknown"));\n  }\n}\n`;
-fs.writeFileSync(path.join(destPreload, "gmail-preload.cjs"), `${formActivity}\n${gmailPreload}`);
+fs.writeFileSync(path.join(destPreload, "microsoft-badge-preload.cjs"), `${formActivity}\n${fs.readFileSync(path.join(root, "src/preload/microsoft-badge-preload.cjs"), "utf8")}`);
+const vendor = path.resolve(root, "../../vendor/adr-crm-extension-0.15.5");
+const waDom = ["shared.js", "wa-dom.js"].map(file => fs.readFileSync(path.join(vendor, file), "utf8"));
+fs.copyFileSync(path.join(root, "src/main/translate-worker.py"), path.join(destPreload, "translate-worker.py"));
+const personalScripts = ["personal-privacy.cjs", "whatsapp-transcripts.cjs", "whatsapp-translation.cjs"].map(file => fs.readFileSync(path.join(root, "src/preload", file), "utf8"));
+fs.writeFileSync(path.join(destPreload, "personal-privacy.cjs"), [formActivity, ...waDom, ...personalScripts].join("\n"));
+fs.copyFileSync(path.join(root, "src/preload/read-voice.js"), path.join(destPreload, "read-voice.js"));
+const wa = path.join(root, "node_modules/@wppconnect/wa-js");
+for (const name of ["wppconnect-wa.js", "wppconnect-wa.js.LICENSE.txt"]) fs.copyFileSync(path.join(wa, "dist", name), path.join(destPreload, name));
+fs.copyFileSync(path.join(wa, "LICENSE"), path.join(destPreload, "wa-js-LICENSE"));
 fs.copyFileSync(
   path.join(root, "src/shell/shell-preload.cjs"),
   path.join(destShell, "shell-preload.cjs"),
@@ -54,6 +51,7 @@ for (const file of [
   "optimizer-panel.js",
   "internal-surfaces.css",
   "overlay.html",
+  "privacy-ui.js",
   "browser-toolbar.html",
   "history.html",
   "prompt.html",
@@ -94,4 +92,16 @@ if (fs.existsSync(fontsSrc)) {
   }
 }
 
+const digest=createHash("sha256");
+for (const dir of ["main","preload","shell"]) {
+  const base=path.join(root,"dist",dir);
+  for (const name of fs.readdirSync(base,{recursive:true}).map(String).sort()) {
+    const file=path.join(base,name);
+    if (name==="build-id.json" || !fs.statSync(file).isFile() || (dir==="main" && !name.endsWith(".bundle.cjs"))) continue;
+    const bytes=fs.readFileSync(file);
+    digest.update(dir+"/"+name.replaceAll("\\","/")+"\0");
+    digest.update(/\.(js|cjs|py|css|svg|html|json|txt)$/.test(name)?bytes.toString("utf8").replaceAll("\r\n","\n"):bytes);
+  }
+}
+fs.writeFileSync(path.join(destPreload,"build-id.json"),JSON.stringify(digest.digest("hex").slice(0,16)));
 console.log("copied preload + shell assets");

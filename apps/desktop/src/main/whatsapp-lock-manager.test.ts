@@ -23,6 +23,7 @@ function setup(settings: Partial<AppStateV1["settings"]> = {}) {
   dirs.push(vault);
   const keyring = { available: true };
   const storage = {
+    getSelectedStorageBackend: () => "gnome_libsecret" as const,
     isEncryptionAvailable: () => keyring.available,
     encryptString: (value: string) => Buffer.from(`encrypted:${value}`, "utf8"),
     decryptString: (value: Buffer) => value.toString("utf8").replace(/^encrypted:/, ""),

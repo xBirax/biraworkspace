@@ -1,0 +1,362 @@
+{
+  "code": "d4f03f4a821dbef503dd69f756658ff069e518f3",
+  "about": "23b0b914851b3f6a",
+  "ubuntu_tests": 799,
+  "baseline_failures": 25,
+  "menu": [
+    "0x00800004  0 biraworkspace.biraworkspace  bira-review BiraWorkspace",
+    "0x00800004  0 biraworkspace.biraworkspace  bira-review BiraWorkspace",
+    "StartupWMClass=biraworkspace"
+  ],
+  "upgrade": [
+    {
+      "readyMs": 1799,
+      "package": "biraworkspace",
+      "platform": "x11",
+      "phase": "reopen",
+      "persisted": true,
+      "build": "23b0b914851b3f6a",
+      "backup": true,
+      "backend": "gnome_libsecret"
+    }
+  ],
+  "reinstall": [
+    {
+      "readyMs": 1745,
+      "package": "biraworkspace",
+      "platform": "x11",
+      "phase": "reopen",
+      "persisted": true,
+      "build": "23b0b914851b3f6a",
+      "backup": true,
+      "backend": "gnome_libsecret"
+    }
+  ],
+  "panel": [
+    {
+      "readyMs": 2626,
+      "package": "biraworkspace",
+      "platform": "x11",
+      "phase": "seed",
+      "persisted": true,
+      "build": "23b0b914851b3f6a",
+      "backup": true,
+      "backend": "gnome_libsecret"
+    },
+    {
+      "phase": "backup",
+      "state": "done",
+      "profile": "/home/bira/daily-accept/BiraWorkspace"
+    },
+    {
+      "phase": "restore",
+      "state": "done",
+      "profile": "/home/bira/daily-accept/BiraWorkspace"
+    },
+    {
+      "readyMs": 1763,
+      "package": "biraworkspace",
+      "platform": "x11",
+      "phase": "reopen",
+      "persisted": true,
+      "build": "23b0b914851b3f6a",
+      "backup": true,
+      "backend": "gnome_libsecret"
+    },
+    {
+      "readyMs": 3279,
+      "package": "BiraWorkspace.AppImage",
+      "platform": "x11",
+      "phase": "seed",
+      "persisted": true,
+      "build": "23b0b914851b3f6a",
+      "backup": true,
+      "backend": "gnome_libsecret"
+    },
+    {
+      "phase": "backup",
+      "state": "done",
+      "profile": "/home/bira/daily-accept/BiraWorkspace"
+    },
+    {
+      "phase": "restore",
+      "state": "done",
+      "profile": "/home/bira/daily-accept/BiraWorkspace"
+    },
+    {
+      "readyMs": 4789,
+      "package": "BiraWorkspace.AppImage",
+      "platform": "x11",
+      "phase": "reopen",
+      "persisted": true,
+      "build": "23b0b914851b3f6a",
+      "backup": true,
+      "backend": "gnome_libsecret"
+    }
+  ],
+  "gnome_wayland": [
+    {
+      "readyMs": 1750,
+      "package": "biraworkspace",
+      "platform": "wayland",
+      "phase": "seed",
+      "persisted": true,
+      "build": "23b0b914851b3f6a",
+      "backup": true,
+      "backend": "gnome_libsecret"
+    },
+    {
+      "readyMs": 1750,
+      "package": "biraworkspace",
+      "platform": "wayland",
+      "phase": "reopen",
+      "persisted": true,
+      "build": "23b0b914851b3f6a",
+      "backup": true,
+      "backend": "gnome_libsecret"
+    },
+    {
+      "readyMs": 5038,
+      "package": "BiraWorkspace.AppImage",
+      "platform": "wayland",
+      "phase": "seed",
+      "persisted": true,
+      "build": "23b0b914851b3f6a",
+      "backup": true,
+      "backend": "gnome_libsecret"
+    },
+    {
+      "readyMs": 3571,
+      "package": "BiraWorkspace.AppImage",
+      "platform": "wayland",
+      "phase": "reopen",
+      "persisted": true,
+      "build": "23b0b914851b3f6a",
+      "backup": true,
+      "backend": "gnome_libsecret"
+    }
+  ],
+  "helper": ".....\n----------------------------------------------------------------------\nRan 5 tests in 0.893s\n\nOK",
+  "windows_backup": "backup-restore.json",
+  "before": [
+    {
+      "readyMs": 2302,
+      "switchMs": [
+        146,
+        90,
+        57,
+        75
+      ],
+      "pssMiB": 335,
+      "package": "biraworkspace",
+      "platform": "x11",
+      "phase": "seed",
+      "persisted": true,
+      "build": "fb4619d706e56a84",
+      "backup": false,
+      "backend": "basic_text"
+    },
+    {
+      "readyMs": 2104,
+      "switchMs": [
+        46,
+        36,
+        41,
+        47
+      ],
+      "pssMiB": 310,
+      "package": "biraworkspace",
+      "platform": "x11",
+      "phase": "reopen",
+      "persisted": true,
+      "build": "fb4619d706e56a84",
+      "backup": false,
+      "backend": "basic_text"
+    },
+    {
+      "readyMs": 1829,
+      "switchMs": [
+        45,
+        38,
+        41,
+        49
+      ],
+      "pssMiB": 302,
+      "package": "biraworkspace",
+      "platform": "x11",
+      "phase": "reopen",
+      "persisted": true,
+      "build": "fb4619d706e56a84",
+      "backup": false,
+      "backend": "basic_text"
+    }
+  ],
+  "after": [
+    {
+      "readyMs": 1867,
+      "switchMs": [
+        12,
+        32,
+        39,
+        34
+      ],
+      "pssMiB": 313,
+      "package": "biraworkspace",
+      "platform": "x11",
+      "phase": "seed",
+      "persisted": true,
+      "build": "23b0b914851b3f6a",
+      "backup": true,
+      "backend": "basic_text"
+    },
+    {
+      "readyMs": 1774,
+      "switchMs": [
+        24,
+        17,
+        19,
+        19
+      ],
+      "pssMiB": 285,
+      "package": "biraworkspace",
+      "platform": "x11",
+      "phase": "reopen",
+      "persisted": true,
+      "build": "23b0b914851b3f6a",
+      "backup": true,
+      "backend": "basic_text"
+    },
+    {
+      "readyMs": 1777,
+      "switchMs": [
+        34,
+        73,
+        25,
+        19
+      ],
+      "pssMiB": 282,
+      "package": "biraworkspace",
+      "platform": "x11",
+      "phase": "reopen",
+      "persisted": true,
+      "build": "23b0b914851b3f6a",
+      "backup": true,
+      "backend": "basic_text"
+    }
+  ],
+  "scroll": [
+    {
+      "version": "antes",
+      "frames": 100,
+      "p50": 20.399999999906868,
+      "p95": 67.19999999995343,
+      "masked": true
+    },
+    {
+      "version": "depois",
+      "frames": 100,
+      "p50": 17.0999999998603,
+      "p95": 22.699999999953434,
+      "masked": true
+    }
+  ],
+  "whatsapp_fixture": [
+    {
+      "english": "Can we set up a meeting tomorrow morning? https://Example.COM/Ver%20Pedido?Token=aB%2F9&idioma=pt#Resumo\nwa.me/5511000000000?text=Bom%20dia",
+      "spanish": "¿Podemos programar una reunión mañana por la mañana? https://Example.COM/Ver%20Pedido?Token=aB%2F9&idioma=pt#Resumo\nwa.me/5511000000000?text=Bom%20dia",
+      "portuguese": "Podemos agendar uma reunião amanhã de manhã? https://Example.COM/Ver%20Pedido?Token=aB%2F9&idioma=pt#Resumo\nwa.me/5511000000000?text=Bom%20dia",
+      "clickedAllDestinations": true,
+      "staleReadIgnored": true,
+      "duplicateBlocked": true,
+      "failurePreservesDraft": true,
+      "editCancelsSend": true,
+      "chatSwitchCancelsSend": true
+    }
+  ],
+  "translation": [
+    {
+      "text": "The meeting is scheduled for tomorrow morning."
+    },
+    {
+      "text": "La reunión está programada para mañana por la mañana."
+    },
+    {
+      "text": "A reunião está marcada para amanhã de manhã."
+    }
+  ],
+  "voice": [
+    "A reunião está madrugada para amanhã de manhã.",
+    " The meeting is scheduled for tomorrow morning.",
+    " La reunión está programada por la mañana, por la mañana."
+  ],
+  "offline_setup": [
+    "Tradução local instalada.",
+    "WhatsApp pt-BR passou: modelo atualizado corrigido, inglês e espanhol verificados."
+  ],
+  "audit": {
+    "info": 0,
+    "low": 12,
+    "moderate": 72,
+    "high": 52,
+    "critical": 4
+  },
+  "critical_modules": [
+    "shell-quote",
+    "tar",
+    "tinypool"
+  ],
+  "high_modules_seen_in_main": [
+    "builder-util-runtime",
+    "js-yaml",
+    "zod"
+  ],
+  "sha256": [
+    "18aa3e6bb055890eecfe9f32b324b8c4def762f87d44268977a3b53ba0bb4caa  BiraWorkspace-0.2.0-local.2-amd64.deb",
+    "1f0ee86e631bf1cf2e2450f767a19442f5245992f6fce03267425097b36ad022  BiraWorkspace-0.2.0-local.2-x86_64.AppImage"
+  ],
+  "windows_tests": 799,
+  "fresh_vm_reinstall": [
+    {
+      "readyMs": 1790,
+      "package": "biraworkspace",
+      "platform": "x11",
+      "phase": "reopen",
+      "persisted": true,
+      "build": "23b0b914851b3f6a",
+      "backup": true,
+      "backend": "basic_text"
+    },
+    {
+      "readyMs": 3452,
+      "package": "BiraWorkspace.AppImage",
+      "platform": "x11",
+      "phase": "reopen",
+      "persisted": true,
+      "build": "23b0b914851b3f6a",
+      "backup": true,
+      "backend": "basic_text"
+    }
+  ],
+  "fresh_vm_after_interrupted_update_and_reboot": [
+    {
+      "readyMs": 2195,
+      "package": "biraworkspace",
+      "platform": "x11",
+      "phase": "reopen",
+      "persisted": true,
+      "build": "23b0b914851b3f6a",
+      "backup": true,
+      "backend": "basic_text"
+    },
+    {
+      "readyMs": 3176,
+      "package": "BiraWorkspace.AppImage",
+      "platform": "x11",
+      "phase": "reopen",
+      "persisted": true,
+      "build": "23b0b914851b3f6a",
+      "backup": true,
+      "backend": "basic_text"
+    }
+  ]
+}

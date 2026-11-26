@@ -96,7 +96,7 @@ describe("buildContextMenuSpec", () => {
   });
 });
 
-describe("buildContextMenuSpec no ADR Browser", () => {
+describe("buildContextMenuSpec no Bira Browser", () => {
   const nav = { canGoBack: true, canGoForward: false };
 
   it("oferece abrir link em nova aba antes de copiar", () => {

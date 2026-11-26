@@ -186,11 +186,11 @@ describe("lista de backups do perfil", () => {
 
   it("lista só cópias completas, das duas pastas, mais nova primeiro", () => {
     const base = tempDir("adr-backup-");
-    const userData = path.join(base, "ADR Workspace");
+    const userData = path.join(base, "BiraWorkspace");
     // Pasta nova (LOCALAPPDATA) e a antiga, ao lado do perfil.
     const root = backupsDirectory(userData, path.join(base, "Local"));
     const legacy = legacyBackupsDirectory(userData);
-    expect(root).toBe(path.join(base, "Local", "ADR Workspace Backups"));
+    expect(root).toBe(path.join(base, "Local", "BiraWorkspace Backups"));
     expect(backupsDirectory(userData, "")).toBe(legacy);
     fs.mkdirSync(path.join(legacy, "antes-0.1.49-20261001"), { recursive: true });
     fs.writeFileSync(path.join(legacy, "antes-0.1.49-20261001", "backup-info.json"), "{}");

@@ -39,6 +39,22 @@ export function newContactUrl(
   return `https://contacts.google.com/new?${params.toString()}`;
 }
 
+// Executado no frame da conta que originou o clique. Um LID não é um telefone.
+export const READ_WHATSAPP_CONTACT = `(async () => {
+  const chat = await window.WPP.chat.getActiveChat();
+  const jid = chat?.id?._serialized;
+  if (typeof jid !== "string" || !/^\\d+@(c\\.us|lid|s\\.whatsapp\\.net)$/.test(jid)) return null;
+  const entry = jid.endsWith("@lid") ? await window.WPP.contact.getPnLidEntry(jid) : null;
+  const pn = entry?.phoneNumber?._serialized || jid;
+  const phone = /^([1-9]\\d{5,14})@(?:c\\.us|s\\.whatsapp\\.net)$/.exec(pn)?.[1];
+  if (!phone || (await window.WPP.chat.getActiveChat())?.id?._serialized !== jid) return null;
+  const candidates = [chat.contact?.name, entry?.contact?.name, chat.contact?.pushname,
+    entry?.contact?.pushname, chat.contact?.verifiedName, chat.formattedTitle];
+  const name = candidates.find(value => typeof value === 'string' && value.trim() &&
+    !/^[+()\\s.\\d-]+$/.test(value));
+  return {jid, phone, name:name?.trim().slice(0,200)};
+})()`;
+
 /** Telefone do WhatsApp vem só em dígitos; o formulário acerta o país com E.164. */
 export function toE164(phone: string): string {
   const digits = String(phone || "").replace(/\D/g, "");

@@ -194,7 +194,7 @@ export function isGoogleOAuthCallback(url: string, redirectUri: string): boolean
 /**
  * A URL é do site do próprio serviço (não de uma página aberta dentro dele)?
  * `homeUrl` é a home do serviço (serviceUrl). Notificação sem pergunta e o
- * "não perturbe" de reunião valem só para o site dele; CRM, shell e ADR Browser
+ * "não perturbe" de reunião valem só para o site dele; CRM, shell e Bira Browser
  * nunca são "o próprio serviço" aqui.
  */
 export function isServiceOwnSite(kind: string, url: string, homeUrl: string): boolean {

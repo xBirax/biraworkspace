@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import { randomUUID } from "node:crypto";
 
 /**
  * Backup do perfil (logins, cookies, estado, cofre).
@@ -14,7 +15,7 @@ import path from "node:path";
  */
 
 /**
- * Onde ficam as cópias: %LOCALAPPDATA%ADR Workspace Backups. Em Roaming (ao
+ * Onde ficam as cópias: %LOCALAPPDATA%BiraWorkspace Backups. Em Roaming (ao
  * lado do perfil, como nas primeiras versões) um perfil móvel de empresa
  * sincronizaria GBs de backup a cada logon. Sem LOCALAPPDATA (fora do Windows),
  * ao lado do perfil.
@@ -24,7 +25,7 @@ export function backupsDirectory(
   localAppData: string | undefined = process.env["LOCALAPPDATA"],
 ): string {
   return localAppData
-    ? path.join(localAppData, "ADR Workspace Backups")
+    ? path.join(localAppData, "BiraWorkspace Backups")
     : `${path.resolve(userData)} Backups`;
 }
 
@@ -126,6 +127,7 @@ export function backupNoticeToShow(status: BackupStatus | null, now = Date.now()
   if (!status || status.state !== "done" || status.acknowledged) return null;
   const finished = Date.parse(status.finishedAt ?? "");
   if (!Number.isFinite(finished) || now - finished > 24 * 60 * 60_000) return null;
+  if (status.label === "restore") return "Perfil restaurado. Perfil anterior preservado em " + status.target;
   const size = typeof status.sizeBytes === "number" ? ` (${formatBytes(status.sizeBytes)})` : "";
   const kind = (status.label ?? "").startsWith("auto") ? "Cópia automática do perfil, antes da atualização," : "Backup do perfil";
   return `${kind} concluído${size}. Ver em Configurações → Geral → Abrir pasta.`;
@@ -145,6 +147,7 @@ export type BackupRequest = {
   /** Executável a reabrir depois da cópia ("" = não reabrir, ex.: pnpm dev). */
   relaunch: string;
   label: "manual";
+  restoreName?: string;
   /** Pasta das cópias (backupsDirectory). */
   backupsRoot: string;
 };
@@ -176,29 +179,49 @@ export function backupScriptArgs(input: BackupRequest, pid: number): string[] {
  * Agenda o script de backup para depois de o app fechar. Quem chama fecha o app
  * logo em seguida (app.quit) — o script espera este processo sair.
  */
-export function startBackupAndRestart(
+export async function startBackupAndRestart(
   input: BackupRequest,
   env: {
     platform?: NodeJS.Platform;
     exists?: (file: string) => boolean;
     spawn?: typeof spawn;
     pid?: number;
+    ready?: () => boolean;
   } = {},
-): { ok: boolean; message: string } {
-  if ((env.platform ?? process.platform) !== "win32") {
-    return { ok: false, message: "Backup automático só no Windows" };
+): Promise<{ ok: boolean; message: string }> {
+  const platform = env.platform ?? process.platform;
+  if (platform !== "win32" && platform !== "linux") {
+    return { ok: false, message: "Backup indisponível neste sistema" };
   }
   if (!(env.exists ?? fs.existsSync)(input.scriptPath)) {
     return { ok: false, message: "Script de backup não encontrado nesta instalação" };
   }
   try {
-    const child = (env.spawn ?? spawn)("powershell.exe", backupScriptArgs(input, env.pid ?? process.pid), {
+    const readyFile = path.join(input.backupsRoot, `ready-${randomUUID()}.json`);
+    const command = platform === "linux" ? "/usr/bin/python3" : "powershell.exe";
+    const args = platform === "linux"
+      ? ["-I", input.scriptPath, "--profile", input.userData, "--root", input.backupsRoot, "--ready", readyFile,
+          "--relaunch", input.relaunch, ...(input.restoreName ? ["--restore", input.restoreName] : [])]
+      : [...backupScriptArgs(input, env.pid ?? process.pid), "-ReadyFile", readyFile];
+    const child = (env.spawn ?? spawn)(command, args, {
       detached: true,
       stdio: "ignore",
       windowsHide: true,
       shell: false,
     });
-    child.on("error", () => undefined);
+    await new Promise<void>((resolve, reject) => {
+      const poll = setInterval(() => {
+        if (!(env.ready ?? (() => fs.existsSync(readyFile)))()) return;
+        clearInterval(poll); clearTimeout(timeout);
+        try { fs.unlinkSync(readyFile); } catch { /* arquivo de sinalização */ }
+        resolve();
+      }, 50);
+      const timeout = setTimeout(() => {
+        clearInterval(poll); child.kill(); reject(new Error("O script de backup não confirmou que está pronto."));
+      }, 10_000);
+      child.on("error", (error) => { clearInterval(poll); clearTimeout(timeout); reject(error); });
+      child.on("exit", () => { clearInterval(poll); clearTimeout(timeout); reject(new Error("O script encerrou antes da confirmação.")); });
+    });
     child.unref();
   } catch (error) {
     return { ok: false, message: `Não foi possível iniciar o backup (${String(error)})` };

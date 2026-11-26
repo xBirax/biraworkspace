@@ -6,7 +6,7 @@ import { build } from "esbuild";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 await build({
-  entryPoints: [path.join(root, "dist/main/index.js")],
+  entryPoints: [path.join(root, "dist/main/personal-entry.js")],
   outfile: path.join(root, "dist/main/index.bundle.cjs"),
   bundle: true,
   platform: "node",

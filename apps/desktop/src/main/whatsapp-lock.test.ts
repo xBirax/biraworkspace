@@ -83,6 +83,7 @@ describe("PinAttemptThrottle", () => {
     const lock = new WhatsAppLock(
       file,
       {
+        getSelectedStorageBackend: () => "gnome_libsecret" as const,
         isEncryptionAvailable: () => true,
         encryptString: (value: string) => Buffer.from(`encrypted:${value}`, "utf8"),
         decryptString: (value: Buffer) => value.toString("utf8").replace(/^encrypted:/, ""),
@@ -106,6 +107,7 @@ describe("PinAttemptThrottle", () => {
     const { file, lock: legacy } = createLock();
     const resets: string[] = [];
     const storage = {
+      getSelectedStorageBackend: () => "gnome_libsecret" as const,
       isEncryptionAvailable: () => true,
       encryptString: (value: string) => Buffer.from(`encrypted:${value}`, "utf8"),
       decryptString: (value: Buffer) => value.toString("utf8").replace(/^encrypted:/, ""),
@@ -177,6 +179,7 @@ function createLock(): { file: string; lock: WhatsAppLock } {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "adr-whatsapp-lock-"));
   created.push(dir);
   const storage = {
+    getSelectedStorageBackend: () => "gnome_libsecret" as const,
     isEncryptionAvailable: () => true,
     encryptString: (value: string) => Buffer.from(`encrypted:${value}`, "utf8"),
     decryptString: (value: Buffer) => value.toString("utf8").replace(/^encrypted:/, ""),
@@ -226,6 +229,7 @@ describe("WhatsAppLock", () => {
     lock.setPin("1234");
     expect(lock.pinState()).toBe("ok");
     const locked = new WhatsAppLock(file, {
+      getSelectedStorageBackend: () => "gnome_libsecret" as const,
       isEncryptionAvailable: () => false,
       encryptString: () => Buffer.alloc(0),
       decryptString: () => "",
@@ -251,6 +255,7 @@ describe("WhatsAppLock", () => {
 
     const { file, lock } = createLock();
     const target = new WhatsAppLock(file.replace("v1.json", "wa-1.v1.json"), {
+      getSelectedStorageBackend: () => "gnome_libsecret" as const,
       isEncryptionAvailable: () => true,
       encryptString: (value: string) => Buffer.from(`encrypted:${value}`, "utf8"),
       decryptString: (value: Buffer) => value.toString("utf8").replace(/^encrypted:/, ""),
@@ -265,6 +270,7 @@ describe("WhatsAppLock", () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "adr-whatsapp-multi-lock-"));
     created.push(dir);
     const storage = {
+      getSelectedStorageBackend: () => "gnome_libsecret" as const,
       isEncryptionAvailable: () => true,
       encryptString: (value: string) => Buffer.from(`encrypted:${value}`, "utf8"),
       decryptString: (value: Buffer) => value.toString("utf8").replace(/^encrypted:/, ""),

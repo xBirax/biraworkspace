@@ -1,0 +1,7 @@
+abi <abi/4.0>,
+include <tunables/global>
+
+/opt/BiraWorkspace/biraworkspace flags=(unconfined) {
+  userns,
+  include if exists <local/biraworkspace>
+}

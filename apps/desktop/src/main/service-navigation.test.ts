@@ -126,7 +126,7 @@ describe("service popups", () => {
     const chat = "https://chatgpt.com/c/abc";
     expect(servicePopupDisposition("chatgpt", "https://bestory.com.br/", "foreground-tab", chat)).toBe("external");
     expect(servicePopupDisposition("chatgpt", "https://chatgpt.com/c/outra", "foreground-tab", chat)).toBe("in-app");
-    // login segue na aba/janela; ADR Browser é o navegador do app
+    // login segue na aba/janela; Bira Browser é o navegador do app
     expect(servicePopupDisposition("chatgpt", "https://accounts.google.com/o/oauth2", "foreground-tab", chat)).toBe("popup");
     expect(servicePopupDisposition("browser", "https://bestory.com.br/", "foreground-tab", "https://www.google.com/")).toBe("in-app");
     // redirecionador do Gmail: decide pelo destino real
@@ -181,7 +181,7 @@ describe("saiu do site do serviço", () => {
     expect(serviceDriftedOffSite("gmail", "", GMAIL)).toBe(false);
   });
 
-  it("o ADR Browser nunca conta: a barra dele é fixa e recarregar não pode ir para casa", () => {
+  it("o Bira Browser nunca conta: a barra dele é fixa e recarregar não pode ir para casa", () => {
     expect(
       serviceDriftedOffSite("browser", "https://example.com/", "https://www.google.com/"),
     ).toBe(false);

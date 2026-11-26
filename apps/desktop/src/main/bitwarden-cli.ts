@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process";
 
 /**
- * Sincronização Bitwarden → Cofre ADR pela CLI oficial (`bw`), que a pessoa
+ * Sincronização Bitwarden → Cofre Bira pela CLI oficial (`bw`), que a pessoa
  * instala (o app não embute a CLI, que é GPL). Desbloqueia, puxa, lista os
  * itens e TRANCA de novo, sempre — inclusive quando algo falha no meio. Nada
  * de `bw serve`: ele deixa o cofre aberto em localhost para qualquer programa.
@@ -115,6 +115,8 @@ export async function pullBitwardenItems(
     throw new BitwardenError("wrong-password", "Senha mestra incorreta ou cofre indisponível.");
   }
   const env = { BW_SESSION: session };
+  let importError: unknown;
+  let outcome: { items: unknown; synced: boolean } | undefined;
   try {
     const sync = await run(["sync", "--nointeraction"], env, 120_000);
     const list = await run(["list", "items", "--nointeraction"], env, 120_000);
@@ -132,9 +134,16 @@ export async function pullBitwardenItems(
     if (!Array.isArray(items)) {
       throw new BitwardenError("failed", "A CLI do Bitwarden devolveu uma resposta inesperada.");
     }
-    return { items, synced: sync.code === 0 };
-  } finally {
-    // Tranca sempre: a sessão aberta valeria para qualquer `bw` desta conta.
-    await run(["lock", "--nointeraction"], env, 30_000);
+    outcome = { items, synced: sync.code === 0 };
+  } catch (error) {
+    importError = error;
   }
+    // Tranca sempre: a sessão aberta valeria para qualquer `bw` desta conta.
+    let locked = false;
+    try { locked = (await run(["lock", "--nointeraction"], env, 30_000)).code === 0; }
+    catch { /* reportado abaixo, sem expor sessão ou saída da CLI */ }
+    env.BW_SESSION = "";
+    if (!locked) throw new BitwardenError("failed", `${importError ? "A importação falhou e " : ""}Não foi possível confirmar o bloqueio do Bitwarden. Tranque a CLI manualmente com bw lock.`);
+  if (importError) throw importError;
+  return outcome!;
 }

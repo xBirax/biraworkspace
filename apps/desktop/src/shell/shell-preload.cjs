@@ -1,6 +1,16 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("adrShell", {
+  editEnglishTerm: (source,target) => ipcRenderer.invoke("shell:edit-english-term",source,target),
+  setTranslation: (id, incoming) => ipcRenderer.invoke('shell:set-translation', id, incoming),
+  setAudioLanguage: (id,language)=>ipcRenderer.invoke('shell:audio-language',id,language),
+  setTranscription: (id, enabled) => ipcRenderer.invoke('shell:set-transcription', id, enabled),
+  setPrivacy: (id,mode) => ipcRenderer.invoke("shell:set-privacy",id,mode),
+  hideAll: () => ipcRenderer.invoke("shell:hide-all"),
+  moveService: (id,workspaceId) => ipcRenderer.invoke("shell:move-service",id,workspaceId),
+  restorePrivacy: id => ipcRenderer.invoke("shell:restore-privacy",id),
+  privacyPanel: (open) => ipcRenderer.invoke("shell:privacy-panel",open),
+  privacyOptions: (id,options) => ipcRenderer.invoke("shell:privacy-options",id,options),
   show: (surface, panelTab) => ipcRenderer.invoke("shell:show", surface, panelTab),
   reload: (hard) => ipcRenderer.invoke("shell:reload", Boolean(hard)),
   getState: () => ipcRenderer.invoke("shell:get-state"),
@@ -54,6 +64,7 @@ contextBridge.exposeInMainWorld("adrShell", {
   setCalendarFeed: (url) => ipcRenderer.invoke("shell:set-calendar-feed", String(url || "")),
   listPermissionGrants: () => ipcRenderer.invoke("shell:list-permission-grants"),
   revokePermissionGrant: (key) => ipcRenderer.invoke("shell:revoke-permission-grant", String(key || "")),
+  restoreProfile: (name) => ipcRenderer.invoke("shell:restore-profile", name),
   listBackups: () => ipcRenderer.invoke("shell:list-backups"),
   openBackups: () => ipcRenderer.invoke("shell:open-backups"),
   backupProfile: () => ipcRenderer.invoke("shell:backup-profile"),

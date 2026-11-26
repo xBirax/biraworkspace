@@ -1,5 +1,5 @@
 /**
- * Peças puras dos recursos de navegador do ADR Browser (buscar na página,
+ * Peças puras dos recursos de navegador do Bira Browser (buscar na página,
  * imprimir, reabrir aba fechada, ícone do site, corretor). Ficam fora de
  * workspace-window.ts para dar para testar sem abrir janela.
  */
